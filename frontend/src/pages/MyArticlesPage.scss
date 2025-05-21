@@ -1,0 +1,123 @@
+/* frontend/src/pages/MyArticlesPage.scss */
+.my-articles-page {
+    .badge {
+        font-weight: 500;
+    }
+
+    .article-status {
+        &.published {
+            background-color: var(--success);
+        }
+
+        &.draft {
+            background-color: var(--secondary);
+        }
+    }
+
+    .table {
+        th {
+            font-weight: 600;
+        }
+
+        td {
+            vertical-align: middle;
+            padding: 0.75rem 1rem;
+        }
+
+        .article-title {
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+        }
+    }
+
+    .stats-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .display-4,
+        .display-5 {
+            color: var(--primary-color);
+        }
+    }
+
+    .btn-sm {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Custom scrollbar for tables */
+    .table-responsive {
+        &::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+
+            &:hover {
+                background: #aaa;
+            }
+        }
+    }
+
+    /* Animation for new articles */
+    .new-article {
+        animation: highlight 2s ease-out;
+    }
+
+    @keyframes highlight {
+        0% {
+            background-color: rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        100% {
+            background-color: transparent;
+        }
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            table {
+                min-width: 800px;
+            }
+        }
+
+        .filters-row {
+            flex-direction: column;
+
+            .nav {
+                margin-bottom: 1rem;
+                width: 100%;
+
+                .nav-link {
+                    flex: 1;
+                    text-align: center;
+                }
+            }
+        }
+
+        .action-buttons {
+            .btn-sm {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    } }
