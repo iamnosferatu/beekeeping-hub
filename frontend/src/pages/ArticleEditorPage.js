@@ -29,7 +29,7 @@ import {
 import axios from "axios";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
-import MarkdownEditor from "../components/editor/MarkdownEditor";
+import WysiwygEditor from "../components/editor/WysiwygEditor"; // Change to WYSIWYG editor
 import TagSelector from "../components/editor/TagSelector";
 import "./ArticleEditorPage.scss";
 
@@ -98,9 +98,6 @@ const ArticleEditorPage = () => {
           status: article.status || "draft",
           tags: article.tags ? article.tags.map((tag) => tag.name) : [],
         });
-
-        // Calculate initial word count
-        calculateWordCount(article.content || "");
       } catch (err) {
         console.error("Error fetching article:", err);
         setError(
@@ -115,13 +112,6 @@ const ArticleEditorPage = () => {
     fetchArticle();
   }, [id, isEditMode, user]);
 
-  // Calculate word count
-  const calculateWordCount = (content) => {
-    const text = content.replace(/[^\w\s]/g, "");
-    const words = text.split(/\s+/).filter((word) => word.length > 0);
-    setWordCount(words.length);
-  };
-
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -129,10 +119,9 @@ const ArticleEditorPage = () => {
     setContentChanged(true);
   };
 
-  // Handle content change
-  const handleContentChange = (value) => {
-    setFormData((prev) => ({ ...prev, content: value }));
-    calculateWordCount(value);
+  // Handle content change from WYSIWYG editor
+  const handleContentChange = (content) => {
+    setFormData((prev) => ({ ...prev, content }));
     setContentChanged(true);
   };
 
@@ -146,14 +135,10 @@ const ArticleEditorPage = () => {
   const generateExcerpt = () => {
     if (!formData.content) return;
 
-    // Strip markdown and get first 160 characters
-    const text = formData.content
-      .replace(/#+\s+(.*)/g, "$1") // Remove headings
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Replace links with just text
-      .replace(/[*_~`]/g, "") // Remove formatting characters
-      .replace(/\n/g, " ") // Replace newlines with spaces
-      .trim();
-
+    // Strip HTML tags and get first 160 characters
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = formData.content;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
     const excerpt = text.substring(0, 160) + (text.length > 160 ? "..." : "");
 
     setFormData((prev) => ({ ...prev, excerpt }));
@@ -187,12 +172,9 @@ const ArticleEditorPage = () => {
 
       // If no excerpt provided, generate one
       if (!articleData.excerpt.trim()) {
-        const text = articleData.content
-          .replace(/#+\s+(.*)/g, "$1")
-          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-          .replace(/[*_~`]/g, "")
-          .replace(/\n/g, " ")
-          .trim();
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = articleData.content;
+        const text = tempDiv.textContent || tempDiv.innerText || "";
 
         articleData.excerpt =
           text.substring(0, 160) + (text.length > 160 ? "..." : "");
@@ -381,15 +363,11 @@ const ArticleEditorPage = () => {
                       </span>
                     }
                   >
-                    <MarkdownEditor
+                    <WysiwygEditor
                       value={formData.content}
                       onChange={handleContentChange}
                       height="500px"
                     />
-                    <div className="d-flex justify-content-between mt-2 text-muted">
-                      <small>{wordCount} words</small>
-                      <small>Markdown supported</small>
-                    </div>
                   </Tab>
 
                   <Tab
@@ -407,46 +385,29 @@ const ArticleEditorPage = () => {
                         <p>Loading preview...</p>
                       </div>
                     ) : (
-                      <div className="markdown-preview">
-                        {/* This would be replaced with an actual markdown preview component */}
-                        <div className="p-4 border rounded">
-                          <h1>{formData.title || "Untitled Article"}</h1>
-                          <div className="mb-3">
-                            {formData.tags.map((tag, index) => (
-                              <Badge
-                                key={index}
-                                bg="secondary"
-                                className="me-1"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="preview-content">
-                            {formData.content ? (
-                              <div>
-                                {/* This is a placeholder for the actual rendered markdown */}
-                                <div className="text-muted italic">
-                                  [Preview of your markdown content would appear
-                                  here]
-                                </div>
-                                <pre
-                                  className="bg-light p-3 rounded mt-3"
-                                  style={{
-                                    maxHeight: "400px",
-                                    overflow: "auto",
-                                  }}
-                                >
-                                  {formData.content}
-                                </pre>
-                              </div>
-                            ) : (
-                              <div className="text-muted">
-                                No content yet. Start writing in the Edit tab.
-                              </div>
-                            )}
-                          </div>
+                      <div className="content-preview p-4 border rounded">
+                        <h1>{formData.title || "Untitled Article"}</h1>
+
+                        <div className="mb-3">
+                          {formData.tags.map((tag, index) => (
+                            <Badge key={index} bg="secondary" className="me-1">
+                              {tag}
+                            </Badge>
+                          ))}
                         </div>
+
+                        {formData.content ? (
+                          <div
+                            className="article-content mt-4"
+                            dangerouslySetInnerHTML={{
+                              __html: formData.content,
+                            }}
+                          />
+                        ) : (
+                          <div className="text-muted">
+                            No content yet. Start writing in the Edit tab.
+                          </div>
+                        )}
                       </div>
                     )}
                   </Tab>

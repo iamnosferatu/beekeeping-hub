@@ -1,6 +1,7 @@
 // backend/src/controllers/articleController.js
 const { Article, User, Tag, Comment, Like, sequelize } = require("../models");
 const { Op } = require("sequelize");
+const slug = require("slug"); // Make sure slug package is installed
 
 // Helper function to build include options for article queries
 const getArticleIncludes = () => {
@@ -37,6 +38,30 @@ const getArticleIncludes = () => {
   ];
 };
 
+// Helper to generate a unique slug from title
+const generateUniqueSlug = async (title) => {
+  // Create base slug from title
+  let baseSlug = slug(title || "article", { lower: true });
+
+  // Check if slug exists
+  let slugToUse = baseSlug;
+  let counter = 1;
+  let existingArticle;
+
+  // Keep checking for slug uniqueness
+  do {
+    existingArticle = await Article.findOne({ where: { slug: slugToUse } });
+
+    if (existingArticle) {
+      // Add incremental number to slug if exists
+      slugToUse = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  } while (existingArticle);
+
+  return slugToUse;
+};
+
 // @desc    Get all articles with pagination, filtering, and search
 // @route   GET /api/articles
 // @access  Public
@@ -56,12 +81,12 @@ exports.getArticles = async (req, res, next) => {
 
       if (tag) {
         // Get article IDs associated with this tag
-        const articleTags = await sequelize.model("ArticleTags").findAll({
-          where: { TagId: tag.id },
-          attributes: ["ArticleId"],
+        const articleTags = await sequelize.model("article_tags").findAll({
+          where: { tag_id: tag.id },
+          attributes: ["article_id"],
         });
 
-        const articleIds = articleTags.map((at) => at.ArticleId);
+        const articleIds = articleTags.map((at) => at.article_id);
 
         if (articleIds.length > 0) {
           whereClause.id = { [Op.in]: articleIds };
@@ -196,9 +221,15 @@ exports.createArticle = async (req, res, next) => {
 
     const user_id = req.user.id;
 
+    // Generate a unique slug from the title
+    const slug = await generateUniqueSlug(title);
+
+    console.log(`Generated slug for article: ${slug}`);
+
     // Create the article
     const article = await Article.create({
       title,
+      slug, // Add the generated slug
       content,
       excerpt: excerpt || content.substring(0, 200) + "...", // Generate excerpt if not provided
       featured_image,
@@ -233,6 +264,7 @@ exports.createArticle = async (req, res, next) => {
       data: fullArticle,
     });
   } catch (error) {
+    console.error("Error creating article:", error);
     next(error);
   }
 };
@@ -274,6 +306,11 @@ exports.updateArticle = async (req, res, next) => {
 
     // Check if publishing for the first time
     const isPublishingNow = !article.published_at && status === "published";
+
+    // Check if title is being changed - if so, update slug
+    if (title && title !== article.title) {
+      article.slug = await generateUniqueSlug(title);
+    }
 
     // Update article
     article.title = title || article.title;

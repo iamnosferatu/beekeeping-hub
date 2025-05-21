@@ -15,6 +15,8 @@ import TagPage from "./pages/TagPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import NotFoundPage from "./pages/NotFoundPage";
+
+import AuthDebugPage from "./pages/AuthDebugPage";
 import DebugPage from "./pages/DebugPage";
 
 // Protected Pages
@@ -46,7 +48,6 @@ function App() {
         <Route path="tags/:slug" element={<TagPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-
         {/* Protected Routes */}
         <Route
           path="profile"
@@ -80,10 +81,9 @@ function App() {
             </RoleRoute>
           }
         />
-
-        {/* Debug Page */}
-        <Route path="debug" element={<DebugPage />} />
-
+        {/* Debug Routes */}
+        <Route path="/auth-debug" element={<AuthDebugPage />} />
+        <Route path="/debug" element={<DebugPage />} />
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
       </Route>

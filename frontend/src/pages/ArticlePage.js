@@ -21,13 +21,10 @@ import {
   BsCalendar3,
 } from "react-icons/bs";
 import axios from "axios";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
 import moment from "moment";
+import "./ArticlePage.scss"; // Make sure to create this file for styles
 
 const ArticlePage = () => {
   const { slug } = useParams();
@@ -272,30 +269,11 @@ const ArticlePage = () => {
       {/* Article Content */}
       <Card className="mb-4 shadow-sm">
         <Card.Body className="article-content">
-          <ReactMarkdown
-            rehypePlugins={[rehypeRaw]}
-            components={{
-              code({ node, inline, className, children, ...props }) {
-                const match = /language-(\w+)/.exec(className || "");
-                return !inline && match ? (
-                  <SyntaxHighlighter
-                    style={tomorrow}
-                    language={match[1]}
-                    PreTag="div"
-                    {...props}
-                  >
-                    {String(children).replace(/\n$/, "")}
-                  </SyntaxHighlighter>
-                ) : (
-                  <code className={className} {...props}>
-                    {children}
-                  </code>
-                );
-              },
-            }}
-          >
-            {article.content}
-          </ReactMarkdown>
+          {/* Render HTML content directly */}
+          <div
+            className="wysiwyg-content"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
         </Card.Body>
       </Card>
 
