@@ -1,0 +1,33 @@
+/* frontend/src/components/editor/MarkdownEditor.scss */
+.markdown-editor {
+    .editor-toolbar {
+        .btn-light {
+            background-color: transparent;
+            border-color: transparent;
+            color: #212529;
+            transition: all 0.2s ease;
+
+            &:hover,
+            &:focus {
+                background-color: rgba(0, 0, 0, 0.08);
+                border-color: transparent;
+            }
+
+            &:active {
+                background-color: rgba(0, 0, 0, 0.12);
+            }
+        }
+    }
+
+    .markdown-textarea {
+        font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        resize: vertical;
+        tab-size: 2;
+
+        &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+        }
+    }
+}

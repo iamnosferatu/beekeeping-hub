@@ -1,0 +1,45 @@
+/* frontend/src/components/editor/TagSelector.scss */
+.tag-selector {
+    .tag-badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: normal;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+
+        span {
+            display: inline-flex;
+            align-items: center;
+
+            svg {
+                font-size: 1.2rem;
+                opacity: 0.8;
+                transition: opacity 0.2s ease;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    .tag-suggestions {
+        z-index: 10;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid rgba(0, 0, 0, 0.125);
+
+        .list-group-item {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f8f9fa;
+            }
+
+            svg {
+                color: var(--primary-color);
+                font-size: 1.2rem;
+            }
+        }
+    } }

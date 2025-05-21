@@ -1,0 +1,128 @@
+/* frontend/src/pages/ArticleEditorPage.scss */
+.article-editor {
+    .editor-tabs {
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+
+            &.active {
+                font-weight: 600;
+                border-bottom-width: 2px;
+            }
+        }
+    }
+
+    .markdown-preview {
+        min-height: 500px;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        overflow-y: auto;
+        background-color: white;
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        .preview-content {
+            margin-top: 1.5rem;
+        }
+    }
+
+    .featured-image-preview {
+        height: 150px;
+        overflow: hidden;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+        }
+    }
+
+    .form-control-lg {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .CodeMirror,
+    .cm-s-easymde {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+    }
+
+    .editor-toolbar {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem 0.25rem 0 0;
+        background-color: #f8f9fa;
+    }
+
+    .tag-selector {
+        .badge {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            font-weight: normal;
+
+            .close-icon {
+                margin-left: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            &:hover {
+                opacity: 0.85;
+            }
+        }
+
+        .tag-input {
+            margin-top: 0.5rem;
+        }
+    }
+
+    .status-badge {
+        text-transform: capitalize;
+
+        &.draft {
+            background-color: #6c757d;
+        }
+
+        &.published {
+            background-color: #198754;
+        }
+    }
+
+    // Custom styling for markdown editor
+    .editor-toolbar button {
+        color: #6c757d;
+
+        &.active,
+        &:hover {
+            color: var(--primary-color);
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+        }
+    }
+
+    // Word counter
+    .word-counter {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    // Responsive adjustments
+    @media (max-width: 991.98px) {
+        .status-sidebar {
+            order: -1;
+            margin-bottom: 1.5rem;
+        }
+    } }

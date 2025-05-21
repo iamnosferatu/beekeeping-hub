@@ -1,0 +1,29 @@
+/* frontend/src/layouts/MainLayout.scss */
+.main-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-container {
+    flex: 1;
+}
+
+.content-area {
+    padding: 1rem;
+}
+
+.sidebar-area {
+    padding: 1rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 767.98px) {
+    .main-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .sidebar-area {
+        margin-top: 2rem;
+    } }

@@ -1,0 +1,407 @@
+// backend/src/controllers/articleController.js
+const { Article, User, Tag, Comment, Like, sequelize } = require("../models");
+const { Op } = require("sequelize");
+
+// Helper function to build include options for article queries
+const getArticleIncludes = () => {
+  return [
+    {
+      model: User,
+      as: "author",
+      attributes: ["id", "username", "first_name", "last_name", "avatar"],
+    },
+    {
+      model: Tag,
+      as: "tags",
+      attributes: ["id", "name", "slug"],
+      through: { attributes: [] }, // Don't include junction table
+    },
+    {
+      model: Comment,
+      as: "comments",
+      where: { status: "approved" },
+      required: false,
+      include: [
+        {
+          model: User,
+          as: "author",
+          attributes: ["id", "username", "first_name", "last_name", "avatar"],
+        },
+      ],
+    },
+    {
+      model: Like,
+      attributes: ["id", "user_id"],
+      required: false,
+    },
+  ];
+};
+
+// @desc    Get all articles with pagination, filtering, and search
+// @route   GET /api/articles
+// @access  Public
+exports.getArticles = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Build where clause for filtering
+    const whereClause = { status: "published" };
+
+    // Filter by tag if provided
+    if (req.query.tag) {
+      // Find tag ID from slug
+      const tag = await Tag.findOne({ where: { slug: req.query.tag } });
+
+      if (tag) {
+        // Get article IDs associated with this tag
+        const articleTags = await sequelize.model("ArticleTags").findAll({
+          where: { TagId: tag.id },
+          attributes: ["ArticleId"],
+        });
+
+        const articleIds = articleTags.map((at) => at.ArticleId);
+
+        if (articleIds.length > 0) {
+          whereClause.id = { [Op.in]: articleIds };
+        } else {
+          // No articles with this tag, return empty result early
+          return res.status(200).json({
+            success: true,
+            data: [],
+            count: 0,
+            pagination: {
+              page,
+              limit,
+              totalPages: 0,
+            },
+          });
+        }
+      }
+    }
+
+    // Search functionality
+    if (req.query.search) {
+      const searchTerm = `%${req.query.search}%`;
+      whereClause[Op.or] = [
+        { title: { [Op.like]: searchTerm } },
+        { content: { [Op.like]: searchTerm } },
+        { excerpt: { [Op.like]: searchTerm } },
+      ];
+    }
+
+    // Get total count for pagination
+    const count = await Article.count({ where: whereClause });
+
+    // Calculate total pages
+    const totalPages = Math.ceil(count / limit);
+
+    // Get articles with related data
+    const articles = await Article.findAll({
+      where: whereClause,
+      include: getArticleIncludes(),
+      order: [["published_at", "DESC"]],
+      limit,
+      offset,
+    });
+
+    // Format articles for response
+    const formattedArticles = articles.map((article) => {
+      const articleJson = article.toJSON();
+
+      // Count comments instead of including all of them in list view
+      if (articleJson.comments) {
+        articleJson.comment_count = articleJson.comments.length;
+      }
+
+      // Count likes
+      if (articleJson.Likes) {
+        articleJson.like_count = articleJson.Likes.length;
+        delete articleJson.Likes; // Remove likes array from response
+      }
+
+      return articleJson;
+    });
+
+    res.status(200).json({
+      success: true,
+      data: formattedArticles,
+      count,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single article by slug
+// @route   GET /api/articles/:slug
+// @access  Public
+exports.getArticle = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    // Find article by slug
+    const article = await Article.findOne({
+      where: { slug, status: "published" },
+      include: getArticleIncludes(),
+    });
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Increment view count
+    article.view_count += 1;
+    await article.save();
+
+    // Get article data
+    const articleData = article.toJSON();
+
+    // Format likes for easier frontend handling
+    if (articleData.Likes) {
+      articleData.like_count = articleData.Likes.length;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: articleData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create a new article
+// @route   POST /api/articles
+// @access  Private (Author, Admin)
+exports.createArticle = async (req, res, next) => {
+  try {
+    const {
+      title,
+      content,
+      excerpt,
+      featured_image,
+      status = "draft",
+      tags = [],
+    } = req.body;
+
+    const user_id = req.user.id;
+
+    // Create the article
+    const article = await Article.create({
+      title,
+      content,
+      excerpt: excerpt || content.substring(0, 200) + "...", // Generate excerpt if not provided
+      featured_image,
+      status,
+      user_id,
+      published_at: status === "published" ? new Date() : null,
+    });
+
+    // Handle tags
+    if (tags.length > 0) {
+      // Get existing tags or create new ones
+      const tagObjects = await Promise.all(
+        tags.map(async (tagName) => {
+          const [tag] = await Tag.findOrCreate({
+            where: { name: tagName.trim() },
+          });
+          return tag;
+        })
+      );
+
+      // Associate tags with article
+      await article.setTags(tagObjects);
+    }
+
+    // Get full article with associations
+    const fullArticle = await Article.findByPk(article.id, {
+      include: getArticleIncludes(),
+    });
+
+    res.status(201).json({
+      success: true,
+      data: fullArticle,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update article
+// @route   PUT /api/articles/:id
+// @access  Private (Owner, Admin)
+exports.updateArticle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Find article
+    const article = await Article.findByPk(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Check ownership
+    if (article.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this article",
+      });
+    }
+
+    // Get update fields
+    const {
+      title,
+      content,
+      excerpt,
+      featured_image,
+      status,
+      tags = [],
+    } = req.body;
+
+    // Check if publishing for the first time
+    const isPublishingNow = !article.published_at && status === "published";
+
+    // Update article
+    article.title = title || article.title;
+    article.content = content || article.content;
+    article.excerpt = excerpt || article.excerpt;
+    article.featured_image = featured_image || article.featured_image;
+
+    if (status) {
+      article.status = status;
+
+      // Set published_at when publishing for the first time
+      if (isPublishingNow) {
+        article.published_at = new Date();
+      }
+    }
+
+    await article.save();
+
+    // Handle tags if provided
+    if (tags.length > 0) {
+      // Get existing tags or create new ones
+      const tagObjects = await Promise.all(
+        tags.map(async (tagName) => {
+          const [tag] = await Tag.findOrCreate({
+            where: { name: tagName.trim() },
+          });
+          return tag;
+        })
+      );
+
+      // Replace existing tags
+      await article.setTags(tagObjects);
+    }
+
+    // Get updated article with associations
+    const updatedArticle = await Article.findByPk(id, {
+      include: getArticleIncludes(),
+    });
+
+    res.status(200).json({
+      success: true,
+      data: updatedArticle,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete article
+// @route   DELETE /api/articles/:id
+// @access  Private (Owner, Admin)
+exports.deleteArticle = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Find article
+    const article = await Article.findByPk(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Check ownership
+    if (article.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this article",
+      });
+    }
+
+    // Delete article (this will also delete associated comments and likes due to cascade)
+    await article.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: "Article deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Toggle like on article
+// @route   POST /api/articles/:id/like
+// @access  Private
+exports.toggleLike = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user_id = req.user.id;
+
+    // Find article
+    const article = await Article.findByPk(id);
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Check if user already liked the article
+    const existingLike = await Like.findOne({
+      where: { article_id: id, user_id },
+    });
+
+    if (existingLike) {
+      // Unlike - remove the like
+      await existingLike.destroy();
+
+      res.status(200).json({
+        success: true,
+        message: "Article unliked successfully",
+        liked: false,
+      });
+    } else {
+      // Like - add a new like
+      await Like.create({ article_id: id, user_id });
+
+      res.status(200).json({
+        success: true,
+        message: "Article liked successfully",
+        liked: true,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
