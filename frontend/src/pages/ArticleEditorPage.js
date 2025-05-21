@@ -16,6 +16,7 @@ import {
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
+import moment from 'moment'
 import {
   BsSave,
   BsEye,
@@ -23,6 +24,8 @@ import {
   BsCheck2Circle,
   BsPencil,
   BsImage,
+  BsShieldFillCheck,
+  BsShieldExclamation,
   BsQuestionCircle,
   BsArrowLeft,
 } from "react-icons/bs";
@@ -47,6 +50,10 @@ const ArticleEditorPage = () => {
     featured_image: "",
     status: "draft",
     tags: [],
+    blocked: false,
+    blocked_reason: "",
+    blocked_by: null,
+    blocked_at: null,
   });
 
   // UI state
@@ -182,6 +189,14 @@ const ArticleEditorPage = () => {
 
       let response;
 
+      if (formData.blocked && user.role !== "admin") {
+        // Preserve blocked status for non-admin users
+        articleData.blocked = true;
+        articleData.blocked_reason = formData.blocked_reason;
+        articleData.blocked_by = formData.blocked_by;
+        articleData.blocked_at = formData.blocked_at;
+      }
+
       if (isEditMode) {
         // Update existing article
         response = await axios.put(`${API_URL}/articles/${id}`, articleData);
@@ -314,13 +329,11 @@ const ArticleEditorPage = () => {
           <BsArrowLeft className="me-2" /> Back
         </Button>
       </div>
-
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-
       {successMessage && (
         <Alert
           variant="success"
@@ -330,7 +343,35 @@ const ArticleEditorPage = () => {
           {successMessage}
         </Alert>
       )}
-
+      // 2. Add a blocked article notice component at the top of the editor form
+      // (Place this right after successMessage Alert)
+      {formData.blocked && (
+        <Alert variant="danger" className="d-flex align-items-start mb-4">
+          <div className="me-3 mt-1">
+            <BsShieldExclamation size={24} />
+          </div>
+          <div>
+            <Alert.Heading>This Article Has Been Blocked</Alert.Heading>
+            <p>
+              <strong>Reason:</strong>{" "}
+              {formData.blocked_reason || "No specific reason provided."}
+            </p>
+            <p>
+              <strong>Blocked by:</strong> {formData.blocked_by?.first_name}{" "}
+              {formData.blocked_by?.last_name || "Administrator"}
+              <br />
+              <strong>Blocked on:</strong>{" "}
+              {moment(formData.blocked_at).format("MMMM D, YYYY [at] h:mm A")}
+            </p>
+            <hr />
+            <p className="mb-0">
+              You can edit this article to address the issues, but only an
+              administrator can remove the block. Contact the administrator
+              after making the necessary changes.
+            </p>
+          </div>
+        </Alert>
+      )}
       <Form onSubmit={(e) => handleSave(e, false)}>
         <Row>
           <Col lg={9}>
@@ -463,9 +504,61 @@ const ArticleEditorPage = () => {
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
+                    {formData.blocked && (
+                      <option value="blocked" disabled>
+                        Blocked (Cannot Change)
+                      </option>
+                    )}
                   </Form.Select>
                 </Form.Group>
-
+                {user.role === "admin" && formData.blocked && (
+                  <Button
+                    variant="outline-success"
+                    className="d-block w-100 mb-3"
+                    onClick={() => {
+                      // Update form data to unblock
+                      setFormData((prev) => ({
+                        ...prev,
+                        blocked: false,
+                        blocked_reason: "",
+                        blocked_by: null,
+                        blocked_at: null,
+                      }));
+                      // Show success message
+                      setSuccessMessage("Article unblocked successfully.");
+                    }}
+                  >
+                    <BsShieldFillCheck className="me-2" />
+                    Unblock Article
+                  </Button>
+                )}
+                {user.role === "admin" && !formData.blocked && (
+                  <Button
+                    variant="outline-danger"
+                    className="d-block w-100 mb-3"
+                    onClick={() => {
+                      // Show modal to confirm and provide reason
+                      // Implementation would require a modal component
+                      // For simplicity, we'll just set the values directly here
+                      setFormData((prev) => ({
+                        ...prev,
+                        blocked: true,
+                        blocked_reason:
+                          "This article requires review. Please contact an administrator.",
+                        blocked_by: {
+                          id: user.id,
+                          first_name: user.first_name,
+                          last_name: user.last_name,
+                        },
+                        blocked_at: new Date().toISOString(),
+                      }));
+                      setSuccessMessage("Article has been blocked.");
+                    }}
+                  >
+                    <BsShieldExclamation className="me-2" />
+                    Block Article
+                  </Button>
+                )}
                 <div className="d-grid gap-2">
                   <Button variant="primary" type="submit" disabled={saving}>
                     {saving ? (

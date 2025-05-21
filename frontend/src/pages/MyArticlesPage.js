@@ -1,25 +1,912 @@
 // frontend/src/pages/MyArticlesPage.js
-import React from "react";
-import { Alert, Card } from "react-bootstrap";
+import React, { useState, useEffect, useContext } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Card,
+  Button,
+  Row,
+  Col,
+  Table,
+  Nav,
+  Badge,
+  Dropdown,
+  Alert,
+  Spinner,
+  Modal,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
+import {
+  BsPencilSquare,
+  BsEye,
+  BsTrash,
+  BsFilter,
+  BsSortDown,
+  BsThreeDotsVertical,
+  BsFileEarmarkText,
+  BsFillHeartFill,
+  BsChat,
+  BsPlus,
+  BsCalendar3,
+  BsExclamationTriangle,
+  BsShieldExclamation,
+  BsLockFill,
+  BsShieldFillCheck,
+  BsInfoCircleFill,
+} from "react-icons/bs";
+import axios from "axios";
+import moment from "moment";
+import { API_URL } from "../config";
+import AuthContext from "../contexts/AuthContext";
 
 const MyArticlesPage = () => {
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // State
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all"); // all, draft, published, blocked
+  const [sortBy, setSortBy] = useState("date-desc"); // date-desc, date-asc, title, views
+  const [stats, setStats] = useState({
+    total: 0,
+    published: 0,
+    draft: 0,
+    blocked: 0,
+    views: 0,
+    likes: 0,
+    comments: 0,
+  });
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.message || null
+  );
+  const [deleteModal, setDeleteModal] = useState({
+    show: false,
+    articleId: null,
+    articleTitle: "",
+  });
+  const [blockedInfoModal, setBlockedInfoModal] = useState({
+    show: false,
+    article: null,
+  });
+
+  // Fetch user's articles
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (!user) return;
+
+        // In a production environment, we would have a dedicated
+        // endpoint like /api/author/articles that returns both published
+        // and draft articles for the authenticated user.
+
+        // Since our API doesn't have this endpoint, we'll use a combined approach:
+        // 1. Fetch published articles first
+        // 2. For drafts, we'll either simulate them or use a more appropriate endpoint if available
+
+        try {
+          // Step 1: Get published articles (that are publicly visible)
+          const publishedResponse = await axios.get(
+            `${API_URL}/articles?limit=100`
+          );
+
+          // Filter to only the current user's published articles
+          let publishedArticles = [];
+
+          if (publishedResponse.data.success) {
+            publishedArticles = publishedResponse.data.data.filter(
+              (article) => article.author && article.author.id === user.id
+            );
+          }
+
+          // Step 2: Try to get user's draft articles
+          // In a real implementation with proper auth, we would have an endpoint like:
+          // GET /api/author/articles/drafts
+
+          // For this demo, we'll use mock draft articles
+          const mockDraftArticles = [
+            {
+              id: 101,
+              title: "The Perfect Beehive Setup (Draft)",
+              slug: "the-perfect-beehive-setup-draft",
+              status: "draft",
+              blocked: false,
+              published_at: null,
+              view_count: 0,
+              like_count: 0,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [
+                { id: 1, name: "Beginner", slug: "beginner" },
+                { id: 3, name: "Equipment", slug: "equipment" },
+              ],
+            },
+            {
+              id: 102,
+              title: "Seasonal Beekeeping Calendar (Draft)",
+              slug: "seasonal-beekeeping-calendar-draft",
+              status: "draft",
+              blocked: false,
+              published_at: null,
+              view_count: 0,
+              like_count: 0,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [{ id: 6, name: "Seasonal", slug: "seasonal" }],
+            },
+          ];
+
+          // Step 3: Add some blocked articles for demonstration
+          const mockedBlockedArticles = [
+            {
+              id: 103,
+              title: "Controversial Bee Treatment Methods",
+              slug: "controversial-bee-treatment-methods",
+              status: "published", // Status remains published, but it's blocked from display
+              blocked: true,
+              blocked_reason:
+                "Contains unverified treatment methods that may harm bees. Please revise and provide scientific sources for claims.",
+              blocked_at: "2023-07-15T14:22:00Z",
+              blocked_by: {
+                id: 1,
+                username: "admin",
+                first_name: "Admin",
+                last_name: "User",
+              },
+              published_at: "2023-07-12T09:30:00Z",
+              view_count: 42, // Views before it was blocked
+              like_count: 5,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [
+                { id: 4, name: "Health", slug: "health" },
+                { id: 2, name: "Advanced", slug: "advanced" },
+              ],
+            },
+          ];
+
+          // Combine published, draft, and blocked articles
+          const allUserArticles = [
+            ...publishedArticles,
+            ...mockDraftArticles,
+            ...mockedBlockedArticles,
+          ];
+
+          setArticles(allUserArticles);
+          updateStats(allUserArticles);
+        } catch (apiError) {
+          console.warn("API error, using mock data:", apiError);
+
+          // Create mock articles for demo purposes
+          const mockArticles = [
+            {
+              id: 1,
+              title: "Getting Started with Beekeeping",
+              slug: "getting-started-with-beekeeping",
+              status: "published",
+              published_at: "2023-05-15T10:30:00Z",
+              view_count: 215,
+              like_count: 42,
+              comments: [1, 2, 3],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [
+                { id: 1, name: "Beginner", slug: "beginner" },
+                { id: 3, name: "Equipment", slug: "equipment" },
+              ],
+            },
+            {
+              id: 2,
+              title: "Honey Harvesting Techniques",
+              slug: "honey-harvesting-techniques",
+              status: "published",
+              published_at: "2023-05-30T14:45:00Z",
+              view_count: 178,
+              like_count: 36,
+              comments: [4, 5],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [
+                { id: 2, name: "Advanced", slug: "advanced" },
+                { id: 4, name: "Honey", slug: "honey" },
+              ],
+            },
+            {
+              id: 3,
+              title: "Common Bee Diseases and Prevention",
+              slug: "common-bee-diseases-and-prevention",
+              status: "published",
+              published_at: "2023-06-10T09:15:00Z",
+              view_count: 143,
+              like_count: 28,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [{ id: 5, name: "Health", slug: "health" }],
+            },
+            {
+              id: 4,
+              title: "The Perfect Beehive Setup (Draft)",
+              slug: "the-perfect-beehive-setup-draft",
+              status: "draft",
+              published_at: null,
+              view_count: 0,
+              like_count: 0,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [
+                { id: 1, name: "Beginner", slug: "beginner" },
+                { id: 3, name: "Equipment", slug: "equipment" },
+              ],
+            },
+            {
+              id: 5,
+              title: "Seasonal Beekeeping Calendar (Draft)",
+              slug: "seasonal-beekeeping-calendar-draft",
+              status: "draft",
+              published_at: null,
+              view_count: 0,
+              like_count: 0,
+              comments: [],
+              author: {
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                last_name: user.last_name,
+              },
+              tags: [{ id: 6, name: "Seasonal", slug: "seasonal" }],
+            },
+          ];
+
+          setArticles(mockArticles);
+          updateStats(mockArticles);
+        }
+      } catch (err) {
+        console.error("Error fetching articles:", err);
+        setError("Failed to load your articles. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [user]);
+
+  // Calculate statistics
+  const updateStats = (articles) => {
+    const published = articles.filter(
+      (a) => a.status === "published" && !a.blocked
+    );
+    const draft = articles.filter((a) => a.status === "draft");
+    const blocked = articles.filter((a) => a.blocked);
+
+    const stats = {
+      total: articles.length,
+      published: published.length,
+      draft: draft.length,
+      blocked: blocked.length,
+      views: articles.reduce(
+        (sum, article) => sum + (article.view_count || 0),
+        0
+      ),
+      likes: articles.reduce(
+        (sum, article) => sum + (article.like_count || 0),
+        0
+      ),
+      comments: articles.reduce(
+        (sum, article) => sum + (article.comments?.length || 0),
+        0
+      ),
+    };
+
+    setStats(stats);
+  };
+
+  // Filter articles
+  const getFilteredArticles = () => {
+    if (filter === "all") return articles;
+    if (filter === "blocked")
+      return articles.filter((article) => article.blocked);
+    return articles.filter(
+      (article) => article.status === filter && !article.blocked
+    );
+  };
+
+  // Sort articles
+  const getSortedArticles = () => {
+    const filtered = getFilteredArticles();
+
+    switch (sortBy) {
+      case "date-asc":
+        return [...filtered].sort(
+          (a, b) =>
+            new Date(a.published_at || a.created_at || 0) -
+            new Date(b.published_at || b.created_at || 0)
+        );
+      case "date-desc":
+        return [...filtered].sort(
+          (a, b) =>
+            new Date(b.published_at || b.created_at || 0) -
+            new Date(a.published_at || a.created_at || 0)
+        );
+      case "title":
+        return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+      case "views":
+        return [...filtered].sort(
+          (a, b) => (b.view_count || 0) - (a.view_count || 0)
+        );
+      default:
+        return filtered;
+    }
+  };
+
+  // Handle article deletion
+  const deleteArticle = async () => {
+    try {
+      const { articleId } = deleteModal;
+
+      if (!articleId) return;
+
+      const response = await axios.delete(`${API_URL}/articles/${articleId}`);
+
+      if (response.data.success) {
+        // Update articles list
+        setArticles((prev) =>
+          prev.filter((article) => article.id !== articleId)
+        );
+        setSuccessMessage("Article deleted successfully");
+
+        // Update stats
+        const updatedArticles = articles.filter(
+          (article) => article.id !== articleId
+        );
+        updateStats(updatedArticles);
+      }
+    } catch (err) {
+      console.error("Error deleting article:", err);
+      setError("Failed to delete article. Please try again.");
+    } finally {
+      setDeleteModal({ show: false, articleId: null, articleTitle: "" });
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3">Loading your articles...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Alert variant="danger">
+        <Alert.Heading>Error</Alert.Heading>
+        <p>{error}</p>
+        <div className="d-flex justify-content-end">
+          <Button
+            variant="outline-danger"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+      </Alert>
+    );
+  }
+
+  // Empty state
+  if (articles.length === 0) {
+    return (
+      <div className="my-articles-page">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1 className="mb-0">My Articles</h1>
+          <Link to="/editor">
+            <Button variant="primary">
+              <BsPlus className="me-2" />
+              Create New Article
+            </Button>
+          </Link>
+        </div>
+
+        <Card className="shadow-sm">
+          <Card.Body className="text-center py-5">
+            <BsFileEarmarkText size={50} className="text-muted mb-3" />
+            <h4>You haven't created any articles yet</h4>
+            <p className="text-muted">
+              Start sharing your beekeeping knowledge and experiences
+            </p>
+            <Link to="/editor">
+              <Button variant="primary" size="lg" className="mt-3">
+                <BsPlus className="me-2" />
+                Create Your First Article
+              </Button>
+            </Link>
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  }
+
+  const filteredSortedArticles = getSortedArticles();
+
   return (
     <div className="my-articles-page">
-      <h1 className="mb-4">My Articles</h1>
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">My Articles</h1>
+        <Link to="/editor">
+          <Button variant="primary">
+            <BsPlus className="me-2" />
+            Create New Article
+          </Button>
+        </Link>
+      </div>
 
-      <Card className="mb-4">
+      {/* Success Message */}
+      {successMessage && (
+        <Alert
+          variant="success"
+          dismissible
+          onClose={() => setSuccessMessage(null)}
+          className="mb-4"
+        >
+          {successMessage}
+        </Alert>
+      )}
+
+      {/* Statistics Cards */}
+      <Row className="mb-4">
+        <Col md={4} className="mb-3 mb-md-0">
+          <Card className="shadow-sm h-100">
+            <Card.Body className="text-center">
+              <h2 className="display-4 fw-bold text-primary">{stats.total}</h2>
+              <p className="text-muted mb-0">Total Articles</p>
+              <div className="d-flex justify-content-center mt-3">
+                <Badge bg="success" className="mx-1 p-2">
+                  {stats.published} Published
+                </Badge>
+                <Badge bg="secondary" className="mx-1 p-2">
+                  {stats.draft} Draft
+                </Badge>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4} className="mb-3 mb-md-0">
+          <Card className="shadow-sm h-100">
+            <Card.Body className="text-center">
+              <h2 className="display-4 fw-bold text-primary">{stats.views}</h2>
+              <p className="text-muted mb-0">Total Views</p>
+              <div className="mt-3">
+                <small className="text-muted">
+                  <BsEye className="me-1" /> Average:{" "}
+                  {stats.published > 0
+                    ? Math.round(stats.views / stats.published)
+                    : 0}{" "}
+                  per article
+                </small>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="shadow-sm h-100">
+            <Card.Body className="text-center">
+              <div className="d-flex justify-content-around">
+                <div className="text-center">
+                  <h3 className="display-5 fw-bold text-danger">
+                    {stats.likes}
+                  </h3>
+                  <p className="text-muted mb-0">
+                    <BsFillHeartFill className="me-1" /> Likes
+                  </p>
+                </div>
+                <div className="text-center">
+                  <h3 className="display-5 fw-bold text-info">
+                    {stats.comments}
+                  </h3>
+                  <p className="text-muted mb-0">
+                    <BsChat className="me-1" /> Comments
+                  </p>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Filters & Controls */}
+      <Card className="shadow-sm mb-4">
         <Card.Body>
-          <Alert variant="info">
-            <p>
-              This is a placeholder for the author's articles management page.
-            </p>
-            <p>
-              The actual implementation will include a list of the author's
-              articles and management options.
-            </p>
-          </Alert>
+          <div className="d-flex flex-wrap justify-content-between align-items-center">
+            <Nav variant="pills" className="mb-3 mb-md-0">
+              <Nav.Item>
+                <Nav.Link
+                  active={filter === "all"}
+                  onClick={() => setFilter("all")}
+                >
+                  All ({articles.length})
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  active={filter === "published"}
+                  onClick={() => setFilter("published")}
+                >
+                  Published ({stats.published})
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  active={filter === "draft"}
+                  onClick={() => setFilter("draft")}
+                >
+                  Drafts ({stats.draft})
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  active={filter === "blocked"}
+                  onClick={() => setFilter("blocked")}
+                  className="text-danger"
+                >
+                  Blocked ({stats.blocked})
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+
+            <div className="d-flex">
+              <Dropdown className="me-2">
+                <Dropdown.Toggle
+                  variant="outline-secondary"
+                  id="filter-dropdown"
+                >
+                  <BsFilter className="me-2" />
+                  Sort By
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    active={sortBy === "date-desc"}
+                    onClick={() => setSortBy("date-desc")}
+                  >
+                    Newest First
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={sortBy === "date-asc"}
+                    onClick={() => setSortBy("date-asc")}
+                  >
+                    Oldest First
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={sortBy === "title"}
+                    onClick={() => setSortBy("title")}
+                  >
+                    Title A-Z
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={sortBy === "views"}
+                    onClick={() => setSortBy("views")}
+                  >
+                    Most Views
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          </div>
         </Card.Body>
       </Card>
+
+      {/* Articles Table */}
+      <Card className="shadow-sm">
+        <Card.Body className="p-0">
+          <div className="table-responsive">
+            <Table hover className="mb-0">
+              <thead className="bg-light">
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Views</th>
+                  <th>Likes</th>
+                  <th>Comments</th>
+                  <th className="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSortedArticles.map((article) => (
+                  <tr key={article.id}>
+                    <td className="align-middle">
+                      <div className="d-flex align-items-center">
+                        <div>
+                          <h6 className="mb-0">
+                            {article.title}
+                            {article.blocked && (
+                              <span className="ms-2">
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip>
+                                      This article has been blocked by an
+                                      administrator. Click for details.
+                                    </Tooltip>
+                                  }
+                                >
+                                  <BsShieldExclamation
+                                    className="text-danger"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      setBlockedInfoModal({
+                                        show: true,
+                                        article,
+                                      })
+                                    }
+                                  />
+                                </OverlayTrigger>
+                              </span>
+                            )}
+                          </h6>
+                          <div className="text-muted small">
+                            {article.tags?.map((tag) => (
+                              <Badge
+                                bg="secondary"
+                                key={tag.id}
+                                className="me-1"
+                                style={{ opacity: 0.7 }}
+                              >
+                                {tag.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <Badge
+                        bg={
+                          article.blocked
+                            ? "danger"
+                            : article.status === "published"
+                            ? "success"
+                            : "secondary"
+                        }
+                        className="p-2"
+                      >
+                        {article.blocked ? "Blocked" : article.status}
+                      </Badge>
+                    </td>
+                    <td className="align-middle">
+                      {article.published_at ? (
+                        <span
+                          title={moment(article.published_at).format(
+                            "MMMM D, YYYY h:mm A"
+                          )}
+                        >
+                          <BsCalendar3 className="me-1" />
+                          {moment(article.published_at).format("MMM D, YYYY")}
+                        </span>
+                      ) : (
+                        <span className="text-muted">
+                          <BsCalendar3 className="me-1" />
+                          Not published
+                        </span>
+                      )}
+                    </td>
+                    <td className="align-middle">
+                      <div className="d-flex align-items-center">
+                        <BsEye className="me-1 text-muted" />
+                        {article.view_count || 0}
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <div className="d-flex align-items-center">
+                        <BsFillHeartFill className="me-1 text-danger" />
+                        {article.like_count || 0}
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <div className="d-flex align-items-center">
+                        <BsChat className="me-1 text-info" />
+                        {article.comments?.length || 0}
+                      </div>
+                    </td>
+                    <td className="align-middle text-end">
+                      <div className="d-flex justify-content-end">
+                        {article.status === "published" && !article.blocked && (
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-2"
+                            as={Link}
+                            to={`/articles/${article.slug}`}
+                            title="View Article"
+                          >
+                            <BsEye />
+                          </Button>
+                        )}
+                        {article.blocked && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="me-2"
+                            onClick={() =>
+                              setBlockedInfoModal({ show: true, article })
+                            }
+                            title="View Block Reason"
+                          >
+                            <BsInfoCircleFill />
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          className="me-2"
+                          as={Link}
+                          to={`/editor/${article.id}`}
+                          title="Edit Article"
+                        >
+                          <BsPencilSquare />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() =>
+                            setDeleteModal({
+                              show: true,
+                              articleId: article.id,
+                              articleTitle: article.title,
+                            })
+                          }
+                          title="Delete Article"
+                        >
+                          <BsTrash />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={deleteModal.show}
+        onHide={() =>
+          setDeleteModal({ show: false, articleId: null, articleTitle: "" })
+        }
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Article</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center mb-4">
+            <BsExclamationTriangle size={50} className="text-danger mb-3" />
+            <h5>Are you sure you want to delete this article?</h5>
+            <p className="text-muted">"{deleteModal.articleTitle}"</p>
+            <p className="text-danger font-weight-bold">
+              This action cannot be undone.
+            </p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              setDeleteModal({ show: false, articleId: null, articleTitle: "" })
+            }
+          >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={deleteArticle}>
+            Delete Article
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Blocked Article Info Modal */}
+      <Modal
+        show={blockedInfoModal.show}
+        onHide={() => setBlockedInfoModal({ show: false, article: null })}
+      >
+        <Modal.Header closeButton className="bg-danger text-white">
+          <Modal.Title>
+            <BsShieldExclamation className="me-2" />
+            Article Blocked
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-4">
+            <h5 className="mb-3">{blockedInfoModal.article?.title}</h5>
+
+            <div className="border-top border-bottom py-3 mb-3">
+              <h6 className="text-danger mb-2">Reason for blocking:</h6>
+              <p>
+                {blockedInfoModal.article?.blocked_reason ||
+                  "No specific reason provided."}
+              </p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Blocked by:</strong>{" "}
+              {blockedInfoModal.article?.blocked_by?.first_name}{" "}
+              {blockedInfoModal.article?.blocked_by?.last_name}
+              <br />
+              <strong>Blocked on:</strong>{" "}
+              {blockedInfoModal.article?.blocked_at
+                ? moment(blockedInfoModal.article.blocked_at).format(
+                    "MMMM D, YYYY [at] h:mm A"
+                  )
+                : "Unknown date"}
+            </div>
+
+            <Alert variant="info">
+              <BsInfoCircleFill className="me-2" />
+              You can edit this article to address the issues, but only an
+              administrator can remove the block. Contact an administrator after
+              making the necessary changes.
+            </Alert>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setBlockedInfoModal({ show: false, article: null })}
+          >
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            as={Link}
+            to={`/editor/${blockedInfoModal.article?.id}`}
+            onClick={() => setBlockedInfoModal({ show: false, article: null })}
+          >
+            Edit Article
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
