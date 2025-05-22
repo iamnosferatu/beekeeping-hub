@@ -1,5 +1,5 @@
 // frontend/src/components/articles/ArticleList.js
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -10,171 +10,37 @@ import {
   Alert,
 } from "react-bootstrap";
 import { BsFillHeartFill, BsEye, BsChat } from "react-icons/bs";
-import axios from "axios";
 import moment from "moment";
-import { API_URL } from "../../config";
+import { useArticles } from "../../hooks/api/useArticles";
 import "./ArticleList.scss";
 
-const ArticleList = ({ tag, search }) => {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 5; // Articles per page
-
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Build query parameters
-        let url = `${API_URL}/articles?page=${page}&limit=${limit}`;
-
-        if (tag) {
-          url += `&tag=${tag}`;
-        }
-
-        if (search) {
-          url += `&search=${search}`;
-        }
-
-        // First, try to get from the real API
-        try {
-          const res = await axios.get(url);
-
-          if (res.data.success) {
-            setArticles(res.data.data);
-            setTotalPages(res.data.pagination.totalPages);
-          } else {
-            throw new Error("Failed to fetch articles");
-          }
-        } catch (apiError) {
-          console.warn("API error, using fallback data:", apiError);
-
-          // Fallback to mock data for development (similar to what was in the original file)
-          const mockArticles = [
-            {
-              id: 1,
-              title: "Getting Started with Beekeeping",
-              slug: "getting-started-with-beekeeping",
-              excerpt:
-                "Learn the basics of beekeeping, including essential equipment, selecting bees, and choosing the right location for your hives.",
-              published_at: "2023-05-15T10:30:00Z",
-              view_count: 215,
-              like_count: 42,
-              comments: [1, 2, 3],
-              author: {
-                id: 1,
-                username: "author1",
-                first_name: "Jane",
-                last_name: "Beekeeper",
-              },
-              tags: [
-                { id: 1, name: "Beginner", slug: "beginner" },
-                { id: 3, name: "Equipment", slug: "equipment" },
-              ],
-            },
-            {
-              id: 2,
-              title: "Honey Harvesting Techniques",
-              slug: "honey-harvesting-techniques",
-              excerpt:
-                "Master the art of honey harvesting with these proven techniques. Learn when to harvest, what equipment to use, and how to extract honey without harming your bees.",
-              published_at: "2023-05-30T14:45:00Z",
-              view_count: 178,
-              like_count: 36,
-              comments: [4, 5],
-              author: {
-                id: 1,
-                username: "author1",
-                first_name: "Jane",
-                last_name: "Beekeeper",
-              },
-              tags: [
-                { id: 2, name: "Advanced", slug: "advanced" },
-                { id: 4, name: "Honey", slug: "honey" },
-              ],
-            },
-            {
-              id: 3,
-              title: "Common Bee Diseases and Prevention",
-              slug: "common-bee-diseases-and-prevention",
-              excerpt:
-                "Learn to identify and prevent common bee diseases including Varroa mites, foulbrood, and nosema. Protecting your bees from these threats is essential for colony survival.",
-              published_at: "2023-06-10T09:15:00Z",
-              view_count: 143,
-              like_count: 28,
-              comments: [],
-              author: {
-                id: 2,
-                username: "author2",
-                first_name: "John",
-                last_name: "Hiveman",
-              },
-              tags: [{ id: 5, name: "Health", slug: "health" }],
-            },
-            {
-              id: 4,
-              title: "The Perfect Beehive Setup",
-              slug: "the-perfect-beehive-setup",
-              excerpt:
-                "Design the ideal home for your bees with this comprehensive guide to beehive setup. Learn about different hive types, optimal positioning, and seasonal configurations.",
-              published_at: "2023-07-05T16:20:00Z",
-              view_count: 97,
-              like_count: 18,
-              comments: [],
-              author: {
-                id: 1,
-                username: "author1",
-                first_name: "Jane",
-                last_name: "Beekeeper",
-              },
-              tags: [
-                { id: 1, name: "Beginner", slug: "beginner" },
-                { id: 3, name: "Equipment", slug: "equipment" },
-              ],
-            },
-          ];
-
-          // Filter mock data if needed
-          let filteredArticles = mockArticles;
-
-          if (tag) {
-            filteredArticles = filteredArticles.filter((article) =>
-              article.tags.some((t) => t.slug === tag)
-            );
-          }
-
-          if (search) {
-            const searchLower = search.toLowerCase();
-            filteredArticles = filteredArticles.filter(
-              (article) =>
-                article.title.toLowerCase().includes(searchLower) ||
-                article.excerpt.toLowerCase().includes(searchLower)
-            );
-          }
-
-          setArticles(filteredArticles);
-          setTotalPages(1); // Just 1 page for mock data
-        }
-      } catch (err) {
-        console.error("Error fetching articles:", err);
-        setError("Failed to load articles. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [page, tag, search]);
+const ArticleList = ({ tag, search, limit = 5 }) => {
+  // Use the new API hook for fetching articles
+  const {
+    data: articles,
+    loading,
+    error,
+    pagination,
+    changePage,
+  } = useArticles(
+    {
+      tag,
+      search,
+      limit,
+    },
+    {
+      onError: (error) => {
+        console.error("Error fetching articles:", error);
+      },
+    }
+  );
 
   const handlePageChange = (newPage) => {
-    setPage(newPage);
+    changePage(newPage);
     window.scrollTo(0, 0);
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="text-center py-5">
@@ -186,16 +52,23 @@ const ArticleList = ({ tag, search }) => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <Alert variant="danger" className="mb-4">
-        <Alert.Heading>Error</Alert.Heading>
-        <p>{error}</p>
+        <Alert.Heading>Error Loading Articles</Alert.Heading>
+        <p>{error.message || "Failed to load articles. Please try again."}</p>
+        {error.type === "NETWORK_ERROR" && (
+          <p className="mb-0">
+            <small>Please check your internet connection and try again.</small>
+          </p>
+        )}
       </Alert>
     );
   }
 
-  if (articles.length === 0) {
+  // Empty state
+  if (!articles || articles.length === 0) {
     return (
       <Alert variant="info" className="mb-4">
         <Alert.Heading>No Articles Found</Alert.Heading>
@@ -238,7 +111,8 @@ const ArticleList = ({ tag, search }) => {
               </div>
 
               <small className="text-muted">
-                {moment(article.published_at).format("MMM D, YYYY")}
+                {article.published_at &&
+                  moment(article.published_at).format("MMM D, YYYY")}
               </small>
             </div>
 
@@ -291,22 +165,22 @@ const ArticleList = ({ tag, search }) => {
       ))}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pagination && pagination.totalPages > 1 && (
         <div className="d-flex justify-content-center mt-4">
           <Pagination>
             <Pagination.First
               onClick={() => handlePageChange(1)}
-              disabled={page === 1}
+              disabled={pagination.page === 1}
             />
             <Pagination.Prev
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
             />
 
-            {[...Array(totalPages).keys()].map((number) => (
+            {[...Array(pagination.totalPages).keys()].map((number) => (
               <Pagination.Item
                 key={number + 1}
-                active={number + 1 === page}
+                active={number + 1 === pagination.page}
                 onClick={() => handlePageChange(number + 1)}
               >
                 {number + 1}
@@ -314,12 +188,12 @@ const ArticleList = ({ tag, search }) => {
             ))}
 
             <Pagination.Next
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages}
             />
             <Pagination.Last
-              onClick={() => handlePageChange(totalPages)}
-              disabled={page === totalPages}
+              onClick={() => handlePageChange(pagination.totalPages)}
+              disabled={pagination.page === pagination.totalPages}
             />
           </Pagination>
         </div>

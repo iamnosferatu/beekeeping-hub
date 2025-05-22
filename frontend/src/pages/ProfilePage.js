@@ -12,20 +12,14 @@ import {
   Modal,
   Badge,
 } from "react-bootstrap";
-import {
-  BsPencil,
-  BsShieldLock,
-  BsUpload,
-  BsPersonCircle,
-  BsTrash,
-} from "react-icons/bs";
+import { BsPencil, BsShieldLock, BsUpload, BsTrash } from "react-icons/bs";
 import AuthContext from "../contexts/AuthContext";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import "./ProfilePage.scss";
 
 const ProfilePage = () => {
-  const { user, updateProfile, changePassword, loading, error, clearError } =
+  const { user, updateProfile, changePassword, error, clearError } =
     useContext(AuthContext);
 
   const [profileImage, setProfileImage] = useState(
@@ -79,7 +73,7 @@ const ProfilePage = () => {
   const handleProfileUpdate = async (values, { setSubmitting }) => {
     try {
       clearError();
-      const updatedUser = await updateProfile({
+      await updateProfile({
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
@@ -88,8 +82,10 @@ const ProfilePage = () => {
       });
 
       setSuccessMessage("Profile updated successfully");
-      setSubmitting(false);
     } catch (err) {
+      // Error is handled by context
+      console.error("Profile update error:", err);
+    } finally {
       setSubmitting(false);
     }
   };
@@ -106,8 +102,10 @@ const ProfilePage = () => {
       setSuccessMessage("Password changed successfully");
       setShowChangePasswordModal(false);
       resetForm();
-      setSubmitting(false);
     } catch (err) {
+      // Error is handled by context
+      console.error("Password change error:", err);
+    } finally {
       setSubmitting(false);
     }
   };
@@ -203,7 +201,9 @@ const ProfilePage = () => {
                         )}
                       </div>
                     </div>
-                    <h4>{`${user?.first_name} ${user?.last_name}`}</h4>
+                    <h4>{`${user?.first_name || ""} ${
+                      user?.last_name || ""
+                    }`}</h4>
                     <p className="text-muted">
                       <Badge bg="secondary">{user?.role}</Badge>
                     </p>

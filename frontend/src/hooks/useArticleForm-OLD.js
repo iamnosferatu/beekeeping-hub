@@ -55,31 +55,7 @@ const useArticleForm = (initialData = {}) => {
       ...prev,
       excerpt,
     }));
-    setContentChanged(true);
   }, [formData.content]);
-
-  const resetForm = useCallback(() => {
-    setFormData({
-      title: "",
-      content: "",
-      excerpt: "",
-      featured_image: "",
-      status: "draft",
-      tags: [],
-      blocked: false,
-      blocked_reason: "",
-      blocked_by: null,
-      blocked_at: null,
-    });
-    setContentChanged(false);
-  }, []);
-
-  const updateFormData = useCallback((newData) => {
-    setFormData((prev) => ({
-      ...prev,
-      ...newData,
-    }));
-  }, []);
 
   return {
     formData,
@@ -89,8 +65,6 @@ const useArticleForm = (initialData = {}) => {
     handleTagsChange,
     generateExcerpt,
     contentChanged,
-    resetForm,
-    updateFormData,
   };
 };
 
