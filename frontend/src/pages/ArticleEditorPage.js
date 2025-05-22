@@ -1,7 +1,7 @@
 // frontend/src/pages/ArticleEditorPage.js
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useEffect, useContext, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Alert, Spinner } from "react-bootstrap";
+import { Container, Alert, Spinner, Button } from "react-bootstrap";
 import axios from "axios";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
@@ -12,6 +12,7 @@ import ArticleMetadata from "../components/editor/ArticleMetadata";
 import ArticleActions from "../components/editor/ArticleActions";
 import ArticleBlockedNotice from "../components/editor/ArticleBlockedNotice";
 import ArticleDebugInfo from "../components/editor/ArticleDebugInfo";
+import ArticleExcerptEditor from "../components/editor/ArticleExcerptEditor";
 
 // Custom Hooks
 import useArticleForm from "../hooks/useArticleForm";
@@ -31,7 +32,6 @@ const ArticleEditorPage = () => {
     handleContentChange,
     handleTagsChange,
     generateExcerpt,
-    contentChanged,
   } = useArticleForm();
 
   const { loading, error, debugInfo, fetchArticle } = useArticleFetch(
@@ -39,6 +39,11 @@ const ArticleEditorPage = () => {
     isEditMode,
     id
   );
+
+  // Navigate back safely
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   // Save article handler
   const handleSave = useCallback(
@@ -116,10 +121,25 @@ const ArticleEditorPage = () => {
 
   // Initial article fetch
   useEffect(() => {
-    if (isEditMode) {
-      fetchArticle(id);
+    if (isEditMode && user) {
+      fetchArticle(id).then((article) => {
+        if (article) {
+          setFormData({
+            title: article.title || "",
+            content: article.content || "",
+            excerpt: article.excerpt || "",
+            featured_image: article.featured_image || "",
+            status: article.status || "draft",
+            tags: article.tags ? article.tags.map((tag) => tag.name) : [],
+            blocked: article.blocked || false,
+            blocked_reason: article.blocked_reason || "",
+            blocked_by: article.blocked_by || null,
+            blocked_at: article.blocked_at || null,
+          });
+        }
+      });
     }
-  }, [id, isEditMode, fetchArticle]);
+  }, [id, isEditMode, user, fetchArticle, setFormData]);
 
   // Loading state
   if (loading) {
@@ -133,6 +153,16 @@ const ArticleEditorPage = () => {
 
   return (
     <Container fluid className="article-editor py-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="mb-0">
+          {isEditMode ? "Edit Article" : "Create New Article"}
+        </h1>
+        <Button variant="outline-secondary" onClick={handleBack}>
+          Back
+        </Button>
+      </div>
+
       {/* Debug Information */}
       <ArticleDebugInfo debugInfo={debugInfo} />
 
@@ -153,20 +183,27 @@ const ArticleEditorPage = () => {
             {/* Article Content Form */}
             <ArticleForm
               formData={formData}
-              onInputChange={handleInputChange}
-              onContentChange={handleContentChange}
-              onGenerateExcerpt={generateExcerpt}
+              handleInputChange={handleInputChange}
+              handleContentChange={handleContentChange}
+            />
+
+            {/* Article Excerpt Editor */}
+            <ArticleExcerptEditor
+              formData={formData}
+              handleInputChange={handleInputChange}
+              generateExcerpt={generateExcerpt}
             />
           </div>
 
           <div className="col-lg-3">
-            {/* Article Metadata and Actions */}
+            {/* Article Metadata */}
             <ArticleMetadata
               formData={formData}
               onInputChange={handleInputChange}
               onTagsChange={handleTagsChange}
             />
 
+            {/* Article Actions */}
             <ArticleActions
               isEditMode={isEditMode}
               formData={formData}

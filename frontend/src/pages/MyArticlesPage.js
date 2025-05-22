@@ -1,6 +1,6 @@
 // frontend/src/pages/MyArticlesPage.js
 import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Card,
   Button,
@@ -21,8 +21,6 @@ import {
   BsEye,
   BsTrash,
   BsFilter,
-  BsSortDown,
-  BsThreeDotsVertical,
   BsFileEarmarkText,
   BsFillHeartFill,
   BsChat,
@@ -30,8 +28,6 @@ import {
   BsCalendar3,
   BsExclamationTriangle,
   BsShieldExclamation,
-  BsLockFill,
-  BsShieldFillCheck,
   BsInfoCircleFill,
 } from "react-icons/bs";
 import axios from "axios";
@@ -41,7 +37,6 @@ import AuthContext from "../contexts/AuthContext";
 
 const MyArticlesPage = () => {
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
   const location = useLocation();
 
   // State
@@ -81,223 +76,32 @@ const MyArticlesPage = () => {
 
         if (!user) return;
 
-        // In a production environment, we would have a dedicated
-        // endpoint like /api/author/articles that returns both published
-        // and draft articles for the authenticated user.
-
-        // Since our API doesn't have this endpoint, we'll use a combined approach:
-        // 1. Fetch published articles first
-        // 2. For drafts, we'll either simulate them or use a more appropriate endpoint if available
-
-        try {
-          // Step 1: Get published articles (that are publicly visible)
-          const publishedResponse = await axios.get(
-            `${API_URL}/articles?limit=100`
-          );
-
-          // Filter to only the current user's published articles
-          let publishedArticles = [];
-
-          if (publishedResponse.data.success) {
-            publishedArticles = publishedResponse.data.data.filter(
-              (article) => article.author && article.author.id === user.id
-            );
-          }
-
-          // Step 2: Try to get user's draft articles
-          // In a real implementation with proper auth, we would have an endpoint like:
-          // GET /api/author/articles/drafts
-
-          // For this demo, we'll use mock draft articles
-          const mockDraftArticles = [
-            {
-              id: 101,
-              title: "The Perfect Beehive Setup (Draft)",
-              slug: "the-perfect-beehive-setup-draft",
-              status: "draft",
-              blocked: false,
-              published_at: null,
-              view_count: 0,
-              like_count: 0,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [
-                { id: 1, name: "Beginner", slug: "beginner" },
-                { id: 3, name: "Equipment", slug: "equipment" },
-              ],
+        // Mock articles for demo
+        const mockArticles = [
+          {
+            id: 1,
+            title: "Getting Started with Beekeeping",
+            slug: "getting-started-with-beekeeping",
+            status: "published",
+            published_at: "2023-05-15T10:30:00Z",
+            view_count: 215,
+            like_count: 42,
+            comments: [1, 2, 3],
+            author: {
+              id: user.id,
+              username: user.username,
+              first_name: user.first_name,
+              last_name: user.last_name,
             },
-            {
-              id: 102,
-              title: "Seasonal Beekeeping Calendar (Draft)",
-              slug: "seasonal-beekeeping-calendar-draft",
-              status: "draft",
-              blocked: false,
-              published_at: null,
-              view_count: 0,
-              like_count: 0,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [{ id: 6, name: "Seasonal", slug: "seasonal" }],
-            },
-          ];
+            tags: [
+              { id: 1, name: "Beginner", slug: "beginner" },
+              { id: 3, name: "Equipment", slug: "equipment" },
+            ],
+          },
+        ];
 
-          // Step 3: Add some blocked articles for demonstration
-          const mockedBlockedArticles = [
-            {
-              id: 103,
-              title: "Controversial Bee Treatment Methods",
-              slug: "controversial-bee-treatment-methods",
-              status: "published", // Status remains published, but it's blocked from display
-              blocked: true,
-              blocked_reason:
-                "Contains unverified treatment methods that may harm bees. Please revise and provide scientific sources for claims.",
-              blocked_at: "2023-07-15T14:22:00Z",
-              blocked_by: {
-                id: 1,
-                username: "admin",
-                first_name: "Admin",
-                last_name: "User",
-              },
-              published_at: "2023-07-12T09:30:00Z",
-              view_count: 42, // Views before it was blocked
-              like_count: 5,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [
-                { id: 4, name: "Health", slug: "health" },
-                { id: 2, name: "Advanced", slug: "advanced" },
-              ],
-            },
-          ];
-
-          // Combine published, draft, and blocked articles
-          const allUserArticles = [
-            ...publishedArticles,
-            ...mockDraftArticles,
-            ...mockedBlockedArticles,
-          ];
-
-          setArticles(allUserArticles);
-          updateStats(allUserArticles);
-        } catch (apiError) {
-          console.warn("API error, using mock data:", apiError);
-
-          // Create mock articles for demo purposes
-          const mockArticles = [
-            {
-              id: 1,
-              title: "Getting Started with Beekeeping",
-              slug: "getting-started-with-beekeeping",
-              status: "published",
-              published_at: "2023-05-15T10:30:00Z",
-              view_count: 215,
-              like_count: 42,
-              comments: [1, 2, 3],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [
-                { id: 1, name: "Beginner", slug: "beginner" },
-                { id: 3, name: "Equipment", slug: "equipment" },
-              ],
-            },
-            {
-              id: 2,
-              title: "Honey Harvesting Techniques",
-              slug: "honey-harvesting-techniques",
-              status: "published",
-              published_at: "2023-05-30T14:45:00Z",
-              view_count: 178,
-              like_count: 36,
-              comments: [4, 5],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [
-                { id: 2, name: "Advanced", slug: "advanced" },
-                { id: 4, name: "Honey", slug: "honey" },
-              ],
-            },
-            {
-              id: 3,
-              title: "Common Bee Diseases and Prevention",
-              slug: "common-bee-diseases-and-prevention",
-              status: "published",
-              published_at: "2023-06-10T09:15:00Z",
-              view_count: 143,
-              like_count: 28,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [{ id: 5, name: "Health", slug: "health" }],
-            },
-            {
-              id: 4,
-              title: "The Perfect Beehive Setup (Draft)",
-              slug: "the-perfect-beehive-setup-draft",
-              status: "draft",
-              published_at: null,
-              view_count: 0,
-              like_count: 0,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [
-                { id: 1, name: "Beginner", slug: "beginner" },
-                { id: 3, name: "Equipment", slug: "equipment" },
-              ],
-            },
-            {
-              id: 5,
-              title: "Seasonal Beekeeping Calendar (Draft)",
-              slug: "seasonal-beekeeping-calendar-draft",
-              status: "draft",
-              published_at: null,
-              view_count: 0,
-              like_count: 0,
-              comments: [],
-              author: {
-                id: user.id,
-                username: user.username,
-                first_name: user.first_name,
-                last_name: user.last_name,
-              },
-              tags: [{ id: 6, name: "Seasonal", slug: "seasonal" }],
-            },
-          ];
-
-          setArticles(mockArticles);
-          updateStats(mockArticles);
-        }
+        setArticles(mockArticles);
+        updateStats(mockArticles);
       } catch (err) {
         console.error("Error fetching articles:", err);
         setError("Failed to load your articles. Please try again.");

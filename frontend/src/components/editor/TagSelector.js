@@ -10,17 +10,12 @@ const TagSelector = ({ selectedTags = [], onChange, maxTags = 5 }) => {
   const [availableTags, setAvailableTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Fetch available tags from API
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
         const response = await axios.get(`${API_URL}/tags`);
 
         if (response.data.success) {
@@ -47,8 +42,6 @@ const TagSelector = ({ selectedTags = [], onChange, maxTags = 5 }) => {
           "Queen Bees",
           "Harvesting",
         ]);
-      } finally {
-        setLoading(false);
       }
     };
 
