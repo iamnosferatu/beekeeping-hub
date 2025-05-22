@@ -164,6 +164,58 @@ exports.getArticles = async (req, res, next) => {
   }
 };
 
+// Get Article by ID
+exports.getArticleById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Use the same include strategy as your getArticle method
+    const article = await Article.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
+        },
+        {
+          model: Tag,
+          as: 'tags',
+          attributes: ['id', 'name', 'slug'],
+          through: { attributes: [] }
+        },
+        {
+          model: Comment,
+          as: 'comments',
+          where: { status: 'approved' },
+          required: false,
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: article
+    });
+  } catch (error) {
+    console.error('Error fetching article by ID:', error);
+    next(error);
+  }
+};
+
 // @desc    Get single article by slug
 // @route   GET /api/articles/:slug
 // @access  Public
@@ -171,9 +223,10 @@ exports.getArticle = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    // Find article by slug
+    // Find article by slug, draft, published or blocked
     const article = await Article.findOne({
-      where: { slug, status: "published" },
+      //where: { slug, status: "published" },
+      where: { slug  },
       include: getArticleIncludes(),
     });
 
