@@ -10,29 +10,22 @@ import {
   Col,
   Alert,
   Spinner,
-  Badge,
-  Tabs,
-  Tab,
   OverlayTrigger,
   Tooltip,
+  Modal,
 } from "react-bootstrap";
-import moment from 'moment'
 import {
-  BsSave,
-  BsEye,
-  BsTrash,
-  BsCheck2Circle,
-  BsPencil,
-  BsImage,
-  BsShieldFillCheck,
-  BsShieldExclamation,
   BsQuestionCircle,
-  BsArrowLeft,
+  BsCheck2Circle,
+  BsSave,
+  BsTrash,
+  BsExclamationTriangle,
 } from "react-icons/bs";
 import axios from "axios";
+import moment from "moment";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
-import WysiwygEditor from "../components/editor/WysiwygEditor"; // Change to WYSIWYG editor
+import WysiwygEditor from "../components/editor/WysiwygEditor";
 import TagSelector from "../components/editor/TagSelector";
 import "./ArticleEditorPage.scss";
 
@@ -41,6 +34,10 @@ const ArticleEditorPage = () => {
   const isEditMode = !!id;
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Placeholder image for featured image
+  const placeholderImage =
+    "https://via.placeholder.com/1200x400?text=Featured+Image";
 
   // Form state
   const [formData, setFormData] = useState({
@@ -61,63 +58,9 @@ const ArticleEditorPage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [activeTab, setActiveTab] = useState("edit");
+  const [debugInfo, setDebugInfo] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [contentChanged, setContentChanged] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [wordCount, setWordCount] = useState(0);
-  const [placeholderImage, setPlaceholderImage] = useState(
-    "https://via.placeholder.com/1200x400?text=Featured+Image"
-  );
-
-  // Load article data if in edit mode
-  useEffect(() => {
-    const fetchArticle = async () => {
-      if (!isEditMode) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await axios.get(`${API_URL}/articles/${id}`);
-
-        if (!response.data.success) {
-          throw new Error("Failed to load article");
-        }
-
-        const article = response.data.data;
-
-        // Check if user has permission to edit
-        if (user.id !== article.user_id && user.role !== "admin") {
-          setError("You don't have permission to edit this article");
-          return;
-        }
-
-        // Set form data from article
-        setFormData({
-          title: article.title || "",
-          content: article.content || "",
-          excerpt: article.excerpt || "",
-          featured_image: article.featured_image || "",
-          status: article.status || "draft",
-          tags: article.tags ? article.tags.map((tag) => tag.name) : [],
-        });
-      } catch (err) {
-        console.error("Error fetching article:", err);
-        setError(
-          err.response?.data?.message ||
-            "Failed to load article. Please try again."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
-  }, [id, isEditMode, user]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -138,7 +81,7 @@ const ArticleEditorPage = () => {
     setContentChanged(true);
   };
 
-  // Generate excerpt from content if not provided
+  // Generate excerpt from content
   const generateExcerpt = () => {
     if (!formData.content) return;
 
@@ -151,92 +94,33 @@ const ArticleEditorPage = () => {
     setFormData((prev) => ({ ...prev, excerpt }));
   };
 
-  // Handle save/publish
-  const handleSave = async (e, saveAsDraft = false) => {
-    e.preventDefault();
-
-    // Validate form
-    if (!formData.title.trim()) {
-      setError("Title is required");
-      return;
+  // Navigate back safely
+  const handleBack = () => {
+    if (contentChanged) {
+      if (
+        window.confirm(
+          "You have unsaved changes. Are you sure you want to leave?"
+        )
+      ) {
+        navigate(-1);
+      }
+    } else {
+      navigate(-1);
     }
+  };
 
-    if (!formData.content.trim()) {
-      setError("Content is required");
-      return;
-    }
+  // Render debug information
+  const renderDebugInfo = () => {
+    if (!debugInfo) return null;
 
-    try {
-      setSaving(true);
-      setError(null);
-      setSuccessMessage(null);
-
-      // Prepare data
-      const articleData = {
-        ...formData,
-        status: saveAsDraft ? "draft" : formData.status,
-      };
-
-      // If no excerpt provided, generate one
-      if (!articleData.excerpt.trim()) {
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = articleData.content;
-        const text = tempDiv.textContent || tempDiv.innerText || "";
-
-        articleData.excerpt =
-          text.substring(0, 160) + (text.length > 160 ? "..." : "");
-      }
-
-      let response;
-
-      if (formData.blocked && user.role !== "admin") {
-        // Preserve blocked status for non-admin users
-        articleData.blocked = true;
-        articleData.blocked_reason = formData.blocked_reason;
-        articleData.blocked_by = formData.blocked_by;
-        articleData.blocked_at = formData.blocked_at;
-      }
-
-      if (isEditMode) {
-        // Update existing article
-        response = await axios.put(`${API_URL}/articles/${id}`, articleData);
-      } else {
-        // Create new article
-        response = await axios.post(`${API_URL}/articles`, articleData);
-      }
-
-      if (response.data.success) {
-        setContentChanged(false);
-
-        if (saveAsDraft) {
-          setSuccessMessage("Article saved as draft");
-          setFormData((prev) => ({ ...prev, status: "draft" }));
-        } else {
-          setSuccessMessage(
-            isEditMode
-              ? "Article updated successfully"
-              : "Article created successfully"
-          );
-
-          // If not edit mode, redirect to new article
-          if (!isEditMode) {
-            setTimeout(() => {
-              navigate(`/articles/${response.data.data.slug}`);
-            }, 1500);
-          }
-        }
-      } else {
-        throw new Error(response.data.message || "Failed to save article");
-      }
-    } catch (err) {
-      console.error("Error saving article:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to save article. Please try again."
-      );
-    } finally {
-      setSaving(false);
-    }
+    return (
+      <Card className="mt-3 bg-light">
+        <Card.Header>Debug Information</Card.Header>
+        <Card.Body>
+          <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+        </Card.Body>
+      </Card>
+    );
   };
 
   // Handle delete
@@ -268,55 +152,194 @@ const ArticleEditorPage = () => {
     }
   };
 
-  // Handle tab change
-  const handleTabChange = (key) => {
-    setActiveTab(key);
-    if (key === "preview") {
-      setPreviewLoading(true);
-      // Simulate preview loading
-      setTimeout(() => setPreviewLoading(false), 500);
-    }
-  };
+  // Handle save/publish
+  const handleSave = async (e, saveAsDraft = false) => {
+    e.preventDefault();
 
-  // Navigate back
-  const handleBack = () => {
-    if (contentChanged) {
-      if (
-        window.confirm(
-          "You have unsaved changes. Are you sure you want to leave?"
-        )
-      ) {
-        navigate(-1);
+    // Validate form
+    if (!formData.title.trim()) {
+      setError("Title is required");
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      setError("Content is required");
+      return;
+    }
+
+    // Define articleData before the try block
+    const articleData = {
+      ...formData,
+      status: saveAsDraft ? "draft" : formData.status,
+      // Generate excerpt if not provided
+      excerpt:
+        formData.excerpt.trim() ||
+        (() => {
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = formData.content;
+          const text = tempDiv.textContent || tempDiv.innerText || "";
+          return text.substring(0, 160) + (text.length > 160 ? "..." : "");
+        })(),
+    };
+
+    try {
+      setSaving(true);
+      setError(null);
+      setSuccessMessage(null);
+
+      let response;
+
+      // Determine whether to update or create
+      if (isEditMode) {
+        // Update existing article
+        response = await axios.put(`${API_URL}/articles/${id}`, articleData);
+      } else {
+        // Create new article
+        response = await axios.post(`${API_URL}/articles`, articleData);
       }
-    } else {
-      navigate(-1);
+
+      if (response.data.success) {
+        // Reset content changed flag
+        setContentChanged(false);
+
+        // Set success message
+        setSuccessMessage(
+          isEditMode
+            ? "Article updated successfully"
+            : "Article created successfully"
+        );
+
+        // Navigate to article if creating new
+        if (!isEditMode) {
+          const newSlug =
+            response.data.data.slug || response.data.data.id.toString();
+
+          setTimeout(() => {
+            navigate(`/articles/${newSlug}`);
+          }, 1500);
+        }
+      } else {
+        throw new Error(response.data.message || "Failed to save article");
+      }
+    } catch (err) {
+      console.error("Error saving article:", err);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to save article. Please check your connection and try again.";
+
+      setError(errorMessage);
+
+      // Capture debug information
+      setDebugInfo({
+        errorMessage,
+        fullError: err,
+        requestData: articleData,
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">Loading article editor...</p>
-      </div>
-    );
-  }
+  // loading articles...
+  useEffect(() => {
+    const fetchArticle = async () => {
+      if (!isEditMode) {
+        setLoading(false);
+        return;
+      }
 
-  // Permission error
-  if (error && error.includes("permission")) {
-    return (
-      <Alert variant="danger">
-        <Alert.Heading>Permission Denied</Alert.Heading>
-        <p>{error}</p>
-        <div className="d-flex justify-content-end">
-          <Button variant="outline-danger" onClick={() => navigate(-1)}>
-            Go Back
-          </Button>
-        </div>
-      </Alert>
-    );
-  }
+      try {
+        setLoading(true);
+        setError(null);
+        setDebugInfo(null);
+        console.log("Fetch Attempt Details:");
+        console.log("Current ID:", id);
+        console.log("Is Edit Mode:", isEditMode);
+        console.log("User ID:", user?.id);
+        console.log("Full User Object:", user);
+
+        // Log all available routes
+        const fetchStrategies = [
+          async () => {
+            console.log("Attempting fetch by slug: /articles/{slug}");
+            const response = await axios.get(`${API_URL}/articles/${id}`);
+            console.log("Slug Fetch Response:", response.data);
+            return response;
+          },
+          async () => {
+            console.log("Attempting fetch by ID: /articles/byId/{id}");
+            const response = await axios.get(`${API_URL}/articles/byId/${id}`);
+            console.log("ID Fetch Response:", response.data);
+            return response;
+          },
+        ];
+
+        let response;
+        let fetchError = null;
+
+        for (const strategy of fetchStrategies) {
+          try {
+            response = await strategy();
+
+            // Log full response for debugging
+            console.log("Fetch response:", response.data);
+
+            // Break if successful
+            if (response.data.success) break;
+          } catch (strategyError) {
+            console.warn("Fetch strategy failed:", strategyError);
+            fetchError = strategyError;
+          }
+        }
+
+        // Validate response
+        if (!response || !response.data.success) {
+          throw new Error(
+            "Failed to load article: " +
+              (fetchError?.message || "Unable to fetch using any strategy")
+          );
+        }
+
+        const article = response.data.data;
+
+        // Check if user has permission to edit
+        if (user.id !== article.user_id && user.role !== "admin") {
+          setError("You don't have permission to edit this article");
+          return;
+        }
+
+        // Set form data from article
+        setFormData({
+          title: article.title || "",
+          content: article.content || "",
+          excerpt: article.excerpt || "",
+          featured_image: article.featured_image || "",
+          status: article.status || "draft",
+          tags: article.tags ? article.tags.map((tag) => tag.name) : [],
+          blocked: article.blocked || false,
+          blocked_reason: article.blocked_reason || "",
+          blocked_by: article.blocked_by || null,
+          blocked_at: article.blocked_at || null,
+        });
+
+        console.log("Article loaded successfully:", formData);
+      } catch (err) {
+        console.error("Detailed Fetch Error:", {
+          errorMessage: err.message,
+          errorResponse: err.response?.data,
+          errorStatus: err.response?.status,
+          requestURL: err.config?.url,
+          fullError: err,
+        });
+      } finally {
+        console.groupEnd();
+      }
+    };
+
+    fetchArticle();
+  }, [id, isEditMode, user]);
 
   return (
     <Container fluid className="article-editor py-4">
@@ -324,16 +347,19 @@ const ArticleEditorPage = () => {
         <h1 className="mb-0">
           {isEditMode ? "Edit Article" : "Create New Article"}
         </h1>
-
         <Button variant="outline-secondary" onClick={handleBack}>
-          <BsArrowLeft className="me-2" /> Back
+          Back
         </Button>
       </div>
+
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
+
+      {renderDebugInfo()}
+
       {successMessage && (
         <Alert
           variant="success"
@@ -343,12 +369,12 @@ const ArticleEditorPage = () => {
           {successMessage}
         </Alert>
       )}
-      // 2. Add a blocked article notice component at the top of the editor form
-      // (Place this right after successMessage Alert)
+
+      {/* Blocked Article Notice */}
       {formData.blocked && (
         <Alert variant="danger" className="d-flex align-items-start mb-4">
           <div className="me-3 mt-1">
-            <BsShieldExclamation size={24} />
+            <BsExclamationTriangle size={24} />
           </div>
           <div>
             <Alert.Heading>This Article Has Been Blocked</Alert.Heading>
@@ -361,21 +387,18 @@ const ArticleEditorPage = () => {
               {formData.blocked_by?.last_name || "Administrator"}
               <br />
               <strong>Blocked on:</strong>{" "}
-              {moment(formData.blocked_at).format("MMMM D, YYYY [at] h:mm A")}
-            </p>
-            <hr />
-            <p className="mb-0">
-              You can edit this article to address the issues, but only an
-              administrator can remove the block. Contact the administrator
-              after making the necessary changes.
+              {formData.blocked_at
+                ? moment(formData.blocked_at).format("MMMM D, YYYY [at] h:mm A")
+                : "Unknown date"}
             </p>
           </div>
         </Alert>
       )}
+
       <Form onSubmit={(e) => handleSave(e, false)}>
         <Row>
           <Col lg={9}>
-            <Card className="mb-4 shadow-sm">
+            <Card className="mb-4">
               <Card.Body>
                 <Form.Group className="mb-3">
                   <Form.Label>Title</Form.Label>
@@ -386,77 +409,19 @@ const ArticleEditorPage = () => {
                     onChange={handleInputChange}
                     placeholder="Enter article title"
                     required
-                    className="form-control-lg"
                   />
                 </Form.Group>
 
-                <Tabs
-                  activeKey={activeTab}
-                  onSelect={handleTabChange}
-                  className="mb-3 editor-tabs"
-                >
-                  <Tab
-                    eventKey="edit"
-                    title={
-                      <span>
-                        <BsPencil className="me-2" />
-                        Edit
-                      </span>
-                    }
-                  >
-                    <WysiwygEditor
-                      value={formData.content}
-                      onChange={handleContentChange}
-                      height="500px"
-                    />
-                  </Tab>
-
-                  <Tab
-                    eventKey="preview"
-                    title={
-                      <span>
-                        <BsEye className="me-2" />
-                        Preview
-                      </span>
-                    }
-                  >
-                    {previewLoading ? (
-                      <div className="text-center py-5">
-                        <Spinner animation="border" size="sm" />
-                        <p>Loading preview...</p>
-                      </div>
-                    ) : (
-                      <div className="content-preview p-4 border rounded">
-                        <h1>{formData.title || "Untitled Article"}</h1>
-
-                        <div className="mb-3">
-                          {formData.tags.map((tag, index) => (
-                            <Badge key={index} bg="secondary" className="me-1">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        {formData.content ? (
-                          <div
-                            className="article-content mt-4"
-                            dangerouslySetInnerHTML={{
-                              __html: formData.content,
-                            }}
-                          />
-                        ) : (
-                          <div className="text-muted">
-                            No content yet. Start writing in the Edit tab.
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </Tab>
-                </Tabs>
+                <WysiwygEditor
+                  value={formData.content}
+                  onChange={handleContentChange}
+                  height="500px"
+                />
               </Card.Body>
             </Card>
 
-            <Card className="mb-4 shadow-sm">
+            {/* Excerpt Card */}
+            <Card className="mb-4">
               <Card.Header>
                 <h5 className="mb-0">Excerpt</h5>
               </Card.Header>
@@ -468,6 +433,7 @@ const ArticleEditorPage = () => {
                   <Button
                     variant="outline-secondary"
                     size="sm"
+                    type="button"
                     onClick={generateExcerpt}
                   >
                     Generate from content
@@ -490,10 +456,8 @@ const ArticleEditorPage = () => {
           </Col>
 
           <Col lg={3}>
-            <Card className="mb-4 shadow-sm">
-              <Card.Header>
-                <h5 className="mb-0">Publish</h5>
-              </Card.Header>
+            {/* Status Card */}
+            <Card className="mb-4">
               <Card.Body>
                 <Form.Group className="mb-3">
                   <Form.Label>Status</Form.Label>
@@ -501,66 +465,19 @@ const ArticleEditorPage = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
+                    disabled={formData.blocked}
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
-                    {formData.blocked && (
-                      <option value="blocked" disabled>
-                        Blocked (Cannot Change)
-                      </option>
-                    )}
                   </Form.Select>
                 </Form.Group>
-                {user.role === "admin" && formData.blocked && (
-                  <Button
-                    variant="outline-success"
-                    className="d-block w-100 mb-3"
-                    onClick={() => {
-                      // Update form data to unblock
-                      setFormData((prev) => ({
-                        ...prev,
-                        blocked: false,
-                        blocked_reason: "",
-                        blocked_by: null,
-                        blocked_at: null,
-                      }));
-                      // Show success message
-                      setSuccessMessage("Article unblocked successfully.");
-                    }}
-                  >
-                    <BsShieldFillCheck className="me-2" />
-                    Unblock Article
-                  </Button>
-                )}
-                {user.role === "admin" && !formData.blocked && (
-                  <Button
-                    variant="outline-danger"
-                    className="d-block w-100 mb-3"
-                    onClick={() => {
-                      // Show modal to confirm and provide reason
-                      // Implementation would require a modal component
-                      // For simplicity, we'll just set the values directly here
-                      setFormData((prev) => ({
-                        ...prev,
-                        blocked: true,
-                        blocked_reason:
-                          "This article requires review. Please contact an administrator.",
-                        blocked_by: {
-                          id: user.id,
-                          first_name: user.first_name,
-                          last_name: user.last_name,
-                        },
-                        blocked_at: new Date().toISOString(),
-                      }));
-                      setSuccessMessage("Article has been blocked.");
-                    }}
-                  >
-                    <BsShieldExclamation className="me-2" />
-                    Block Article
-                  </Button>
-                )}
+
                 <div className="d-grid gap-2">
-                  <Button variant="primary" type="submit" disabled={saving}>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    disabled={saving || formData.blocked}
+                  >
                     {saving ? (
                       <>
                         <Spinner
@@ -582,29 +499,18 @@ const ArticleEditorPage = () => {
 
                   <Button
                     variant="outline-secondary"
+                    type="button"
                     onClick={(e) => handleSave(e, true)}
-                    disabled={saving}
+                    disabled={saving || formData.blocked}
                   >
-                    {saving ? (
-                      <>
-                        <Spinner
-                          animation="border"
-                          size="sm"
-                          className="me-2"
-                        />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <BsSave className="me-2" />
-                        Save as Draft
-                      </>
-                    )}
+                    <BsSave className="me-2" />
+                    Save as Draft
                   </Button>
 
                   {isEditMode && (
                     <Button
                       variant="outline-danger"
+                      type="button"
                       onClick={() => setShowDeleteConfirm(true)}
                       disabled={saving}
                     >
@@ -613,49 +519,26 @@ const ArticleEditorPage = () => {
                     </Button>
                   )}
                 </div>
-
-                {showDeleteConfirm && (
-                  <Alert variant="danger" className="mt-3">
-                    <p>
-                      Are you sure you want to delete this article? This action
-                      cannot be undone.
-                    </p>
-                    <div className="d-flex justify-content-between">
-                      <Button variant="danger" size="sm" onClick={handleDelete}>
-                        Yes, Delete
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </Alert>
-                )}
               </Card.Body>
             </Card>
 
-            <Card className="mb-4 shadow-sm">
+            {/* Featured Image Card */}
+            <Card className="mb-4">
               <Card.Header>
                 <h5 className="mb-0">Featured Image</h5>
               </Card.Header>
               <Card.Body>
                 <div className="featured-image-preview mb-3">
-                  {formData.featured_image ? (
-                    <img
-                      src={formData.featured_image}
-                      alt="Featured preview"
-                      className="img-fluid rounded"
-                    />
-                  ) : (
-                    <img
-                      src={placeholderImage}
-                      alt="Featured placeholder"
-                      className="img-fluid rounded opacity-50"
-                    />
-                  )}
+                  <img
+                    src={formData.featured_image || placeholderImage}
+                    alt="Featured preview"
+                    className="img-fluid rounded"
+                    style={{
+                      height: "200px",
+                      width: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
                 </div>
                 <Form.Group>
                   <Form.Label>
@@ -686,7 +569,8 @@ const ArticleEditorPage = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mb-4 shadow-sm">
+            {/* Tags Card */}
+            <Card className="mb-4">
               <Card.Header>
                 <h5 className="mb-0">Tags</h5>
               </Card.Header>
@@ -703,6 +587,37 @@ const ArticleEditorPage = () => {
           </Col>
         </Row>
       </Form>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={showDeleteConfirm}
+        onHide={() => setShowDeleteConfirm(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Article</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center">
+            <BsExclamationTriangle size={50} className="text-danger mb-3" />
+            <h5>Are you sure you want to delete this article?</h5>
+            <p className="text-muted">
+              This action cannot be undone. The article will be permanently
+              removed from your account.
+            </p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete Article
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

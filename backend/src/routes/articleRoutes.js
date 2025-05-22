@@ -8,6 +8,7 @@ const router = express.Router();
 // Public routes
 router.get("/", articleController.getArticles);
 router.get("/:slug", articleController.getArticle);
+router.get('/byId/:id', articleController.getArticleById);
 
 // Protected routes
 router.post(
