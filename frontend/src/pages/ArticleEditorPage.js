@@ -339,7 +339,7 @@ const ArticleEditorPage = () => {
     };
 
     fetchArticle();
-  }, [id, isEditMode, user]);
+  }, [id, isEditMode, user, formData]);
 
   return (
     <Container fluid className="article-editor py-4">
