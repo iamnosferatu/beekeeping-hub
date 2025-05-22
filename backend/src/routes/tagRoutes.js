@@ -1,59 +1,47 @@
-// backend/src/routes/tagRoutes.js
+// ============================================================================
+// backend/src/routes/tagRoutes.js - WITH VALIDATION
+// ============================================================================
+
 const express = require("express");
+const { protect, authorize } = require("../middleware/auth");
+const {
+  validateTagCreate,
+  validateTagUpdate,
+  validateId,
+  validateSlug,
+} = require("../middleware/validation");
+const {
+  getTags,
+  getTag,
+  createTag,
+  updateTag,
+  deleteTag,
+} = require("../controllers/tagController");
+
 const router = express.Router();
 
-// Define controller functions
-const tagController = {
-  getTags: async (req, res, next) => {
-    try {
-      res.status(200).json({
-        success: true,
-        data: [
-          {
-            id: 1,
-            name: "Beginner",
-            slug: "beginner",
-            description: "Articles for beginners",
-          },
-          {
-            id: 2,
-            name: "Advanced",
-            slug: "advanced",
-            description: "Advanced topics",
-          },
-          {
-            id: 3,
-            name: "Equipment",
-            slug: "equipment",
-            description: "Equipment related articles",
-          },
-        ],
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  getTag: async (req, res, next) => {
-    try {
-      res.status(200).json({
-        success: true,
-        data: {
-          id: 1,
-          name: "Beginner",
-          slug: req.params.slug,
-          description: "Articles for beginners",
-          articles: [],
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
-};
-
 // Public routes
-router.get("/", tagController.getTags);
-router.get("/:slug", tagController.getTag);
+router.get("/", getTags);
+router.get("/:slug", validateSlug, getTag);
+
+// Protected routes (for creating tags)
+router.post(
+  "/",
+  protect,
+  authorize("author", "admin"),
+  validateTagCreate,
+  createTag
+);
+
+// Admin only routes
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  validateId,
+  validateTagUpdate,
+  updateTag
+);
+router.delete("/:id", protect, authorize("admin"), validateId, deleteTag);
 
 module.exports = router;

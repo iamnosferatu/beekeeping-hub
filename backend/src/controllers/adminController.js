@@ -1,6 +1,7 @@
-// backend/src/controllers/adminController.js
+// backend/src/controllers/adminController.js - REAL DATABASE STATS VERSION
 const os = require("os");
-const { sequelize } = require("../models");
+const { sequelize, User, Article, Comment, Tag } = require("../models");
+const { Op } = require("sequelize");
 
 // @desc    Get system diagnostic information
 // @route   GET /api/admin/diagnostics/system
@@ -19,14 +20,11 @@ exports.getSystemDiagnostics = async (req, res, next) => {
     // Get CPU usage
     let cpuUsage = null;
     try {
-      // This is an approximation since getting exact CPU usage in Node.js
-      // without additional modules is complex
       const startUsage = process.cpuUsage();
-      // Spin the CPU for 100ms
       const now = Date.now();
       while (Date.now() - now < 100) {}
       const endUsage = process.cpuUsage(startUsage);
-      cpuUsage = (endUsage.user + endUsage.system) / 1000000 / 0.1; // Usage over 100ms
+      cpuUsage = (endUsage.user + endUsage.system) / 1000000 / 0.1;
     } catch (error) {
       console.error("Error getting CPU usage:", error);
     }
@@ -44,13 +42,10 @@ exports.getSystemDiagnostics = async (req, res, next) => {
         host: process.env.DB_HOST,
         database: process.env.DB_NAME,
         user: process.env.DB_USER,
-        // Never return password
       },
       env: {
-        // Only include non-sensitive environment variables
         NODE_ENV: process.env.NODE_ENV,
         PORT: process.env.PORT,
-        // Add other safe environment variables here
       },
       os: {
         platform: os.platform(),
@@ -75,10 +70,7 @@ exports.getSystemDiagnostics = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getLogs = async (req, res, next) => {
   try {
-    // This is a placeholder. In a real application, you would implement
-    // a way to read logs from your logging system (files, database, etc.)
-    // For simplicity, we're returning mock logs
-
+    // Mock logs for demo - in production, you'd read from actual log files
     const mockLogs = [
       {
         level: "info",
@@ -102,18 +94,8 @@ exports.getLogs = async (req, res, next) => {
       },
       {
         level: "info",
-        message: "User john.doe logged in",
+        message: "User logged in",
         timestamp: new Date(Date.now() - 20000).toISOString(),
-      },
-      {
-        level: "info",
-        message: 'Article created: "Introduction to Beekeeping"',
-        timestamp: new Date(Date.now() - 15000).toISOString(),
-      },
-      {
-        level: "debug",
-        message: "Cache hit for article #1234",
-        timestamp: new Date(Date.now() - 5000).toISOString(),
       },
     ];
 
@@ -131,14 +113,11 @@ exports.getLogs = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getApiMetrics = async (req, res, next) => {
   try {
-    // This is a placeholder. In a real application, you would implement
-    // a way to collect and return API metrics (requests per minute, etc.)
-    // For simplicity, we're returning mock metrics
-
+    // Mock metrics - in production, you'd collect real metrics
     const mockMetrics = {
       requestsPerMinute: 42,
-      averageResponseTime: 120, // ms
-      errorRate: 0.02, // 2%
+      averageResponseTime: 120,
+      errorRate: 0.02,
       endpoints: {
         "/api/articles": { hits: 156, avgTime: 85 },
         "/api/auth/login": { hits: 78, avgTime: 210 },
@@ -158,23 +137,20 @@ exports.getApiMetrics = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getDatabaseDiagnostics = async (req, res, next) => {
   try {
-    // Test database connection
     let connected = false;
     let tableStats = null;
     let errorMessage = null;
 
     try {
-      // Check connection
       await sequelize.authenticate();
       connected = true;
 
-      // Get table stats (simplified example)
-      // In a real application, you would get actual stats from the database
+      // Get actual table stats from database
       tableStats = {
-        users: { count: await sequelize.models.User.count() },
-        articles: { count: await sequelize.models.Article.count() },
-        comments: { count: await sequelize.models.Comment.count() },
-        tags: { count: await sequelize.models.Tag.count() },
+        users: { count: await User.count() },
+        articles: { count: await Article.count() },
+        comments: { count: await Comment.count() },
+        tags: { count: await Tag.count() },
       };
     } catch (error) {
       errorMessage = error.message;
@@ -208,14 +184,251 @@ exports.testEndpoint = async (req, res, next) => {
       });
     }
 
-    // We're using axios in the frontend, so we don't need this endpoint
-    // Just returning mock success to demonstrate
     res.status(200).json({
       success: true,
       message: "Endpoint testing should be done from the frontend",
       request: { url, method, headers },
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get dashboard statistics from real database
+// @route   GET /api/admin/dashboard
+// @access  Private (Admin only)
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    console.log("Fetching real dashboard statistics from database...");
+
+    // Get current date boundaries for time-based stats
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Fetch article statistics
+    const [totalArticles, publishedArticles, draftArticles, archivedArticles] =
+      await Promise.all([
+        Article.count(),
+        Article.count({ where: { status: "published" } }),
+        Article.count({ where: { status: "draft" } }),
+        Article.count({ where: { status: "archived" } }),
+      ]);
+
+    // Fetch comment statistics
+    const [totalComments, approvedComments, pendingComments, rejectedComments] =
+      await Promise.all([
+        Comment.count(),
+        Comment.count({ where: { status: "approved" } }),
+        Comment.count({ where: { status: "pending" } }),
+        Comment.count({ where: { status: "rejected" } }),
+      ]);
+
+    // Fetch user statistics
+    const [totalUsers, adminUsers, authorUsers, regularUsers] =
+      await Promise.all([
+        User.count(),
+        User.count({ where: { role: "admin" } }),
+        User.count({ where: { role: "author" } }),
+        User.count({ where: { role: "user" } }),
+      ]);
+
+    // Fetch tag count
+    const totalTags = await Tag.count();
+
+    // Fetch view statistics from articles
+    const viewStats = await Article.findAll({
+      attributes: [
+        [sequelize.fn("SUM", sequelize.col("view_count")), "total_views"],
+      ],
+      raw: true,
+    });
+
+    // Get view stats by time period (this is simplified - in production you'd track views with timestamps)
+    const totalViews = viewStats[0]?.total_views || 0;
+
+    // For demo purposes, we'll calculate rough estimates for time-based views
+    // In production, you'd have a separate views tracking table with timestamps
+    const todayViews = Math.floor(totalViews * 0.1); // Rough estimate
+    const weekViews = Math.floor(totalViews * 0.3); // Rough estimate
+    const monthViews = Math.floor(totalViews * 0.8); // Rough estimate
+
+    // Compile statistics
+    const stats = {
+      articles: {
+        total: totalArticles,
+        published: publishedArticles,
+        draft: draftArticles,
+        archived: archivedArticles,
+      },
+      comments: {
+        total: totalComments,
+        approved: approvedComments,
+        pending: pendingComments,
+        rejected: rejectedComments,
+      },
+      users: {
+        total: totalUsers,
+        admin: adminUsers,
+        author: authorUsers,
+        user: regularUsers,
+      },
+      tags: {
+        total: totalTags,
+      },
+      views: {
+        total: parseInt(totalViews) || 0,
+        today: todayViews,
+        thisWeek: weekViews,
+        thisMonth: monthViews,
+      },
+    };
+
+    console.log("Dashboard stats compiled:", stats);
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard statistics:", error);
+    next(error);
+  }
+};
+
+// @desc    Get users for admin management
+// @route   GET /api/admin/users
+// @access  Private (Admin only)
+exports.getUsers = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get users with pagination
+    const { count, rows: users } = await User.findAndCountAll({
+      attributes: { exclude: ["password"] },
+      order: [["created_at", "DESC"]],
+      limit,
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      success: true,
+      data: users,
+      count,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    next(error);
+  }
+};
+
+// @desc    Update user role
+// @route   PUT /api/admin/users/:id/role
+// @access  Private (Admin only)
+exports.updateUserRole = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    // Validate role
+    const validRoles = ["user", "author", "admin"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role specified",
+      });
+    }
+
+    // Find and update user
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.role = role;
+    await user.save();
+
+    // Return updated user without password
+    const updatedUser = user.toJSON();
+    delete updatedUser.password;
+
+    res.status(200).json({
+      success: true,
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    next(error);
+  }
+};
+
+// @desc    Get comments for moderation
+// @route   GET /api/admin/comments
+// @access  Private (Admin only)
+exports.getCommentsForModeration = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const status = req.query.status || "all";
+
+    // Build where clause
+    let whereClause = {};
+    if (status !== "all") {
+      whereClause.status = status;
+    }
+
+    // Get comments with user and article info
+    const { count, rows: comments } = await Comment.findAndCountAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: "author",
+          attributes: ["id", "username", "first_name", "last_name"],
+        },
+        {
+          model: Article,
+          as: "article",
+          attributes: ["id", "title", "slug"],
+        },
+      ],
+      order: [["created_at", "DESC"]],
+      limit,
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      success: true,
+      data: comments,
+      count,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching comments for moderation:", error);
     next(error);
   }
 };
