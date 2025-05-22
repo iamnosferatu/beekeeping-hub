@@ -446,7 +446,7 @@ const MyArticlesPage = () => {
         <Card.Body className="p-0">
           <div className="table-responsive">
             <Table hover className="mb-0">
-              <thead className="bg-light">
+              <thead className="bg-dark">
                 <tr>
                   <th>Title</th>
                   <th>Status</th>

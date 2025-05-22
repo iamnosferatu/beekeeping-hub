@@ -1,6 +1,45 @@
-// frontend/src/services/api.js
+// frontend/src/services/api.js - FIXED VERSION
 import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
+
+/**
+ * Helper function to clean query parameters
+ */
+const cleanParams = (params) => {
+  const cleaned = {};
+
+  Object.keys(params).forEach((key) => {
+    const value = params[key];
+
+    // Only include parameters that have actual values
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      value !== "undefined" &&
+      value !== "null"
+    ) {
+      // For arrays, filter out undefined/null values
+      if (Array.isArray(value)) {
+        const cleanedArray = value.filter(
+          (item) =>
+            item !== undefined &&
+            item !== null &&
+            item !== "" &&
+            item !== "undefined" &&
+            item !== "null"
+        );
+        if (cleanedArray.length > 0) {
+          cleaned[key] = cleanedArray;
+        }
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  });
+
+  return cleaned;
+};
 
 /**
  * Centralized API service for all HTTP requests
@@ -36,7 +75,7 @@ class ApiService {
         if (process.env.NODE_ENV === "development") {
           console.log(
             `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
-            config.data
+            config.data || config.params
           );
         }
 
@@ -231,7 +270,12 @@ class ApiService {
   // =============================================================================
   articles = {
     getAll: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
+      // Clean parameters to avoid sending undefined values
+      const cleanedParams = cleanParams(params);
+      console.log("Articles getAll - Original params:", params);
+      console.log("Articles getAll - Cleaned params:", cleanedParams);
+
+      const queryString = new URLSearchParams(cleanedParams).toString();
       return this.request({
         method: "GET",
         url: `/articles${queryString ? `?${queryString}` : ""}`,
@@ -239,6 +283,10 @@ class ApiService {
     },
 
     getById: async (id) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid article ID");
+      }
+
       return this.request({
         method: "GET",
         url: `/articles/byId/${id}`,
@@ -246,6 +294,10 @@ class ApiService {
     },
 
     getBySlug: async (slug) => {
+      if (!slug || slug === "undefined" || slug === "null") {
+        throw new Error("Invalid article slug");
+      }
+
       return this.request({
         method: "GET",
         url: `/articles/${slug}`,
@@ -253,22 +305,36 @@ class ApiService {
     },
 
     create: async (articleData) => {
+      // Clean the article data
+      const cleanedData = cleanParams(articleData);
+
       return this.request({
         method: "POST",
         url: "/articles",
-        data: articleData,
+        data: cleanedData,
       });
     },
 
     update: async (id, articleData) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid article ID");
+      }
+
+      // Clean the article data
+      const cleanedData = cleanParams(articleData);
+
       return this.request({
         method: "PUT",
         url: `/articles/${id}`,
-        data: articleData,
+        data: cleanedData,
       });
     },
 
     delete: async (id) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid article ID");
+      }
+
       return this.request({
         method: "DELETE",
         url: `/articles/${id}`,
@@ -276,6 +342,10 @@ class ApiService {
     },
 
     toggleLike: async (id) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid article ID");
+      }
+
       return this.request({
         method: "POST",
         url: `/articles/${id}/like`,
@@ -284,7 +354,8 @@ class ApiService {
 
     // Get articles by current user
     getMyArticles: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
+      const cleanedParams = cleanParams(params);
+      const queryString = new URLSearchParams(cleanedParams).toString();
       return this.request({
         method: "GET",
         url: `/author/articles${queryString ? `?${queryString}` : ""}`,
@@ -297,7 +368,8 @@ class ApiService {
   // =============================================================================
   comments = {
     getAll: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
+      const cleanedParams = cleanParams(params);
+      const queryString = new URLSearchParams(cleanedParams).toString();
       return this.request({
         method: "GET",
         url: `/comments${queryString ? `?${queryString}` : ""}`,
@@ -305,22 +377,32 @@ class ApiService {
     },
 
     create: async (commentData) => {
+      const cleanedData = cleanParams(commentData);
       return this.request({
         method: "POST",
         url: "/comments",
-        data: commentData,
+        data: cleanedData,
       });
     },
 
     update: async (id, commentData) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid comment ID");
+      }
+
+      const cleanedData = cleanParams(commentData);
       return this.request({
         method: "PUT",
         url: `/comments/${id}`,
-        data: commentData,
+        data: cleanedData,
       });
     },
 
     delete: async (id) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid comment ID");
+      }
+
       return this.request({
         method: "DELETE",
         url: `/comments/${id}`,
@@ -328,6 +410,10 @@ class ApiService {
     },
 
     updateStatus: async (id, status) => {
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Invalid comment ID");
+      }
+
       return this.request({
         method: "PUT",
         url: `/comments/${id}/status`,
@@ -348,6 +434,10 @@ class ApiService {
     },
 
     getBySlug: async (slug) => {
+      if (!slug || slug === "undefined" || slug === "null") {
+        throw new Error("Invalid tag slug");
+      }
+
       return this.request({
         method: "GET",
         url: `/tags/${slug}`,
@@ -355,10 +445,11 @@ class ApiService {
     },
 
     create: async (tagData) => {
+      const cleanedData = cleanParams(tagData);
       return this.request({
         method: "POST",
         url: "/tags",
-        data: tagData,
+        data: cleanedData,
       });
     },
   };
@@ -375,7 +466,8 @@ class ApiService {
     },
 
     getUsers: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
+      const cleanedParams = cleanParams(params);
+      const queryString = new URLSearchParams(cleanedParams).toString();
       return this.request({
         method: "GET",
         url: `/admin/users${queryString ? `?${queryString}` : ""}`,
@@ -383,6 +475,10 @@ class ApiService {
     },
 
     updateUserRole: async (userId, role) => {
+      if (!userId || userId === "undefined" || userId === "null") {
+        throw new Error("Invalid user ID");
+      }
+
       return this.request({
         method: "PUT",
         url: `/admin/users/${userId}/role`,
@@ -391,7 +487,8 @@ class ApiService {
     },
 
     getCommentsForModeration: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
+      const cleanedParams = cleanParams(params);
+      const queryString = new URLSearchParams(cleanedParams).toString();
       return this.request({
         method: "GET",
         url: `/admin/comments${queryString ? `?${queryString}` : ""}`,

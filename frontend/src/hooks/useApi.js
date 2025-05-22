@@ -1,4 +1,4 @@
-// frontend/src/hooks/useApi.js
+// frontend/src/hooks/useApi.js - ENHANCED WITH DEBUG
 import { useState, useEffect, useCallback } from "react";
 
 /**
@@ -24,6 +24,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
 
       try {
         const response = await apiCall(...args);
+        console.log("useApi execute response:", response);
 
         if (response.success) {
           const data = transform ? transform(response.data) : response.data;
@@ -45,6 +46,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
           return { success: false, error };
         }
       } catch (error) {
+        console.error("useApi execute error:", error);
         setState((prev) => ({ ...prev, loading: false, error }));
 
         if (onError) {
@@ -86,7 +88,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
   });
 
   const [state, setState] = useState({
-    data: [],
+    data: null,
     pagination: {
       page: 1,
       limit: 10,
@@ -104,11 +106,48 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
       const mergedParams = { ...params, ...newParams };
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
+      console.log("usePaginatedApi execute with params:", mergedParams);
+
       try {
         const response = await apiCall(mergedParams);
+        console.log("usePaginatedApi response:", response);
 
         if (response.success) {
-          const { data, pagination } = response.data;
+          // Handle different response structures
+          let data, pagination;
+
+          if (response.data && Array.isArray(response.data)) {
+            // Direct array response
+            data = response.data;
+            pagination = response.pagination || {
+              page: mergedParams.page || 1,
+              limit: mergedParams.limit || 10,
+              totalPages: 1,
+              total: response.data.length,
+            };
+          } else if (response.data && response.data.data) {
+            // Nested response structure
+            data = response.data.data;
+            pagination = response.data.pagination ||
+              response.pagination || {
+                page: mergedParams.page || 1,
+                limit: mergedParams.limit || 10,
+                totalPages: 1,
+                total: response.data.data.length,
+              };
+          } else {
+            // Fallback
+            data = response.data || [];
+            pagination = response.pagination || {
+              page: mergedParams.page || 1,
+              limit: mergedParams.limit || 10,
+              totalPages: 1,
+              total: 0,
+            };
+          }
+
+          console.log("usePaginatedApi processed data:", { data, pagination });
+
           setState({
             data,
             pagination,
@@ -123,6 +162,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
           return { success: true, data, pagination };
         } else {
           const error = response.error;
+          console.error("usePaginatedApi error response:", error);
           setState((prev) => ({ ...prev, loading: false, error }));
 
           if (onError) {
@@ -132,6 +172,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
           return { success: false, error };
         }
       } catch (error) {
+        console.error("usePaginatedApi catch error:", error);
         setState((prev) => ({ ...prev, loading: false, error }));
 
         if (onError) {

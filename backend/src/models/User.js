@@ -1,4 +1,4 @@
-// backend/src/models/User.js
+// backend/src/models/User.js - FIXED VERSION
 const bcrypt = require("bcryptjs");
 
 module.exports = (sequelize, DataTypes) => {
@@ -61,6 +61,10 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      // Force table name to be lowercase and plural
+      tableName: "users",
+      // Disable automatic pluralization
+      freezeTableName: true,
       hooks: {
         // Remove password when converting to JSON
         afterCreate: (user) => {

@@ -60,19 +60,20 @@ const HomePage = () => {
         </p>
       </div>
 
-      {/* Development Notice */}
+      {/* User Notice */}
       {isDevMode && (
         <Alert variant="info" className="mb-4">
-          <Alert.Heading>🚧 Development Mode</Alert.Heading>
+          <Alert.Heading>🚧 Alert Mode</Alert.Heading>
           <p>
-            You're running in development mode. If the backend API is not
-            available, the app will automatically use mock data so you can
-            continue developing.
+            This needs to be triggered from the database. When an alert flag is
+            set by the admin, a message saved in the db will be displayed here.
           </p>
           <p className="mb-0">
-            <strong>Backend not running?</strong> No problem! Mock data will be
-            used automatically. To start the backend:{" "}
-            <code>cd backend && npm run dev</code>
+            <strong>
+              For example, Warning Veroa hse beed detected in the area 
+            </strong>
+   
+            <code> A code example here --- cd backend && npm run dev</code>
           </p>
         </Alert>
       )}

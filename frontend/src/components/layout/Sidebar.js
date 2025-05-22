@@ -1,52 +1,40 @@
-// frontend/src/components/layout/Sidebar.js
+// frontend/src/components/layout/Sidebar.js - NO MOCK DATA VERSION
 import React, { useState, useEffect } from "react";
-import { Card, ListGroup, Badge } from "react-bootstrap";
+import { Card, ListGroup, Badge, Alert, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { API_URL } from "../../config";
 
 const Sidebar = () => {
   const [tags, setTags] = useState([]);
   const [recentArticles, setRecentArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSidebarData = async () => {
       try {
         setLoading(true);
+        setError(null);
 
-        // For now, use placeholder data instead of API calls
-        setTags([
-          { id: 1, name: "Beginner", slug: "beginner", count: 8 },
-          { id: 2, name: "Advanced", slug: "advanced", count: 5 },
-          { id: 3, name: "Equipment", slug: "equipment", count: 7 },
-          { id: 4, name: "Honey", slug: "honey", count: 4 },
-          { id: 5, name: "Health", slug: "health", count: 3 },
-          { id: 6, name: "Seasonal", slug: "seasonal", count: 2 },
-        ]);
+        // Fetch tags from API
+        const tagsResponse = await axios.get(`${API_URL}/tags`);
+        if (tagsResponse.data.success) {
+          setTags(tagsResponse.data.data);
+        } else {
+          throw new Error("Failed to fetch tags");
+        }
 
-        setRecentArticles([
-          {
-            id: 1,
-            title: "Getting Started with Beekeeping",
-            slug: "getting-started-with-beekeeping",
-          },
-          {
-            id: 2,
-            title: "Honey Harvesting Techniques",
-            slug: "honey-harvesting-techniques",
-          },
-          {
-            id: 3,
-            title: "Common Bee Diseases and Prevention",
-            slug: "common-bee-diseases-and-prevention",
-          },
-          {
-            id: 4,
-            title: "The Perfect Beehive Setup",
-            slug: "the-perfect-beehive-setup",
-          },
-        ]);
+        // Fetch recent articles from API
+        const articlesResponse = await axios.get(`${API_URL}/articles?limit=4`);
+        if (articlesResponse.data.success) {
+          setRecentArticles(articlesResponse.data.data);
+        } else {
+          throw new Error("Failed to fetch recent articles");
+        }
       } catch (error) {
         console.error("Error fetching sidebar data:", error);
+        setError("Failed to load sidebar content");
       } finally {
         setLoading(false);
       }
@@ -54,6 +42,71 @@ const Sidebar = () => {
 
     fetchSidebarData();
   }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <>
+        {/* Popular Tags Loading */}
+        <Card className="mb-4 shadow-sm">
+          <Card.Header>
+            <h5 className="mb-0">Popular Tags</h5>
+          </Card.Header>
+          <Card.Body>
+            <div className="text-center">
+              <Spinner
+                animation="border"
+                size="sm"
+                variant="primary"
+                role="status"
+              >
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </div>
+          </Card.Body>
+        </Card>
+
+        {/* Recent Articles Loading */}
+        <Card className="mb-4 shadow-sm">
+          <Card.Header>
+            <h5 className="mb-0">Recent Articles</h5>
+          </Card.Header>
+          <Card.Body>
+            <div className="text-center">
+              <Spinner
+                animation="border"
+                size="sm"
+                variant="primary"
+                role="status"
+              >
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </div>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <>
+        {/* Error State */}
+        <Card className="mb-4 shadow-sm">
+          <Card.Header>
+            <h5 className="mb-0">Sidebar</h5>
+          </Card.Header>
+          <Card.Body>
+            <Alert variant="danger" className="mb-0">
+              <Alert.Heading>Unable to Load Content</Alert.Heading>
+              <p className="mb-0">{error}</p>
+            </Alert>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  }
 
   return (
     <>
@@ -64,16 +117,7 @@ const Sidebar = () => {
         </Card.Header>
 
         <Card.Body>
-          {loading ? (
-            <div className="text-center">
-              <div
-                className="spinner-border spinner-border-sm text-primary"
-                role="status"
-              >
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          ) : (
+          {tags.length > 0 ? (
             <div className="d-flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <Link
@@ -82,14 +126,20 @@ const Sidebar = () => {
                   className="text-decoration-none"
                 >
                   <Badge bg="secondary" className="p-2">
-                    {tag.name}{" "}
-                    <span className="badge bg-light text-dark ms-1">
-                      {tag.count}
-                    </span>
+                    {tag.name}
+                    {tag.article_count && (
+                      <span className="badge bg-light text-dark ms-1">
+                        {tag.article_count}
+                      </span>
+                    )}
                   </Badge>
                 </Link>
               ))}
             </div>
+          ) : (
+            <Alert variant="info" className="mb-0">
+              No tags available
+            </Alert>
           )}
         </Card.Body>
       </Card>
@@ -100,32 +150,34 @@ const Sidebar = () => {
           <h5 className="mb-0">Recent Articles</h5>
         </Card.Header>
 
-        <ListGroup variant="flush">
-          {loading ? (
-            <ListGroup.Item className="text-center py-3">
-              <div
-                className="spinner-border spinner-border-sm text-primary"
-                role="status"
-              >
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </ListGroup.Item>
-          ) : (
-            recentArticles.map((article) => (
+        {recentArticles.length > 0 ? (
+          <ListGroup variant="flush">
+            {recentArticles.map((article) => (
               <ListGroup.Item key={article.id}>
                 <Link
                   to={`/articles/${article.slug}`}
                   className="text-decoration-none"
                 >
-                  {article.title}
+                  <div className="fw-semibold">{article.title}</div>
+                  {article.published_at && (
+                    <small className="text-muted">
+                      {new Date(article.published_at).toLocaleDateString()}
+                    </small>
+                  )}
                 </Link>
               </ListGroup.Item>
-            ))
-          )}
-        </ListGroup>
+            ))}
+          </ListGroup>
+        ) : (
+          <Card.Body>
+            <Alert variant="info" className="mb-0">
+              No recent articles available
+            </Alert>
+          </Card.Body>
+        )}
       </Card>
 
-      {/* Newsletter Signup (Optional) */}
+      {/* Newsletter Signup */}
       <Card className="mb-4 shadow-sm">
         <Card.Header>
           <h5 className="mb-0">Newsletter</h5>

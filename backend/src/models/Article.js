@@ -1,4 +1,4 @@
-// backend/src/models/Article.js
+// backend/src/models/Article.js - FIXED VERSION
 
 module.exports = (sequelize, DataTypes) => {
   const slug = require("slug");
@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       content: {
-        // Fix: Use TEXT without parameters, or use LONGTEXT
         type: DataTypes.TEXT,
         allowNull: false,
       },
@@ -50,12 +49,16 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      // Force table name to be lowercase and plural
+      tableName: "articles",
+      // Disable automatic pluralization
+      freezeTableName: true,
       hooks: {
         beforeValidate: (article) => {
-          if (article.name && (!article.slug || article.slug.trim() === "")) {
-            article.slug = slug(article.name, { lower: true });
+          if (article.title && (!article.slug || article.slug.trim() === "")) {
+            article.slug = slug(article.title, { lower: true });
             console.log(
-              `Generated slug '${article.slug}' for article '${article.name}'`
+              `Generated slug '${article.slug}' for article '${article.title}'`
             );
           }
         },

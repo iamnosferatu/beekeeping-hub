@@ -1,6 +1,6 @@
-// frontend/src/components/debug/TokenDebugger.js
+// frontend/src/components/debug/TokenDebugger.js - FIXED VERSION
 import React, { useContext, useState } from "react";
-import { Card, Button, Alert, Table, Badge } from "react-bootstrap";
+import { Card, Button, Alert, Badge } from "react-bootstrap";
 import { BsClipboard, BsTrash, BsArrowRepeat } from "react-icons/bs";
 import AuthContext from "../../contexts/AuthContext";
 import { TOKEN_NAME } from "../../config";
@@ -11,7 +11,7 @@ const TokenDebugger = () => {
   const [decodeError, setDecodeError] = useState(null);
 
   // Decode JWT token manually (just the payload, not verification)
-  const decodeToken = () => {
+  const decodeToken = React.useCallback(() => {
     try {
       if (!token) {
         setDecodeError("No token found");
@@ -32,7 +32,7 @@ const TokenDebugger = () => {
       setDecodeError(`Failed to decode token: ${error.message}`);
       setDecodedToken(null);
     }
-  };
+  }, [token]);
 
   // Copy token to clipboard
   const copyToken = () => {
@@ -89,7 +89,7 @@ const TokenDebugger = () => {
     if (token) {
       decodeToken();
     }
-  }, [token]);
+  }, [token, decodeToken]); // Fixed: Added decodeToken to dependencies
 
   const isTokenExpired = () => {
     if (!decodedToken || !decodedToken.exp) return false;
@@ -130,7 +130,7 @@ const TokenDebugger = () => {
         </div>
 
         {/* Token Status */}
-        <Table size="sm" bordered>
+        <table className="table table-sm table-bordered">
           <tbody>
             <tr>
               <td>
@@ -159,13 +159,13 @@ const TokenDebugger = () => {
               </td>
             </tr>
           </tbody>
-        </Table>
+        </table>
 
         {/* Token Details */}
         {token && (
           <div className="mb-3">
             <h6>Token Details:</h6>
-            <div className="bg-light p-2 rounded mb-2">
+            <div className="bg-dark p-2 rounded mb-2">
               <small className="font-monospace text-break">{token}</small>
             </div>
 
@@ -190,7 +190,7 @@ const TokenDebugger = () => {
         {decodedToken && (
           <div className="mb-3">
             <h6>Decoded Payload:</h6>
-            <Table size="sm" bordered>
+            <table className="table table-sm table-bordered">
               <tbody>
                 <tr>
                   <td>
@@ -231,7 +231,7 @@ const TokenDebugger = () => {
                   </td>
                 </tr>
               </tbody>
-            </Table>
+            </table>
           </div>
         )}
 

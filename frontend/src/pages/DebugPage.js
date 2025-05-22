@@ -215,7 +215,7 @@ const DebugPage = () => {
 
                     <h5>Request Headers</h5>
                     <div
-                      className="bg-light p-3 mb-3"
+                      className="bg-dark p-3 mb-3"
                       style={{ maxHeight: "200px", overflow: "auto" }}
                     >
                       <pre className="mb-0">
@@ -291,7 +291,7 @@ const DebugPage = () => {
                 <h5>JWT Token</h5>
                 {token ? (
                   <div
-                    className="bg-light p-3 mb-3"
+                    className="bg-dark p-3 mb-3"
                     style={{ maxHeight: "200px", overflow: "auto" }}
                   >
                     <pre className="mb-0">{token}</pre>
@@ -419,7 +419,7 @@ const DebugPage = () => {
 
                 <h5>CSS Variables</h5>
                 <div
-                  className="bg-light p-3 mb-3"
+                  className="bg-dark p-3 mb-3"
                   style={{ maxHeight: "200px", overflow: "auto" }}
                 >
                   <pre className="mb-0">
