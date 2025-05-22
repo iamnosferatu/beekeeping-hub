@@ -1,22 +1,12 @@
 // frontend/src/pages/HomePage.js
 import React from "react";
-import { Card, Button, Alert } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ArticleList from "../components/articles/ArticleList";
-import ApiDebugger from "../components/debug/ApiDebugger";
 
 const HomePage = () => {
-  const isDevMode = process.env.NODE_ENV === "development";
-
   return (
     <div className="home-page">
-      {/* API Debug Component - Only in development */}
-      {isDevMode && (
-        <div className="mb-4">
-          <ApiDebugger />
-        </div>
-      )}
-
       {/* Hero Section */}
       <Card className="text-center bg-dark text-white mb-4 border-0">
         <Card.Img
@@ -59,23 +49,6 @@ const HomePage = () => {
           experiences, and contribute to the wonderful world of beekeeping!
         </p>
       </div>
-
-      {/* Development Notice */}
-      {isDevMode && (
-        <Alert variant="info" className="mb-4">
-          <Alert.Heading>🚧 Development Mode</Alert.Heading>
-          <p>
-            You're running in development mode. If the backend API is not
-            available, the app will automatically use mock data so you can
-            continue developing.
-          </p>
-          <p className="mb-0">
-            <strong>Backend not running?</strong> No problem! Mock data will be
-            used automatically. To start the backend:{" "}
-            <code>cd backend && npm run dev</code>
-          </p>
-        </Alert>
-      )}
 
       {/* Featured Articles */}
       <h2 className="mb-4">Latest Articles</h2>

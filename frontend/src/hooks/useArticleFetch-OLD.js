@@ -57,7 +57,7 @@ const useArticleFetch = (user, isEditMode, id) => {
         const article = response.data.data;
 
         // Check if user has permission to edit
-        if (user && user.id !== article.user_id && user.role !== "admin") {
+        if (user.id !== article.user_id && user.role !== "admin") {
           throw new Error("You don't have permission to edit this article");
         }
 
@@ -65,13 +65,6 @@ const useArticleFetch = (user, isEditMode, id) => {
         setDebugInfo({
           articleId,
           fetchStrategies: ["bySlug", "byId"],
-          userPermissions: {
-            userId: user?.id,
-            articleUserId: article.user_id,
-            userRole: user?.role,
-            hasPermission:
-              user?.id === article.user_id || user?.role === "admin",
-          },
         });
 
         return article;
@@ -80,7 +73,6 @@ const useArticleFetch = (user, isEditMode, id) => {
 
         setError(
           err.response?.data?.message ||
-            err.message ||
             "Failed to load article. The article may have been deleted or you don't have permission to view it."
         );
 
@@ -88,8 +80,6 @@ const useArticleFetch = (user, isEditMode, id) => {
         setDebugInfo({
           error: err.message,
           response: err.response?.data,
-          status: err.response?.status,
-          config: err.config,
           fullError: err,
         });
 
@@ -101,21 +91,11 @@ const useArticleFetch = (user, isEditMode, id) => {
     [isEditMode, user]
   );
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-
-  const clearDebugInfo = useCallback(() => {
-    setDebugInfo(null);
-  }, []);
-
   return {
     loading,
     error,
     debugInfo,
     fetchArticle,
-    clearError,
-    clearDebugInfo,
   };
 };
 

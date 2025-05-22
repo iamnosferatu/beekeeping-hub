@@ -1,7 +1,7 @@
 // frontend/src/contexts/AuthContext.js
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
-import { API_URL, TOKEN_NAME } from "../config";
+import { TOKEN_NAME } from "../config";
+import apiService from "../services/api";
 
 // Create context
 export const AuthContext = createContext();
@@ -20,29 +20,25 @@ export const AuthProvider = ({ children }) => {
     );
   }, [token]);
 
-  // Set up axios defaults
-  useEffect(() => {
-    if (token) {
-      console.log("AuthContext - Setting Authorization header");
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } else {
-      console.log("AuthContext - Removing Authorization header");
-      delete axios.defaults.headers.common["Authorization"];
-    }
-  }, [token]);
-
   // Load user from token on mount
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
         try {
           console.log("AuthContext - Loading user data");
-          // Get user data from API
-          const res = await axios.get(`${API_URL}/auth/me`);
-          console.log("AuthContext - User data loaded:", res.data.user);
-          setUser(res.data.user);
+
+          const response = await apiService.auth.getProfile();
+
+          if (response.success) {
+            console.log("AuthContext - User data loaded:", response.data.user);
+            setUser(response.data.user);
+          } else {
+            console.error("AuthContext - Error loading user:", response.error);
+            logout();
+            setError("Authentication error. Please log in again.");
+          }
         } catch (err) {
-          console.error("AuthContext - Error loading user:", err);
+          console.error("AuthContext - Unexpected error loading user:", err);
           logout();
           setError("Authentication error. Please log in again.");
         }
@@ -64,25 +60,27 @@ export const AuthProvider = ({ children }) => {
 
       console.log(`AuthContext - Attempting login for: ${email}`);
 
-      // Make API call to login
-      const res = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password,
-      });
+      const response = await apiService.auth.login({ email, password });
 
-      console.log("AuthContext - Login successful, setting token and user");
+      if (response.success) {
+        console.log("AuthContext - Login successful, setting token and user");
 
-      // Save token to localStorage and state
-      localStorage.setItem(TOKEN_NAME, res.data.token);
-      setToken(res.data.token);
-      setUser(res.data.user);
+        // Save token to localStorage and state
+        localStorage.setItem(TOKEN_NAME, response.data.token);
+        setToken(response.data.token);
+        setUser(response.data.user);
 
-      return res.data.user;
+        return response.data.user;
+      } else {
+        const errorMessage =
+          response.error?.message || "Login failed. Please try again.";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     } catch (err) {
       console.error("AuthContext - Login error:", err);
-      setError(
-        err.response?.data?.message || "Login failed. Please try again."
-      );
+      const errorMessage = err.message || "Login failed. Please try again.";
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -97,24 +95,30 @@ export const AuthProvider = ({ children }) => {
 
       console.log("AuthContext - Registering new user");
 
-      // Make API call to register
-      const res = await axios.post(`${API_URL}/auth/register`, userData);
+      const response = await apiService.auth.register(userData);
 
-      console.log(
-        "AuthContext - Registration successful, setting token and user"
-      );
+      if (response.success) {
+        console.log(
+          "AuthContext - Registration successful, setting token and user"
+        );
 
-      // Save token to localStorage and state
-      localStorage.setItem(TOKEN_NAME, res.data.token);
-      setToken(res.data.token);
-      setUser(res.data.user);
+        // Save token to localStorage and state
+        localStorage.setItem(TOKEN_NAME, response.data.token);
+        setToken(response.data.token);
+        setUser(response.data.user);
 
-      return res.data.user;
+        return response.data.user;
+      } else {
+        const errorMessage =
+          response.error?.message || "Registration failed. Please try again.";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     } catch (err) {
       console.error("AuthContext - Registration error:", err);
-      setError(
-        err.response?.data?.message || "Registration failed. Please try again."
-      );
+      const errorMessage =
+        err.message || "Registration failed. Please try again.";
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -127,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(TOKEN_NAME);
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common["Authorization"];
+    setError(null);
   };
 
   // Update user profile
@@ -136,17 +140,24 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Make API call to update profile
-      const res = await axios.put(`${API_URL}/auth/profile`, userData);
-      console.log("AuthContext - Profile updated successfully");
-      setUser(res.data.user);
-      return res.data.user;
+      const response = await apiService.auth.updateProfile(userData);
+
+      if (response.success) {
+        console.log("AuthContext - Profile updated successfully");
+        setUser(response.data.user);
+        return response.data.user;
+      } else {
+        const errorMessage =
+          response.error?.message ||
+          "Failed to update profile. Please try again.";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     } catch (err) {
       console.error("AuthContext - Profile update error:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to update profile. Please try again."
-      );
+      const errorMessage =
+        err.message || "Failed to update profile. Please try again.";
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -159,16 +170,23 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Make API call to change password
-      await axios.put(`${API_URL}/auth/password`, passwords);
-      console.log("AuthContext - Password changed successfully");
-      return true;
+      const response = await apiService.auth.changePassword(passwords);
+
+      if (response.success) {
+        console.log("AuthContext - Password changed successfully");
+        return true;
+      } else {
+        const errorMessage =
+          response.error?.message ||
+          "Failed to change password. Please try again.";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
     } catch (err) {
       console.error("AuthContext - Password change error:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to change password. Please try again."
-      );
+      const errorMessage =
+        err.message || "Failed to change password. Please try again.";
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -203,6 +221,15 @@ export const AuthProvider = ({ children }) => {
   // Clear error
   const clearError = () => setError(null);
 
+  // Check if user is authenticated
+  const isAuthenticated = !!user && !!token;
+
+  // Check if user is admin
+  const isAdmin = user?.role === "admin";
+
+  // Check if user is author or admin
+  const canCreateContent = user?.role === "author" || user?.role === "admin";
+
   // Log the context value on each render for debugging
   const contextValue = {
     user,
@@ -216,6 +243,9 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     hasRole,
     clearError,
+    isAuthenticated,
+    isAdmin,
+    canCreateContent,
   };
 
   console.log("AuthContext - Current state:", {
@@ -223,6 +253,9 @@ export const AuthProvider = ({ children }) => {
     token: token ? "Present" : "None",
     loading,
     error,
+    isAuthenticated,
+    isAdmin,
+    canCreateContent,
   });
 
   return (
