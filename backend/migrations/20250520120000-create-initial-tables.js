@@ -92,7 +92,7 @@ module.exports = {
         allowNull: true,
       },
       status: {
-        type: Sequelize.ENUM("draft", "published", "archived"),
+        type: Sequelize.ENUM("draft", "published", "archived", "blocked"),
         defaultValue: "draft",
       },
       view_count: {
