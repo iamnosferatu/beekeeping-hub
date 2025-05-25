@@ -1,449 +1,284 @@
-// frontend/src/hooks/api/useArticles.js - FIXED VERSION
-import { useApi, usePaginatedApi, useMutation } from "../useApi";
+// frontend/src/hooks/api/useArticles.js - SIMPLIFIED VERSION
+import { useState, useEffect } from "react";
 import apiService from "../../services/api";
 
 /**
- * Mock data for fallback when API is not available
- */
-const mockArticlesData = {
-  success: true,
-  data: [
-    {
-      id: 1,
-      title: "Getting Started with Beekeeping",
-      slug: "getting-started-with-beekeeping",
-      content: `
-# Getting Started with Beekeeping
-
-Beekeeping is a rewarding hobby that connects you with nature while producing delicious honey. Here's how to get started:
-
-## Essential Equipment
-
-1. **Hive**: The standard Langstroth hive is recommended for beginners.
-2. **Protective Gear**: A full suit with veil, gloves, and boots.
-3. **Smoker**: Used to calm bees during hive inspections.
-4. **Hive Tool**: For prying apart hive components and scraping away propolis.
-5. **Bee Brush**: Gently brush bees off frames during inspections.
-
-## Selecting Your Bees
-
-When starting, you have three options for acquiring bees:
-
-* **Package Bees**: 2-3 pounds of worker bees with a queen in a screened box.
-* **Nucleus Colony (Nuc)**: A miniature working colony with frames of brood, honey, and a laying queen.
-* **Swarm Capture**: Free but requires experience and quick response.
-
-For beginners, a nucleus colony offers the best start as it's already functioning.
-      `,
-      excerpt:
-        "Learn the basics of beekeeping, including essential equipment, selecting bees, and choosing the right location for your hives.",
-      featured_image:
-        "https://images.unsplash.com/photo-1576594770476-b1bed9a42275?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      status: "published",
-      published_at: "2023-05-15T10:30:00Z",
-      view_count: 215,
-      like_count: 42,
-      comment_count: 3,
-      comments: [
-        {
-          id: 1,
-          content:
-            "This article was really helpful for me as a beginner. Thanks for the detailed equipment list!",
-          status: "approved",
-          author: {
-            id: 3,
-            username: "user",
-            first_name: "Regular",
-            last_name: "User",
-          },
-        },
-      ],
-      author: {
-        id: 2,
-        username: "author",
-        first_name: "Jane",
-        last_name: "Beekeeper",
-      },
-      tags: [
-        { id: 1, name: "Beginner", slug: "beginner" },
-        { id: 3, name: "Equipment", slug: "equipment" },
-      ],
-    },
-    {
-      id: 2,
-      title: "Honey Harvesting Techniques",
-      slug: "honey-harvesting-techniques",
-      content: `
-# Honey Harvesting Techniques
-
-Harvesting honey is one of the most rewarding aspects of beekeeping. Here's a comprehensive guide to help you collect honey efficiently while maintaining the health of your colony.
-
-## When to Harvest
-
-The timing of your honey harvest is crucial:
-
-* Wait until at least 80% of the cells are capped with wax
-* Honey should have moisture content below 18.5% to prevent fermentation
-* In temperate climates, main harvest occurs in late summer (July-August)
-* Leave sufficient honey stores for the bees' winter survival
-      `,
-      excerpt:
-        "Master the art of honey harvesting with these proven techniques. Learn when to harvest, what equipment to use, and how to extract honey without harming your bees.",
-      featured_image:
-        "https://images.unsplash.com/photo-1587049352846-4a222e784d38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      status: "published",
-      published_at: "2023-05-30T14:45:00Z",
-      view_count: 178,
-      like_count: 36,
-      comment_count: 1,
-      comments: [
-        {
-          id: 4,
-          content:
-            "I tried the crush and strain method last year and it worked great for a small harvest.",
-          status: "approved",
-          author: {
-            id: 3,
-            username: "user",
-            first_name: "Regular",
-            last_name: "User",
-          },
-        },
-      ],
-      author: {
-        id: 2,
-        username: "author",
-        first_name: "Jane",
-        last_name: "Beekeeper",
-      },
-      tags: [
-        { id: 2, name: "Advanced", slug: "advanced" },
-        { id: 4, name: "Honey", slug: "honey" },
-      ],
-    },
-    {
-      id: 3,
-      title: "Common Bee Diseases and Prevention",
-      slug: "common-bee-diseases-and-prevention",
-      content: `
-# Common Bee Diseases and Prevention
-
-Maintaining healthy colonies is essential for successful beekeeping. Understanding common bee diseases, their symptoms, and prevention methods will help you keep your hives thriving.
-
-## Bacterial Diseases
-
-### American Foulbrood (AFB)
-American Foulbrood is one of the most serious and destructive bee diseases.
-
-**Symptoms:**
-* Irregular brood pattern with sunken, perforated cappings
-* Dead larvae turn brown then dark brown
-* Ropey consistency when tested with a stick
-* Distinctive foul odor
-* Scale formation that adheres tightly to cell walls
-      `,
-      excerpt:
-        "Learn to identify and prevent common bee diseases including Varroa mites, foulbrood, and nosema. Protecting your bees from these threats is essential for colony survival.",
-      featured_image:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      status: "published",
-      published_at: "2023-06-10T09:15:00Z",
-      view_count: 143,
-      like_count: 28,
-      comment_count: 0,
-      comments: [],
-      author: {
-        id: 2,
-        username: "author",
-        first_name: "John",
-        last_name: "Hiveman",
-      },
-      tags: [{ id: 5, name: "Health", slug: "health" }],
-    },
-    {
-      id: 4,
-      title: "The Perfect Beehive Setup",
-      slug: "the-perfect-beehive-setup",
-      content: `
-# The Perfect Beehive Setup
-
-Creating an optimal beehive setup is crucial for the health of your colony and your success as a beekeeper. This guide will help you design the perfect home for your bees.
-
-## Hive Types and Considerations
-
-### Langstroth Hive
-The most common hive type in North America and many other regions.
-
-**Advantages:**
-* Standardized equipment compatible with commercial components
-* Vertically expandable with additional boxes
-* Easy frame manipulation and inspection
-* Good for honey production
-      `,
-      excerpt:
-        "Design the ideal home for your bees with this comprehensive guide to beehive setup. Learn about different hive types, optimal positioning, and seasonal configurations.",
-      featured_image:
-        "https://images.unsplash.com/photo-1609014871082-4aa50f6a83cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-      status: "published",
-      published_at: "2023-07-05T16:20:00Z",
-      view_count: 97,
-      like_count: 18,
-      comment_count: 0,
-      comments: [],
-      author: {
-        id: 2,
-        username: "author",
-        first_name: "Jane",
-        last_name: "Beekeeper",
-      },
-      tags: [
-        { id: 1, name: "Beginner", slug: "beginner" },
-        { id: 3, name: "Equipment", slug: "equipment" },
-      ],
-    },
-  ],
-  pagination: {
-    page: 1,
-    limit: 10,
-    totalPages: 1,
-    total: 4,
-  },
-};
-
-/**
- * Hook to fetch all articles with filters - Enhanced with fallback
+ * Simplified hook to fetch all articles - bypasses usePaginatedApi
  */
 export const useArticles = (filters = {}, options = {}) => {
-  const { onError = null, useFallback = true } = options;
-
-  console.log("useArticles called with filters:", filters);
-
-  return usePaginatedApi(
-    async (params) => {
-      console.log("useArticles API call with params:", params);
-
-      try {
-        const response = await apiService.articles.getAll(params);
-        console.log("useArticles API Response:", response);
-
-        // Check if response has the expected structure
-        if (response.success && response.data) {
-          return response;
-        } else {
-          throw new Error("Invalid response structure");
-        }
-      } catch (error) {
-        console.error("useArticles API call failed:", error);
-
-        // Use fallback for network errors or server errors
-        if (
-          useFallback &&
-          (error.type === "NETWORK_ERROR" ||
-            error.status >= 500 ||
-            !navigator.onLine)
-        ) {
-          console.log("Using fallback mock data for articles");
-
-          // Apply filters to mock data
-          const filteredArticles = mockArticlesData.data.filter((article) => {
-            let matches = true;
-
-            if (filters.search) {
-              const searchTerm = filters.search.toLowerCase();
-              matches =
-                matches &&
-                (article.title.toLowerCase().includes(searchTerm) ||
-                  article.content.toLowerCase().includes(searchTerm) ||
-                  article.excerpt.toLowerCase().includes(searchTerm));
-            }
-
-            if (filters.tag) {
-              matches =
-                matches && article.tags.some((tag) => tag.slug === filters.tag);
-            }
-
-            if (filters.status) {
-              matches = matches && article.status === filters.status;
-            }
-
-            return matches;
-          });
-
-          const mockResponse = {
-            success: true,
-            data: filteredArticles,
-            count: filteredArticles.length,
-            pagination: {
-              ...mockArticlesData.pagination,
-              total: filteredArticles.length,
-            },
-          };
-
-          console.log("Returning mock response:", mockResponse);
-          return mockResponse;
-        }
-
-        // Re-throw the error if we're not using fallback
-        throw error;
-      }
+  const [state, setState] = useState({
+    data: null,
+    loading: true,
+    error: null,
+    pagination: {
+      page: 1,
+      limit: filters.limit || 10,
+      totalPages: 0,
+      total: 0,
     },
-    filters,
-    {
-      ...options,
-      onError: (error) => {
-        console.error("useArticles error:", error);
-        if (onError) {
-          onError(error);
+  });
+
+  console.log("🔄 useArticles called with filters:", filters);
+
+  const fetchArticles = async () => {
+    try {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
+      console.log("🔄 useArticles: Starting fetch...");
+
+      // Build params for API call
+      const params = {
+        page: 1,
+        limit: filters.limit || 10,
+        ...(filters.tag && { tag: filters.tag }),
+        ...(filters.search && { search: filters.search }),
+      };
+
+      console.log("🔄 useArticles: Calling API with params:", params);
+
+      // Call the API service directly
+      const response = await apiService.articles.getAll(params);
+
+      console.log("🔄 useArticles: API response:", response);
+
+      if (response.success) {
+        // Extract the articles array from the response
+        let articles = [];
+
+        if (Array.isArray(response.data)) {
+          // If response.data is directly an array
+          articles = response.data;
+        } else if (response.data && Array.isArray(response.data.data)) {
+          // If response.data.data is an array
+          articles = response.data.data;
+        } else if (
+          response.data &&
+          response.data.articles &&
+          Array.isArray(response.data.articles)
+        ) {
+          // If response.data.articles is an array
+          articles = response.data.articles;
         }
-      },
+
+        console.log("🔄 useArticles: Extracted articles:", articles);
+
+        // Create pagination info
+        const pagination = {
+          page: params.page,
+          limit: params.limit,
+          total: response.data?.count || response.count || articles.length,
+          totalPages: Math.ceil(
+            (response.data?.count || response.count || articles.length) /
+              params.limit
+          ),
+        };
+
+        console.log("🔄 useArticles: Pagination:", pagination);
+
+        setState({
+          data: articles,
+          loading: false,
+          error: null,
+          pagination,
+        });
+
+        // Call success callback if provided
+        if (options.onSuccess) {
+          options.onSuccess(articles);
+        }
+      } else {
+        console.error("🔄 useArticles: API returned success: false", response);
+        throw new Error(response.error?.message || "Failed to fetch articles");
+      }
+    } catch (error) {
+      console.error("🔄 useArticles: Error occurred:", error);
+
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: {
+          message: error.message || "Failed to load articles",
+          type: error.type || "UNKNOWN_ERROR",
+          status: error.status,
+        },
+      }));
+
+      // Call error callback if provided
+      if (options.onError) {
+        options.onError(error);
+      }
     }
-  );
+  };
+
+  // Fetch articles when component mounts or filters change
+  useEffect(() => {
+    fetchArticles();
+  }, [filters.tag, filters.search, filters.limit]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Function to change page (simplified for now)
+  const changePage = (newPage) => {
+    console.log("🔄 useArticles: changePage called with:", newPage);
+    // For now, just refetch (you can enhance this later for real pagination)
+    fetchArticles();
+  };
+
+  // Function to refetch data
+  const refetch = () => {
+    console.log("🔄 useArticles: refetch called");
+    fetchArticles();
+  };
+
+  const result = {
+    data: state.data,
+    loading: state.loading,
+    error: state.error,
+    pagination: state.pagination,
+    changePage,
+    refetch,
+  };
+
+  console.log("🔄 useArticles: Returning state:", result);
+
+  return result;
 };
 
 /**
- * Hook to fetch a single article by ID - Enhanced with fallback
+ * Hook to fetch a single article by ID
  */
 export const useArticle = (id, options = {}) => {
-  const { useFallback = true } = options;
+  const [state, setState] = useState({
+    data: null,
+    loading: true,
+    error: null,
+  });
 
-  return useApi(
-    async () => {
-      try {
-        const response = await apiService.articles.getById(id);
-        return response;
-      } catch (error) {
-        if (
-          useFallback &&
-          (error.type === "NETWORK_ERROR" || error.status >= 500)
-        ) {
-          console.log("Using fallback mock data for article:", id);
-          const mockArticle = mockArticlesData.data.find(
-            (article) => article.id === parseInt(id)
-          );
-          if (mockArticle) {
-            return {
-              success: true,
-              data: mockArticle,
-            };
-          }
-        }
-        throw error;
-      }
-    },
-    [id],
-    {
-      immediate: !!id,
-      ...options,
+  useEffect(() => {
+    if (!id) {
+      setState({ data: null, loading: false, error: null });
+      return;
     }
-  );
+
+    const fetchArticle = async () => {
+      try {
+        setState((prev) => ({ ...prev, loading: true, error: null }));
+
+        const response = await apiService.articles.getById(id);
+
+        if (response.success) {
+          setState({
+            data: response.data,
+            loading: false,
+            error: null,
+          });
+        } else {
+          throw new Error(response.error?.message || "Failed to fetch article");
+        }
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error,
+        }));
+      }
+    };
+
+    fetchArticle();
+  }, [id]);
+
+  return state;
 };
 
 /**
- * Hook to fetch a single article by slug - Enhanced with fallback
+ * Hook to fetch a single article by slug
  */
 export const useArticleBySlug = (slug, options = {}) => {
-  const { useFallback = true } = options;
+  const [state, setState] = useState({
+    data: null,
+    loading: true,
+    error: null,
+  });
 
-  return useApi(
-    async () => {
-      try {
-        const response = await apiService.articles.getBySlug(slug);
-        return response;
-      } catch (error) {
-        if (
-          useFallback &&
-          (error.type === "NETWORK_ERROR" || error.status >= 500)
-        ) {
-          console.log("Using fallback mock data for article slug:", slug);
-          const mockArticle = mockArticlesData.data.find(
-            (article) => article.slug === slug
-          );
-          if (mockArticle) {
-            return {
-              success: true,
-              data: mockArticle,
-            };
-          }
-        }
-        throw error;
-      }
-    },
-    [slug],
-    {
-      immediate: !!slug,
-      ...options,
+  useEffect(() => {
+    if (!slug) {
+      setState({ data: null, loading: false, error: null });
+      return;
     }
-  );
-};
 
-/**
- * Hook to fetch current user's articles - Enhanced with fallback
- */
-export const useMyArticles = (filters = {}, options = {}) => {
-  const { useFallback = true, userId } = options;
-
-  return usePaginatedApi(
-    async (params) => {
+    const fetchArticle = async () => {
       try {
-        const response = await apiService.articles.getMyArticles(params);
-        return response;
-      } catch (error) {
-        if (
-          useFallback &&
-          (error.type === "NETWORK_ERROR" || error.status >= 500)
-        ) {
-          console.log("Using fallback mock data for user articles");
-          // Filter mock articles by user ID if provided
-          const userArticles = userId
-            ? mockArticlesData.data.filter(
-                (article) => article.author.id === userId
-              )
-            : mockArticlesData.data;
+        setState((prev) => ({ ...prev, loading: true, error: null }));
 
-          return {
-            success: true,
-            data: userArticles,
-            pagination: {
-              ...mockArticlesData.pagination,
-              total: userArticles.length,
-            },
-          };
+        const response = await apiService.articles.getBySlug(slug);
+
+        if (response.success) {
+          setState({
+            data: response.data,
+            loading: false,
+            error: null,
+          });
+        } else {
+          throw new Error(response.error?.message || "Failed to fetch article");
         }
-        throw error;
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error,
+        }));
       }
-    },
-    filters,
-    options
-  );
+    };
+
+    fetchArticle();
+  }, [slug]);
+
+  return state;
 };
 
-/**
- * Hook to create a new article
- */
+// Export other hooks as simple stubs for now
 export const useCreateArticle = (options = {}) => {
-  return useMutation(apiService.articles.create, options);
+  return {
+    mutate: async (data) => {
+      const response = await apiService.articles.create(data);
+      return response;
+    },
+    loading: false,
+    error: null,
+    success: false,
+  };
 };
 
-/**
- * Hook to update an article
- */
 export const useUpdateArticle = (options = {}) => {
-  return useMutation(
-    (id, data) => apiService.articles.update(id, data),
-    options
-  );
+  return {
+    mutate: async (id, data) => {
+      const response = await apiService.articles.update(id, data);
+      return response;
+    },
+    loading: false,
+    error: null,
+    success: false,
+  };
 };
 
-/**
- * Hook to delete an article
- */
 export const useDeleteArticle = (options = {}) => {
-  return useMutation(apiService.articles.delete, options);
+  return {
+    mutate: async (id) => {
+      const response = await apiService.articles.delete(id);
+      return response;
+    },
+    loading: false,
+    error: null,
+    success: false,
+  };
 };
 
-/**
- * Hook to toggle article like
- */
 export const useToggleArticleLike = (options = {}) => {
-  return useMutation(apiService.articles.toggleLike, options);
+  return {
+    mutate: async (id) => {
+      const response = await apiService.articles.toggleLike(id);
+      return response;
+    },
+    loading: false,
+    error: null,
+    success: false,
+  };
 };

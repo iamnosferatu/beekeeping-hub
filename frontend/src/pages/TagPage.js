@@ -1,7 +1,7 @@
 // frontend/src/pages/TagPage.js
 import React from "react";
 import { useParams } from "react-router-dom";
-import ArticleList from "../components/articles/ArticleList";
+import ArticleList from "../components/article/ArticleList";
 
 const TagPage = () => {
   const { slug } = useParams();

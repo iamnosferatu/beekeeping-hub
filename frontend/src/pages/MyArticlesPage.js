@@ -1,4 +1,6 @@
 // frontend/src/pages/MyArticlesPage.js
+// REPLACE THE ENTIRE FILE WITH THIS COMPLETE FIXED VERSION:
+
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -67,53 +69,7 @@ const MyArticlesPage = () => {
     article: null,
   });
 
-  // Fetch user's articles
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        if (!user) return;
-
-        // Mock articles for demo
-        const mockArticles = [
-          {
-            id: 1,
-            title: "Getting Started with Beekeeping",
-            slug: "getting-started-with-beekeeping",
-            status: "published",
-            published_at: "2023-05-15T10:30:00Z",
-            view_count: 215,
-            like_count: 42,
-            comments: [1, 2, 3],
-            author: {
-              id: user.id,
-              username: user.username,
-              first_name: user.first_name,
-              last_name: user.last_name,
-            },
-            tags: [
-              { id: 1, name: "Beginner", slug: "beginner" },
-              { id: 3, name: "Equipment", slug: "equipment" },
-            ],
-          },
-        ];
-
-        setArticles(mockArticles);
-        updateStats(mockArticles);
-      } catch (err) {
-        console.error("Error fetching articles:", err);
-        setError("Failed to load your articles. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [user]);
-
-  // Calculate statistics
+  // Calculate statistics - DEFINED FUNCTION
   const updateStats = (articles) => {
     const published = articles.filter(
       (a) => a.status === "published" && !a.blocked
@@ -121,7 +77,7 @@ const MyArticlesPage = () => {
     const draft = articles.filter((a) => a.status === "draft");
     const blocked = articles.filter((a) => a.blocked);
 
-    const stats = {
+    const newStats = {
       total: articles.length,
       published: published.length,
       draft: draft.length,
@@ -140,8 +96,65 @@ const MyArticlesPage = () => {
       ),
     };
 
-    setStats(stats);
+    setStats(newStats);
   };
+
+  // Fetch user's articles - FIXED useEffect (NOT CONDITIONAL)
+  useEffect(() => {
+    const fetchArticles = async () => {
+      // Check if user exists INSIDE the effect, not as a condition for the effect
+      if (!user) {
+        setLoading(false);
+        setError("Please log in to view your articles");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Use the API service to fetch user's articles
+        const response = await axios.get(`${API_URL}/articles`, {
+          params: { author: user.id },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(
+              "beekeeper_auth_token"
+            )}`,
+          },
+        });
+
+        if (response.data.success) {
+          const userArticles = response.data.data || [];
+          setArticles(userArticles);
+          updateStats(userArticles);
+        } else {
+          throw new Error(response.data.message || "Failed to fetch articles");
+        }
+      } catch (err) {
+        console.error("Error fetching articles:", err);
+
+        if (err.response?.status === 401) {
+          setError("Authentication expired. Please log in again.");
+        } else if (err.response?.status === 403) {
+          setError("You don't have permission to view articles.");
+        } else if (!err.response) {
+          setError(
+            "Unable to connect to server. Please ensure the backend is running on port 8080."
+          );
+        } else {
+          setError("Failed to load your articles. Please try again.");
+        }
+
+        // Set empty array to prevent issues with undefined
+        setArticles([]);
+        updateStats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [user]); // This useEffect is NOT conditional - it always runs
 
   // Filter articles
   const getFilteredArticles = () => {
@@ -188,19 +201,23 @@ const MyArticlesPage = () => {
 
       if (!articleId) return;
 
-      const response = await axios.delete(`${API_URL}/articles/${articleId}`);
+      const response = await axios.delete(`${API_URL}/articles/${articleId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem(
+            "beekeeper_auth_token"
+          )}`,
+        },
+      });
 
       if (response.data.success) {
         // Update articles list
-        setArticles((prev) =>
-          prev.filter((article) => article.id !== articleId)
-        );
-        setSuccessMessage("Article deleted successfully");
-
-        // Update stats
         const updatedArticles = articles.filter(
           (article) => article.id !== articleId
         );
+        setArticles(updatedArticles);
+        setSuccessMessage("Article deleted successfully");
+
+        // Update stats
         updateStats(updatedArticles);
       }
     } catch (err) {

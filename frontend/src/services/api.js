@@ -1,9 +1,9 @@
-// frontend/src/services/api.js
+// frontend/src/services/api.js - DEBUG VERSION
 import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
 
 /**
- * Centralized API service for all HTTP requests
+ * Centralized API service for all HTTP requests - WITH DEBUGGING
  */
 class ApiService {
   constructor() {
@@ -36,7 +36,12 @@ class ApiService {
         if (process.env.NODE_ENV === "development") {
           console.log(
             `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
-            config.data
+            {
+              baseURL: config.baseURL,
+              fullURL: `${config.baseURL}${config.url}`,
+              data: config.data,
+              params: config.params,
+            }
           );
         }
 
@@ -57,7 +62,11 @@ class ApiService {
             `✅ API Response: ${response.config.method?.toUpperCase()} ${
               response.config.url
             }`,
-            response.data
+            {
+              status: response.status,
+              data: response.data,
+              headers: response.headers,
+            }
           );
         }
 
@@ -73,7 +82,12 @@ class ApiService {
             `❌ API Error: ${error.config?.method?.toUpperCase()} ${
               error.config?.url
             }`,
-            customError
+            {
+              error: customError,
+              originalError: error,
+              response: error.response?.data,
+              status: error.response?.status,
+            }
           );
         }
 
@@ -164,23 +178,124 @@ class ApiService {
   }
 
   /**
-   * Generic request method with error handling
+   * Generic request method with enhanced error handling and debugging
    */
   async request(config) {
     try {
+      console.log("🔄 ApiService.request called with config:", config);
+
       const response = await this.client(config);
+
+      console.log("✅ ApiService.request successful:", {
+        status: response.status,
+        data: response.data,
+        config: config,
+      });
+
       return {
         success: true,
         data: response.data,
         status: response.status,
       };
     } catch (error) {
+      console.error("❌ ApiService.request failed:", {
+        error,
+        config,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
       return {
         success: false,
         error,
       };
     }
   }
+
+  // =============================================================================
+  // ARTICLE ENDPOINTS
+  // =============================================================================
+  articles = {
+    getAll: async (params = {}) => {
+      console.log("📚 articles.getAll called with params:", params);
+
+      const queryString = new URLSearchParams(params).toString();
+      const url = `/articles${queryString ? `?${queryString}` : ""}`;
+
+      console.log("📚 articles.getAll making request to:", url);
+
+      const result = await this.request({
+        method: "GET",
+        url: url,
+      });
+
+      console.log("📚 articles.getAll result:", result);
+      return result;
+    },
+
+    getById: async (id) => {
+      console.log("📄 articles.getById called with id:", id);
+
+      const result = await this.request({
+        method: "GET",
+        url: `/articles/byId/${id}`,
+      });
+
+      console.log("📄 articles.getById result:", result);
+      return result;
+    },
+
+    getBySlug: async (slug) => {
+      console.log("📄 articles.getBySlug called with slug:", slug);
+
+      const result = await this.request({
+        method: "GET",
+        url: `/articles/${slug}`,
+      });
+
+      console.log("📄 articles.getBySlug result:", result);
+      return result;
+    },
+
+    create: async (articleData) => {
+      return this.request({
+        method: "POST",
+        url: "/articles",
+        data: articleData,
+      });
+    },
+
+    update: async (id, articleData) => {
+      return this.request({
+        method: "PUT",
+        url: `/articles/${id}`,
+        data: articleData,
+      });
+    },
+
+    delete: async (id) => {
+      return this.request({
+        method: "DELETE",
+        url: `/articles/${id}`,
+      });
+    },
+
+    toggleLike: async (id) => {
+      return this.request({
+        method: "POST",
+        url: `/articles/${id}/like`,
+      });
+    },
+
+    // Get articles by current user
+    getMyArticles: async (params = {}) => {
+      const queryString = new URLSearchParams(params).toString();
+      return this.request({
+        method: "GET",
+        url: `/author/articles${queryString ? `?${queryString}` : ""}`,
+      });
+    },
+  };
 
   // =============================================================================
   // AUTH ENDPOINTS
@@ -227,74 +342,9 @@ class ApiService {
   };
 
   // =============================================================================
-  // ARTICLE ENDPOINTS
+  // OTHER ENDPOINTS
   // =============================================================================
-  articles = {
-    getAll: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
-      return this.request({
-        method: "GET",
-        url: `/articles${queryString ? `?${queryString}` : ""}`,
-      });
-    },
 
-    getById: async (id) => {
-      return this.request({
-        method: "GET",
-        url: `/articles/byId/${id}`,
-      });
-    },
-
-    getBySlug: async (slug) => {
-      return this.request({
-        method: "GET",
-        url: `/articles/${slug}`,
-      });
-    },
-
-    create: async (articleData) => {
-      return this.request({
-        method: "POST",
-        url: "/articles",
-        data: articleData,
-      });
-    },
-
-    update: async (id, articleData) => {
-      return this.request({
-        method: "PUT",
-        url: `/articles/${id}`,
-        data: articleData,
-      });
-    },
-
-    delete: async (id) => {
-      return this.request({
-        method: "DELETE",
-        url: `/articles/${id}`,
-      });
-    },
-
-    toggleLike: async (id) => {
-      return this.request({
-        method: "POST",
-        url: `/articles/${id}/like`,
-      });
-    },
-
-    // Get articles by current user
-    getMyArticles: async (params = {}) => {
-      const queryString = new URLSearchParams(params).toString();
-      return this.request({
-        method: "GET",
-        url: `/author/articles${queryString ? `?${queryString}` : ""}`,
-      });
-    },
-  };
-
-  // =============================================================================
-  // COMMENT ENDPOINTS
-  // =============================================================================
   comments = {
     getAll: async (params = {}) => {
       const queryString = new URLSearchParams(params).toString();
@@ -336,9 +386,6 @@ class ApiService {
     },
   };
 
-  // =============================================================================
-  // TAG ENDPOINTS
-  // =============================================================================
   tags = {
     getAll: async () => {
       return this.request({
@@ -363,9 +410,6 @@ class ApiService {
     },
   };
 
-  // =============================================================================
-  // ADMIN ENDPOINTS
-  // =============================================================================
   admin = {
     getDashboardStats: async () => {
       return this.request({

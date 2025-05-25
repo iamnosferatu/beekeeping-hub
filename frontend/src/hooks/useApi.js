@@ -1,4 +1,4 @@
-// frontend/src/hooks/useApi.js - ENHANCED WITH DEBUG
+// frontend/src/hooks/useApi.js - FIXED VERSION
 import { useState, useEffect, useCallback } from "react";
 
 /**
@@ -78,7 +78,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
 };
 
 /**
- * Hook for paginated API calls
+ * Hook for paginated API calls - FIXED to match backend response structure
  */
 export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
   const [params, setParams] = useState({
@@ -113,40 +113,44 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
         console.log("usePaginatedApi response:", response);
 
         if (response.success) {
-          // Handle different response structures
-          let data, pagination;
+          // Handle the backend response structure
+          // Your backend returns: { success: true, data: [...], count: N, pagination: {...} }
+          let data = response.data || [];
 
-          if (response.data && Array.isArray(response.data)) {
-            // Direct array response
-            data = response.data;
-            pagination = response.pagination || {
-              page: mergedParams.page || 1,
-              limit: mergedParams.limit || 10,
-              totalPages: 1,
-              total: response.data.length,
-            };
-          } else if (response.data && response.data.data) {
-            // Nested response structure
-            data = response.data.data;
-            pagination = response.data.pagination ||
-              response.pagination || {
-                page: mergedParams.page || 1,
-                limit: mergedParams.limit || 10,
-                totalPages: 1,
-                total: response.data.data.length,
-              };
-          } else {
-            // Fallback
-            data = response.data || [];
-            pagination = response.pagination || {
-              page: mergedParams.page || 1,
-              limit: mergedParams.limit || 10,
-              totalPages: 1,
-              total: 0,
-            };
+          // Ensure data is always an array
+          if (!Array.isArray(data)) {
+            console.warn("API returned non-array data:", data);
+            // Try to extract array from common response patterns
+            if (data && typeof data === "object") {
+              if (Array.isArray(data.data)) {
+                data = data.data;
+              } else if (Array.isArray(data.articles)) {
+                data = data.articles;
+              } else if (data.id) {
+                // Single item, wrap in array
+                data = [data];
+              } else {
+                data = [];
+              }
+            } else {
+              data = [];
+            }
           }
 
-          console.log("usePaginatedApi processed data:", { data, pagination });
+          const pagination = response.pagination || {
+            page: mergedParams.page || 1,
+            limit: mergedParams.limit || 10,
+            totalPages: Math.ceil(
+              (response.count || data.length) / (mergedParams.limit || 10)
+            ),
+            total: response.count || data.length,
+          };
+
+          console.log("usePaginatedApi processed data:", {
+            data,
+            pagination,
+            originalResponse: response,
+          });
 
           setState({
             data,

@@ -1,12 +1,39 @@
-// frontend/src/pages/HomePage.js
+// frontend/src/pages/HomePage.js - DEBUG VERSION
 import React from "react";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ArticleList from "../components/articles/ArticleList";
+import ArticleList from "../components/article/ArticleList";
+import ApiDebugger from "../components/debug/ApiDebugger";
+import ApiTestComponent from "../components/debug/ApiTestComponent";
+
+// This home page contains some great debug information.
+// Create something similar to be used when problems occure.
 
 const HomePage = () => {
+  const isDevMode = process.env.NODE_ENV === "development";
+
+  console.log("🏠 HomePage rendering", {
+    isDevMode,
+    currentPath: window.location.pathname,
+  });
+
   return (
     <div className="home-page">
+      {/* API Debug Component - Only in development */}
+      {isDevMode && (
+        <div className="mb-4">
+          <Alert variant="info">
+            <Alert.Heading>🔧 Development Mode</Alert.Heading>
+            <p>
+              Debug information is shown below. This will help identify API
+              issues.
+            </p>
+          </Alert>
+          <ApiTestComponent />
+          <ApiDebugger />
+        </div>
+      )}
+
       {/* Hero Section */}
       <Card className="text-center bg-dark text-white mb-4 border-0">
         <Card.Img
@@ -50,9 +77,41 @@ const HomePage = () => {
         </p>
       </div>
 
+      {/* Development Notice */}
+      {isDevMode && (
+        <Alert variant="info" className="mb-4">
+          <Alert.Heading>🚧 Development Mode</Alert.Heading>
+          <p>
+            You're running in development mode. Watch the browser console for
+            detailed API logs.
+          </p>
+          <p className="mb-0">
+            <strong>Backend Status:</strong> Check{" "}
+            <a
+              href="http://localhost:8080/api/health"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              http://localhost:8080/api/health
+            </a>{" "}
+            to verify backend is running.
+          </p>
+        </Alert>
+      )}
+
       {/* Featured Articles */}
       <h2 className="mb-4">Latest Articles</h2>
-      <ArticleList />
+      <div className="articles-section">
+        {isDevMode && (
+          <Alert variant="warning" className="mb-3">
+            <p className="mb-0">
+              <strong>🔍 Debug:</strong> ArticleList component will be rendered
+              below. Check browser console for detailed API call logs.
+            </p>
+          </Alert>
+        )}
+        <ArticleList />
+      </div>
 
       {/* Call to Action */}
       <div className="text-center my-5">

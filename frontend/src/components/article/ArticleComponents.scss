@@ -1,0 +1,76 @@
+// frontend/src/components/article/ArticleComponents.scss
+
+.article-page {
+  .article-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+
+    .author-name {
+      font-weight: 600;
+      color: var(--link-color);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .article-stats {
+    font-size: 0.95rem;
+    color: var(--secondary-color);
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &[title="Like"],
+      &[title="Unlike"] {
+        &:hover {
+          color: #dc3545;
+        }
+      }
+    }
+  }
+
+  .wysiwyg-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      margin-top: 1.5em;
+      margin-bottom: 0.8em;
+      color: var(--text-color);
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.25rem;
+      margin: 1.5rem 0;
+    }
+
+    blockquote {
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary-color);
+      background-color: rgba(0, 0, 0, 0.03);
+      font-style: italic;
+    }
+  }
+}

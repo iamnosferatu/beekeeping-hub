@@ -1,6 +1,6 @@
 // frontend/src/pages/ArticleListPage.js
 import React from "react";
-import ArticleList from "../components/articles/ArticleList";
+import ArticleList from "../components/article/ArticleList";
 
 const ArticleListPage = () => {
   return (
