@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import ArticleList from "../components/article/ArticleList";
 import ApiDebugger from "../components/debug/ApiDebugger";
 import ApiTestComponent from "../components/debug/ApiTestComponent";
+import ArticleApiTester from "../components/debug/ArticleApiTester";
+
 
 // This home page contains some great debug information.
 // Create something similar to be used when problems occure.
@@ -31,6 +33,7 @@ const HomePage = () => {
           </Alert>
           <ApiTestComponent />
           <ApiDebugger />
+          <ArticleApiTester />
         </div>
       )}
 

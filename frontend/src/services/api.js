@@ -213,9 +213,12 @@ class ApiService {
   }
 
   // =============================================================================
-  // ARTICLE ENDPOINTS
+  // ARTICLE ENDPOINTS - FIXED
   // =============================================================================
   articles = {
+    /**
+     * Get all articles with optional filters
+     */
     getAll: async (params = {}) => {
       console.log("📚 articles.getAll called with params:", params);
 
@@ -233,31 +236,59 @@ class ApiService {
       return result;
     },
 
+    /**
+     * Get article by numeric ID
+     * Used for editing and admin functions
+     */
     getById: async (id) => {
       console.log("📄 articles.getById called with id:", id);
 
+      // Ensure we're using the correct endpoint for ID-based fetching
       const result = await this.request({
         method: "GET",
-        url: `/articles/byId/${id}`,
+        url: `/articles/byId/${id}`, // Explicit ID endpoint
       });
 
       console.log("📄 articles.getById result:", result);
       return result;
     },
 
+    /**
+     * Get article by URL slug
+     * Used for public article viewing
+     */
     getBySlug: async (slug) => {
       console.log("📄 articles.getBySlug called with slug:", slug);
 
+      // IMPORTANT: This should fetch by slug, not ID
+      // The backend should have a route that handles slug-based queries
       const result = await this.request({
         method: "GET",
-        url: `/articles/${slug}`,
+        url: `/articles/bySlug/${slug}`, // Explicit slug endpoint
       });
+
+      // If the above fails, try the default endpoint which might handle both
+      if (!result.success) {
+        console.log("📄 Trying alternative endpoint for slug:", slug);
+
+        const alternativeResult = await this.request({
+          method: "GET",
+          url: `/articles/${slug}`, // This might work if backend handles it
+        });
+
+        return alternativeResult;
+      }
 
       console.log("📄 articles.getBySlug result:", result);
       return result;
     },
 
+    /**
+     * Create new article
+     */
     create: async (articleData) => {
+      console.log("✏️ articles.create called with data:", articleData);
+
       return this.request({
         method: "POST",
         url: "/articles",
@@ -265,7 +296,17 @@ class ApiService {
       });
     },
 
+    /**
+     * Update existing article
+     */
     update: async (id, articleData) => {
+      console.log(
+        "📝 articles.update called with id:",
+        id,
+        "data:",
+        articleData
+      );
+
       return this.request({
         method: "PUT",
         url: `/articles/${id}`,
@@ -273,22 +314,36 @@ class ApiService {
       });
     },
 
+    /**
+     * Delete article
+     */
     delete: async (id) => {
+      console.log("🗑️ articles.delete called with id:", id);
+
       return this.request({
         method: "DELETE",
         url: `/articles/${id}`,
       });
     },
 
+    /**
+     * Toggle article like
+     */
     toggleLike: async (id) => {
+      console.log("❤️ articles.toggleLike called with id:", id);
+
       return this.request({
         method: "POST",
         url: `/articles/${id}/like`,
       });
     },
 
-    // Get articles by current user
+    /**
+     * Get articles by current user
+     */
     getMyArticles: async (params = {}) => {
+      console.log("👤 articles.getMyArticles called with params:", params);
+
       const queryString = new URLSearchParams(params).toString();
       return this.request({
         method: "GET",

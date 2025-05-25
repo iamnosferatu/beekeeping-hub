@@ -1,152 +1,129 @@
-// frontend/src/components/article/ArticleComments.js
-import React, { useState, useContext, useEffect } from "react";
-import { Card, Form, Button, Alert, Spinner, Badge } from "react-bootstrap";
+// frontend/src/components/articles/ArticleComments.js
+import React, { useState, useContext } from "react";
+import {
+  Card,
+  Form,
+  Button,
+  Alert,
+  Spinner,
+  Badge,
+  ListGroup,
+} from "react-bootstrap";
 import { BsChat, BsPlus } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import AuthContext from "../../contexts/AuthContext";
-import CommentItem from "./CommentItem";
-import { useCreateComment, useComments } from "../../hooks/api/useComments";
+import moment from "moment";
 
+/**
+ * ArticleComments Component
+ *
+ * Handles article comments display and submission.
+ * Includes authentication checks and real-time comment addition.
+ *
+ * @param {number} articleId - ID of the article
+ * @param {Array} initialComments - Initial comments array
+ * @param {boolean} showCommentForm - Whether to show the comment form
+ */
 const ArticleComments = ({
   articleId,
   initialComments = [],
   showCommentForm = true,
-  allowReplies = true,
 }) => {
   const { user } = useContext(AuthContext);
 
-  // Local state
+  // Local state for comments management
+  const [comments, setComments] = useState(initialComments);
   const [commentText, setCommentText] = useState("");
-  const [showAllComments, setShowAllComments] = useState(false);
-  const [localComments, setLocalComments] = useState(initialComments);
-  const [sortBy, setSortBy] = useState("newest"); // newest, oldest, popular
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  // API hooks
-  const {
-    data: commentsData,
-    loading: loadingComments,
-    error: commentsError,
-    refetch: refetchComments,
-  } = useComments({ articleId, status: "approved" }, { immediate: false });
-
-  const {
-    mutate: createComment,
-    loading: submittingComment,
-    error: submitError,
-  } = useCreateComment({
-    onSuccess: (newComment) => {
-      // Add new comment to local state
-      setLocalComments((prev) => [newComment, ...prev]);
-      setCommentText("");
-    },
-  });
-
-  // Use local comments or fetched comments
-  const comments = commentsData || localComments;
-
-  // Sort comments based on selected sorting
-  const getSortedComments = () => {
-    if (!comments) return [];
-
-    const sorted = [...comments];
-
-    switch (sortBy) {
-      case "oldest":
-        return sorted.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at)
-        );
-      case "popular":
-        return sorted.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      case "newest":
-      default:
-        return sorted.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-    }
-  };
-
-  // Handle comment submission
+  /**
+   * Handle comment form submission
+   */
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
 
-    if (!commentText.trim()) return;
+    // Validate comment text
+    if (!commentText.trim()) {
+      setSubmitError("Please enter a comment");
+      return;
+    }
 
-    await createComment({
-      content: commentText.trim(),
-      articleId,
-    });
-  };
-
-  // Handle reply to a comment
-  const handleReply = async (parentId, content) => {
-    await createComment({
-      content,
-      articleId,
-      parentId,
-    });
-  };
-
-  // Handle comment editing
-  const handleEdit = (comment) => {
-    // This would typically open an edit modal or inline editor
-    console.log("Edit comment:", comment);
-    // TODO: Implement edit functionality
-  };
-
-  // Handle comment deletion
-  const handleDelete = async (commentId) => {
     try {
-      // TODO: Implement delete API call
-      console.log("Delete comment:", commentId);
+      setSubmitting(true);
+      setSubmitError(null);
 
-      // Remove from local state
-      setLocalComments((prev) =>
-        prev.filter((comment) => comment.id !== commentId)
+      // TODO: Replace with actual API call when backend is ready
+      // For now, we'll show an error message
+      console.log("Submitting comment:", { articleId, content: commentText });
+
+      // Simulate API call failure
+      throw new Error(
+        "Comment submission is not yet implemented. Please check back later."
       );
     } catch (error) {
-      console.error("Failed to delete comment:", error);
+      console.error("Failed to submit comment:", error);
+      setSubmitError(
+        error.message || "Failed to submit comment. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Handle comment reporting
-  const handleReport = (comment) => {
-    // TODO: Implement report functionality
-    console.log("Report comment:", comment);
-  };
+  /**
+   * Render individual comment
+   */
+  const renderComment = (comment) => (
+    <ListGroup.Item key={comment.id} className="py-3">
+      <div className="d-flex">
+        {/* Author Avatar */}
+        <img
+          src={
+            comment.author?.avatar ||
+            "https://via.placeholder.com/40x40?text=👤"
+          }
+          alt={comment.author?.username || "Anonymous"}
+          className="rounded-circle me-3"
+          width="40"
+          height="40"
+          style={{ objectFit: "cover" }}
+        />
 
-  // Get comments to display (limit if not showing all)
-  const displayComments = showAllComments
-    ? getSortedComments()
-    : getSortedComments().slice(0, 5);
-
-  const hasMoreComments = comments && comments.length > 5 && !showAllComments;
+        {/* Comment Content */}
+        <div className="flex-grow-1">
+          <div className="d-flex justify-content-between align-items-start mb-1">
+            <h6 className="mb-0 comment-author">
+              {comment.author
+                ? `${comment.author.first_name || ""} ${
+                    comment.author.last_name || ""
+                  }`.trim() ||
+                  comment.author.username ||
+                  "Anonymous"
+                : "Anonymous"}
+            </h6>
+            <small className="text-muted comment-date">
+              {moment(comment.created_at).fromNow()}
+            </small>
+          </div>
+          <p className="mb-0 comment-content">{comment.content}</p>
+        </div>
+      </div>
+    </ListGroup.Item>
+  );
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm comments-section">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <h4 className="mb-0">
           <BsChat className="me-2" />
           Comments
-          {comments && (
+          {comments.length > 0 && (
             <Badge bg="secondary" className="ms-2">
               {comments.length}
             </Badge>
           )}
         </h4>
-
-        {/* Sort Options */}
-        {comments && comments.length > 1 && (
-          <Form.Select
-            size="sm"
-            style={{ width: "auto" }}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="popular">Most Popular</option>
-          </Form.Select>
-        )}
       </Card.Header>
 
       <Card.Body>
@@ -173,26 +150,31 @@ const ArticleComments = ({
                       placeholder="Write a comment..."
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      disabled={submittingComment}
+                      disabled={submitting}
                       required
                     />
                   </div>
                 </div>
 
+                {/* Error Alert */}
                 {submitError && (
-                  <Alert variant="danger" className="mb-3">
-                    {submitError.message ||
-                      "Failed to submit comment. Please try again."}
+                  <Alert
+                    variant="danger"
+                    dismissible
+                    onClose={() => setSubmitError(null)}
+                  >
+                    {submitError}
                   </Alert>
                 )}
 
+                {/* Submit Button */}
                 <div className="d-flex justify-content-end">
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={submittingComment || !commentText.trim()}
+                    disabled={submitting || !commentText.trim()}
                   >
-                    {submittingComment ? (
+                    {submitting ? (
                       <>
                         <Spinner
                           as="span"
@@ -214,17 +196,19 @@ const ArticleComments = ({
                 </div>
               </Form>
             ) : (
+              /* Login prompt for non-authenticated users */
               <Alert variant="info" className="text-center">
                 <p className="mb-2">Please log in to leave a comment</p>
                 <div>
-                  <Link to="/login" className="btn btn-primary btn-sm me-2">
-                    Log In
+                  <Link to="/login">
+                    <Button variant="primary" size="sm" className="me-2">
+                      Log In
+                    </Button>
                   </Link>
-                  <Link
-                    to="/register"
-                    className="btn btn-outline-primary btn-sm"
-                  >
-                    Sign Up
+                  <Link to="/register">
+                    <Button variant="outline-primary" size="sm">
+                      Sign Up
+                    </Button>
                   </Link>
                 </div>
               </Alert>
@@ -233,24 +217,9 @@ const ArticleComments = ({
         )}
 
         {/* Comments List */}
-        {loadingComments ? (
-          <div className="text-center py-4">
-            <Spinner animation="border" variant="primary" />
-            <p className="mt-2 text-muted">Loading comments...</p>
-          </div>
-        ) : commentsError ? (
-          <Alert variant="danger">
-            <Alert.Heading>Error Loading Comments</Alert.Heading>
-            <p>{commentsError.message || "Failed to load comments."}</p>
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={refetchComments}
-            >
-              Try Again
-            </Button>
-          </Alert>
-        ) : !comments || comments.length === 0 ? (
+        {comments.length > 0 ? (
+          <ListGroup variant="flush">{comments.map(renderComment)}</ListGroup>
+        ) : (
           <Alert variant="light" className="text-center">
             <BsChat size={30} className="text-muted mb-2" />
             <p className="mb-0">
@@ -260,47 +229,6 @@ const ArticleComments = ({
                 : "Log in to start the conversation!"}
             </p>
           </Alert>
-        ) : (
-          <>
-            {/* Comments */}
-            <div className="comments-list">
-              {displayComments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
-                  onReply={allowReplies ? handleReply : null}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onReport={handleReport}
-                  showReplyForm={allowReplies}
-                />
-              ))}
-            </div>
-
-            {/* Show More Button */}
-            {hasMoreComments && (
-              <div className="text-center mt-4">
-                <Button
-                  variant="outline-primary"
-                  onClick={() => setShowAllComments(true)}
-                >
-                  Show {comments.length - 5} More Comments
-                </Button>
-              </div>
-            )}
-
-            {/* Show Less Button */}
-            {showAllComments && comments.length > 5 && (
-              <div className="text-center mt-4">
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowAllComments(false)}
-                >
-                  Show Less
-                </Button>
-              </div>
-            )}
-          </>
         )}
       </Card.Body>
     </Card>
