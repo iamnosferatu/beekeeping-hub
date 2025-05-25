@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ArticleList from "../components/article/ArticleList";
+import ArticleList from "../components/articles/ArticleList";
 import ApiDebugger from "../components/debug/ApiDebugger";
 import ApiTestComponent from "../components/debug/ApiTestComponent";
 

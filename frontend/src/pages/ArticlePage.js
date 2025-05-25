@@ -3,10 +3,10 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { Spinner, Alert } from "react-bootstrap";
 import { useArticleBySlug } from "../hooks/api/useArticles";
-import ArticleHeader from "../components/article/ArticleHeader";
-import ArticleContent from "../components/article/ArticleContent";
-import ArticleAuthor from "../components/article/ArticleAuthor";
-import ArticleComments from "../components/article/ArticleComments";
+import ArticleHeader from "../components/articles/ArticleHeader";
+import ArticleContent from "../components/articles/ArticleContent";
+import ArticleAuthor from "../components/articles/ArticleAuthor";
+import ArticleComments from "../components/articles/ArticleComments";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ErrorAlert from "../components/common/ErrorAlert";
 
