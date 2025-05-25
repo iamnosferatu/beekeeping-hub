@@ -331,7 +331,7 @@ const DiagnosticsPage = () => {
                             <p>
                               <strong>Response:</strong>
                             </p>
-                            <pre className="bg-light p-3 rounded">
+                            <pre className="bg-dark p-3 rounded">
                               {formatJson(error.response)}
                             </pre>
                           </div>

@@ -1,4 +1,4 @@
-// frontend/src/hooks/api/useArticles.js - Updated with fallbacks
+// frontend/src/hooks/api/useArticles.js - FIXED VERSION
 import { useApi, usePaginatedApi, useMutation } from "../useApi";
 import apiService from "../../services/api";
 
@@ -43,6 +43,7 @@ For beginners, a nucleus colony offers the best start as it's already functionin
       published_at: "2023-05-15T10:30:00Z",
       view_count: 215,
       like_count: 42,
+      comment_count: 3,
       comments: [
         {
           id: 1,
@@ -94,6 +95,7 @@ The timing of your honey harvest is crucial:
       published_at: "2023-05-30T14:45:00Z",
       view_count: 178,
       like_count: 36,
+      comment_count: 1,
       comments: [
         {
           id: 4,
@@ -148,6 +150,7 @@ American Foulbrood is one of the most serious and destructive bee diseases.
       published_at: "2023-06-10T09:15:00Z",
       view_count: 143,
       like_count: 28,
+      comment_count: 0,
       comments: [],
       author: {
         id: 2,
@@ -185,6 +188,7 @@ The most common hive type in North America and many other regions.
       published_at: "2023-07-05T16:20:00Z",
       view_count: 97,
       like_count: 18,
+      comment_count: 0,
       comments: [],
       author: {
         id: 2,
@@ -197,34 +201,12 @@ The most common hive type in North America and many other regions.
         { id: 3, name: "Equipment", slug: "equipment" },
       ],
     },
-    {
-      id: 5,
-      title: "Seasonal Beekeeping Calendar (Draft)",
-      slug: "seasonal-beekeeping-calendar-draft",
-      content:
-        "Detailed content about seasonal beekeeping activities throughout the year...",
-      excerpt:
-        "Follow this monthly calendar of beekeeping tasks to keep your colonies healthy and productive throughout the year.",
-      featured_image: "",
-      status: "draft",
-      published_at: null,
-      view_count: 0,
-      like_count: 0,
-      comments: [],
-      author: {
-        id: 2,
-        username: "author",
-        first_name: "Jane",
-        last_name: "Beekeeper",
-      },
-      tags: [{ id: 6, name: "Seasonal", slug: "seasonal" }],
-    },
   ],
   pagination: {
     page: 1,
     limit: 10,
     totalPages: 1,
-    total: 5,
+    total: 4,
   },
 };
 
@@ -234,20 +216,36 @@ The most common hive type in North America and many other regions.
 export const useArticles = (filters = {}, options = {}) => {
   const { onError = null, useFallback = true } = options;
 
-  // Enhanced error handler with fallback
-  const handleError = (error) => {
-    console.warn("API Error, checking if fallback should be used:", error);
+  console.log("useArticles called with filters:", filters);
 
-    if (
-      useFallback &&
-      (error.type === "NETWORK_ERROR" || error.status >= 500)
-    ) {
-      console.log("Using fallback mock data for articles");
-      return {
-        success: true,
-        data: {
-          data: mockArticlesData.data.filter((article) => {
-            // Apply filters to mock data
+  return usePaginatedApi(
+    async (params) => {
+      console.log("useArticles API call with params:", params);
+
+      try {
+        const response = await apiService.articles.getAll(params);
+        console.log("useArticles API Response:", response);
+
+        // Check if response has the expected structure
+        if (response.success && response.data) {
+          return response;
+        } else {
+          throw new Error("Invalid response structure");
+        }
+      } catch (error) {
+        console.error("useArticles API call failed:", error);
+
+        // Use fallback for network errors or server errors
+        if (
+          useFallback &&
+          (error.type === "NETWORK_ERROR" ||
+            error.status >= 500 ||
+            !navigator.onLine)
+        ) {
+          console.log("Using fallback mock data for articles");
+
+          // Apply filters to mock data
+          const filteredArticles = mockArticlesData.data.filter((article) => {
             let matches = true;
 
             if (filters.search) {
@@ -269,38 +267,35 @@ export const useArticles = (filters = {}, options = {}) => {
             }
 
             return matches;
-          }),
-          pagination: mockArticlesData.pagination,
-        },
-      };
-    }
+          });
 
-    if (onError) {
-      onError(error);
-    }
+          const mockResponse = {
+            success: true,
+            data: filteredArticles,
+            count: filteredArticles.length,
+            pagination: {
+              ...mockArticlesData.pagination,
+              total: filteredArticles.length,
+            },
+          };
 
-    return null;
-  };
-
-  return usePaginatedApi(
-    async (params) => {
-      try {
-        const response = await apiService.articles.getAll(params);
-        console.log("API Response received:", response);
-        return response;
-      } catch (error) {
-        console.error("API call failed:", error);
-        const fallbackResult = handleError(error);
-        if (fallbackResult) {
-          return fallbackResult;
+          console.log("Returning mock response:", mockResponse);
+          return mockResponse;
         }
+
+        // Re-throw the error if we're not using fallback
         throw error;
       }
     },
     filters,
     {
       ...options,
-      onError: handleError,
+      onError: (error) => {
+        console.error("useArticles error:", error);
+        if (onError) {
+          onError(error);
+        }
+      },
     }
   );
 };
@@ -328,7 +323,7 @@ export const useArticle = (id, options = {}) => {
           if (mockArticle) {
             return {
               success: true,
-              data: { data: mockArticle },
+              data: mockArticle,
             };
           }
         }
@@ -366,7 +361,7 @@ export const useArticleBySlug = (slug, options = {}) => {
           if (mockArticle) {
             return {
               success: true,
-              data: { data: mockArticle },
+              data: mockArticle,
             };
           }
         }
@@ -407,12 +402,10 @@ export const useMyArticles = (filters = {}, options = {}) => {
 
           return {
             success: true,
-            data: {
-              data: userArticles,
-              pagination: {
-                ...mockArticlesData.pagination,
-                total: userArticles.length,
-              },
+            data: userArticles,
+            pagination: {
+              ...mockArticlesData.pagination,
+              total: userArticles.length,
             },
           };
         }

@@ -188,7 +188,7 @@ function hello() {
   return (
     <div className="markdown-editor">
       {/* Toolbar */}
-      <div className="editor-toolbar p-1 mb-2 border rounded bg-light">
+      <div className="editor-toolbar p-1 mb-2 border rounded bg-dark">
         <ButtonGroup className="me-2 mb-1">
           <Button variant="light" onClick={addH1} title="Heading 1">
             <BsTypeH1 />

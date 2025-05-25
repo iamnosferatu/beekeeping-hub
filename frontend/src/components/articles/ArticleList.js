@@ -1,4 +1,4 @@
-// frontend/src/components/articles/ArticleList.js
+// frontend/src/components/articles/ArticleList.js - FIXED VERSION
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -17,7 +17,7 @@ import "./ArticleList.scss";
 const ArticleList = ({ tag, search, limit = 5 }) => {
   // Use the new API hook for fetching articles
   const {
-    data: articles,
+    data: articlesData, // Changed this - was destructuring wrong
     loading,
     error,
     pagination,
@@ -34,6 +34,19 @@ const ArticleList = ({ tag, search, limit = 5 }) => {
       },
     }
   );
+
+  // Debug logging
+  console.log("ArticleList Debug:", {
+    articlesData,
+    loading,
+    error,
+    pagination,
+  });
+
+  // Extract articles from the data structure
+  // The API returns { data: [...], pagination: {...} }
+  // But sometimes it might be nested differently
+  const articles = articlesData?.data || articlesData || [];
 
   const handlePageChange = (newPage) => {
     changePage(newPage);
@@ -136,7 +149,8 @@ const ArticleList = ({ tag, search, limit = 5 }) => {
                 </span>
                 <span title="Comments">
                   <BsChat className="me-1" />
-                  {article.comments ? article.comments.length : 0}
+                  {article.comment_count ||
+                    (article.comments ? article.comments.length : 0)}
                 </span>
               </div>
 

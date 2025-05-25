@@ -1,6 +1,6 @@
-// frontend/src/components/debug/ApiDebugger.js
+// frontend/src/components/debug/ApiDebugger.js - FIXED VERSION
 import React, { useState, useEffect, useContext } from "react";
-import { Card, Button, Alert, Badge, Tab, Nav, Table } from "react-bootstrap";
+import { Card, Button, Alert, Badge, Tab, Nav } from "react-bootstrap";
 import {
   BsCheckCircle,
   BsXCircle,
@@ -289,7 +289,7 @@ const ApiDebugger = () => {
                             <details>
                               <summary>Response Data</summary>
                               <pre
-                                className="mt-2 p-2 bg-light rounded"
+                                className="mt-2 p-2 bg-dark rounded"
                                 style={{ maxHeight: "200px", overflow: "auto" }}
                               >
                                 {JSON.stringify(status.data, null, 2)}
@@ -320,7 +320,7 @@ const ApiDebugger = () => {
                               {status.details.data && (
                                 <details className="mt-1">
                                   <summary>Error Details</summary>
-                                  <pre className="mt-2 p-2 bg-light rounded">
+                                  <pre className="mt-2 p-2 bg-dark rounded">
                                     {JSON.stringify(
                                       status.details.data,
                                       null,

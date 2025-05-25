@@ -83,7 +83,7 @@ const Sidebar = () => {
                 >
                   <Badge bg="secondary" className="p-2">
                     {tag.name}{" "}
-                    <span className="badge bg-light text-dark ms-1">
+                    <span className="badge bg-dark text-dark ms-1">
                       {tag.count}
                     </span>
                   </Badge>

@@ -114,7 +114,7 @@ const ArticleEditorPage = () => {
     if (!debugInfo) return null;
 
     return (
-      <Card className="mt-3 bg-light">
+      <Card className="mt-3 bg-dark">
         <Card.Header>Debug Information</Card.Header>
         <Card.Body>
           <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
