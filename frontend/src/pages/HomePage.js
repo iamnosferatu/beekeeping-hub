@@ -1,8 +1,10 @@
 // frontend/src/pages/HomePage.js - Production Version
-import React from "react";
-import { Card, Button } from "react-bootstrap";
+import React, { useContext } from "react";
+import { Card, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { BsShieldExclamation } from "react-icons/bs";
 import ArticleList from "../components/articles/ArticleList";
+import AuthContext from "../contexts/AuthContext";
 
 /**
  * HomePage Component
@@ -11,8 +13,23 @@ import ArticleList from "../components/articles/ArticleList";
  * Features a hero section, introduction, and latest articles.
  */
 const HomePage = () => {
+  const { user } = useContext(AuthContext);
+  const isAdmin = user && user.role === "admin";
+
   return (
     <div className="home-page">
+      {/* Admin Notice about Blocked Articles */}
+      {isAdmin && (
+        <Alert variant="info" className="d-flex align-items-center">
+          <BsShieldExclamation className="me-2" />
+          <div>
+            <strong>Admin View:</strong> You can see blocked articles marked
+            with a red border and "Blocked" badge. Regular users cannot see
+            these articles.
+          </div>
+        </Alert>
+      )}
+
       {/* Hero Section */}
       <Card className="text-center bg-dark text-white mb-4 border-0">
         <Card.Img
@@ -59,7 +76,7 @@ const HomePage = () => {
       {/* Featured Articles Section */}
       <h2 className="mb-4">Latest Articles</h2>
       <div className="articles-section">
-        <ArticleList limit={6} />
+        <ArticleList limit={8} />
       </div>
 
       {/* Call to Action Section */}

@@ -1,42 +1,60 @@
 // frontend/src/components/editor/ArticleExcerptEditor.js
 import React from "react";
-import { Form, Card, Button } from "react-bootstrap";
+import { Card, Form, Button } from "react-bootstrap";
+import { BsArrowRepeat } from "react-icons/bs";
 
+/**
+ * ArticleExcerptEditor Component
+ *
+ * Allows editing of the article excerpt with auto-generation option
+ */
 const ArticleExcerptEditor = ({
   formData,
   handleInputChange,
   generateExcerpt,
-}) => (
-  <Card className="mb-4">
-    <Card.Header>
-      <h5 className="mb-0">Excerpt</h5>
-    </Card.Header>
-    <Card.Body>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <Form.Label>Article excerpt (displayed in article listings)</Form.Label>
-        <Button
-          variant="outline-secondary"
-          size="sm"
-          type="button"
-          onClick={generateExcerpt}
-        >
-          Generate from content
-        </Button>
-      </div>
-      <Form.Control
-        as="textarea"
-        rows={3}
-        name="excerpt"
-        value={formData.excerpt}
-        onChange={handleInputChange}
-        placeholder="Enter a brief excerpt or summary of your article"
-      />
-      <Form.Text className="text-muted">
-        If left empty, an excerpt will be automatically generated from your
-        content.
-      </Form.Text>
-    </Card.Body>
-  </Card>
-);
+}) => {
+  /**
+   * Character count for excerpt
+   */
+  const excerptLength = formData.excerpt ? formData.excerpt.length : 0;
+  const maxLength = 200;
+
+  return (
+    <Card className="mb-4">
+      <Card.Header>
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">Article Excerpt</h5>
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={generateExcerpt}
+            disabled={!formData.content}
+            title="Generate excerpt from content"
+          >
+            <BsArrowRepeat className="me-1" />
+            Auto-generate
+          </Button>
+        </div>
+      </Card.Header>
+      <Card.Body>
+        <Form.Group>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            name="excerpt"
+            value={formData.excerpt}
+            onChange={handleInputChange}
+            placeholder="Brief description of your article (optional)"
+            maxLength={maxLength}
+          />
+          <Form.Text className="text-muted">
+            {excerptLength}/{maxLength} characters
+            {!formData.excerpt && " - Will be auto-generated if left empty"}
+          </Form.Text>
+        </Form.Group>
+      </Card.Body>
+    </Card>
+  );
+};
 
 export default ArticleExcerptEditor;

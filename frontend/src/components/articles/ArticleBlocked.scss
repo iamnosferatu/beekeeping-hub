@@ -1,0 +1,70 @@
+/* frontend/src/components/articles/ArticleBlocked.scss */
+
+/* Blocked article card styling */
+.article-card {
+    &.border-danger {
+        border-width: 2px !important;
+    }
+
+    /* Blocked badge positioning */
+    .position-absolute.top-0.end-0 {
+        z-index: 10;
+    }
+
+    /* Title color for blocked articles */
+    .article-title.text-danger {
+        &:hover {
+            color: #dc3545 !important;
+            opacity: 0.8;
+        }
+    }
+}
+
+/* Article list blocked indicator */
+.article-list {
+
+    /* Add visual distinction for blocked articles in lists */
+    .article-card.border-danger {
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(220, 53, 69, 0.03);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+}
+
+/* Blocked alert in article page */
+.alert-danger {
+    &.article-blocked-alert {
+        border-left-width: 4px;
+    }
+}
+
+/* Admin-only blocked indicators */
+.blocked-indicator {
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .article-card {
+        .position-absolute.top-0.end-0 {
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+    } }

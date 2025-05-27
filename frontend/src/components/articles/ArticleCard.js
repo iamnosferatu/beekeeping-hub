@@ -1,21 +1,58 @@
 // frontend/src/components/articles/ArticleCard.js
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { Card, Button } from "react-bootstrap";
-
-// Import from centralized constants
-import { ARTICLE_CONFIG, ARIA_LABELS } from "../../constants";
-
-// Import utilities
-import { isValidArticle } from "../../utils/validators";
-import { formatAuthorName, formatDate } from "../../utils/formatters";
-import { getArticleUrl, getAuthorUrl } from "../../utils/urlHelpers";
-
+import { Card, Button, Badge, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { BsShieldExclamation } from "react-icons/bs";
+import AuthContext from "../../contexts/AuthContext";
 // Import sub-components
 import ArticleImage from "./ArticleImage";
 import ArticleTags from "./ArticleTags";
 import ArticleStats from "./ArticleStats";
 import ArticleAuthor from "./ArticleAuthor";
+
+// Import utilities (simplified if constants don't exist)
+const ARTICLE_CONFIG = { IMAGE_LOADING: "lazy" };
+const ARIA_LABELS = {
+  ARTICLE: {
+    CARD: "article",
+    TITLE: "article title",
+    EXCERPT: "article excerpt",
+    READ_MORE: "read more",
+  },
+};
+
+// Import utilities
+const isValidArticle = (article) => {
+  return (
+    article &&
+    typeof article === "object" &&
+    article.id &&
+    article.title &&
+    article.slug
+  );
+};
+
+const formatAuthorName = (author) => {
+  if (!author) return "Unknown Author";
+  const fullName = `${author.first_name || ""} ${
+    author.last_name || ""
+  }`.trim();
+  return fullName || author.username || "Unknown Author";
+};
+
+const formatDate = (date) => {
+  if (!date) return "Draft";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const getArticleUrl = (slug) => `/articles/${slug}`;
+const getAuthorUrl = (username) => `/author/${username}`;
+
+
 
 /**
  * ArticleCard Component
@@ -37,6 +74,8 @@ const ArticleCard = ({
   showStats = true,
   className = "",
 }) => {
+  const { user } = useContext(AuthContext);
+
   // Validate article data
   if (!isValidArticle(article)) {
     console.warn("ArticleCard: Invalid article data provided", article);
@@ -44,28 +83,71 @@ const ArticleCard = ({
   }
 
   const articleUrl = getArticleUrl(article.slug);
+  const isAdmin = user && user.role === "admin";
+  const isBlocked = article.blocked;
 
   return (
     <Card
-      className={`article-card shadow-sm h-100 ${className}`}
+      className={`article-card shadow-sm h-100 ${className} ${
+        isBlocked && isAdmin ? "border-danger" : ""
+      }`}
       role={ARIA_LABELS.ARTICLE.CARD}
     >
+      {/* Blocked Badge for Admins */}
+      {isBlocked && isAdmin && (
+        <div
+          className="position-absolute top-0 end-0 p-2"
+          style={{ zIndex: 10 }}
+        >
+          <OverlayTrigger
+            placement="left"
+            overlay={
+              <Tooltip>
+                This article is blocked. Reason:{" "}
+                {article.blocked_reason || "No reason specified"}
+              </Tooltip>
+            }
+          >
+            <Badge bg="danger" className="d-flex align-items-center">
+              <BsShieldExclamation className="me-1" />
+              Blocked
+            </Badge>
+          </OverlayTrigger>
+        </div>
+      )}
+
       {/* Featured Image */}
       {showImage && article.featured_image && (
-        <ArticleImage
-          src={article.featured_image}
-          alt={article.title}
-          articleUrl={articleUrl}
-          loading={ARTICLE_CONFIG.IMAGE_LOADING}
-        />
+        <div className="position-relative">
+          <ArticleImage
+            src={article.featured_image}
+            alt={article.title}
+            articleUrl={articleUrl}
+            loading={ARTICLE_CONFIG.IMAGE_LOADING}
+          />
+          {/* Overlay for blocked articles */}
+          {isBlocked && isAdmin && (
+            <div
+              className="position-absolute top-0 start-0 w-100 h-100"
+              style={{
+                backgroundColor: "rgba(220, 53, 69, 0.1)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+        </div>
       )}
 
       <Card.Body className="d-flex flex-column">
         {/* Header: Tags and Date */}
         <ArticleCardHeader article={article} showTags={true} showDate={true} />
 
-        {/* Article Title */}
-        <ArticleCardTitle title={article.title} url={articleUrl} />
+        {/* Article Title with blocked indicator */}
+        <ArticleCardTitle
+          title={article.title}
+          url={articleUrl}
+          isBlocked={isBlocked && isAdmin}
+        />
 
         {/* Article Excerpt */}
         <ArticleCardExcerpt excerpt={article.excerpt} />
@@ -117,13 +199,15 @@ const ArticleCardHeader = ({ article, showTags, showDate }) => (
 
 /**
  * ArticleCardTitle Component
- * Displays article title as a link
+ * Displays article title as a link with optional blocked styling
  */
-const ArticleCardTitle = ({ title, url }) => (
+const ArticleCardTitle = ({ title, url, isBlocked }) => (
   <Card.Title className="mb-3">
     <Link
       to={url}
-      className="article-title text-decoration-none"
+      className={`article-title text-decoration-none ${
+        isBlocked ? "text-danger" : ""
+      }`}
       aria-label={ARIA_LABELS.ARTICLE.TITLE}
     >
       {title}

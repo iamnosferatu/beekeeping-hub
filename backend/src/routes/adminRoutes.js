@@ -2,6 +2,7 @@
 const express = require("express");
 const { protect, authorize } = require("../middleware/auth");
 const diagnosticsRoutes = require("./adminDiagnosticsRoutes");
+const adminArticleRoutes = require("./adminArticleRoutes");
 
 const router = express.Router();
 
@@ -11,6 +12,9 @@ router.use(authorize("admin"));
 
 // Mount diagnostics routes
 router.use("/diagnostics", diagnosticsRoutes);
+
+// Mount article management routes (for blocking/unblocking)
+router.use("/", adminArticleRoutes);
 
 // Define controller functions
 const adminController = {

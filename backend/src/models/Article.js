@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       content: {
-        // Fix: Use TEXT without parameters, or use LONGTEXT
         type: DataTypes.TEXT,
         allowNull: false,
       },
@@ -48,14 +47,36 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      // Blocking-related fields
+      blocked: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      blocked_reason: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      blocked_by: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "users",
+          key: "id",
+        },
+      },
+      blocked_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       hooks: {
         beforeValidate: (article) => {
-          if (article.name && (!article.slug || article.slug.trim() === "")) {
-            article.slug = slug(article.name, { lower: true });
+          // Fix: Check for title, not name
+          if (article.title && (!article.slug || article.slug.trim() === "")) {
+            article.slug = slug(article.title, { lower: true });
             console.log(
-              `Generated slug '${article.slug}' for article '${article.name}'`
+              `Generated slug '${article.slug}' for article '${article.title}'`
             );
           }
         },

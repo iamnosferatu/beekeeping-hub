@@ -58,7 +58,7 @@ const generateUniqueSlug = async (title) => {
 
 // @desc    Get all articles with pagination, filtering, and search
 // @route   GET /api/articles
-// @access  Public
+// @access  Public (but blocked articles are hidden from non-admins)
 exports.getArticles = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -69,7 +69,20 @@ exports.getArticles = async (req, res, next) => {
     let whereClause = { status: "published" };
     let includeOptions = getArticleIncludes();
 
-    // Filter by tag if provided - using a different approach
+    // IMPORTANT: Filter out blocked articles for non-admin users
+    // Only show blocked articles to admins or the article author
+    if (!req.user || req.user.role !== "admin") {
+      whereClause.blocked = false;
+    }
+
+    // If user is requesting their own articles (author filter)
+    if (req.query.author) {
+      whereClause.user_id = req.query.author;
+      // Authors can see their own blocked articles
+      delete whereClause.blocked;
+    }
+
+    // Filter by tag if provided
     if (req.query.tag) {
       console.log("Filtering by tag:", req.query.tag);
 
@@ -148,6 +161,16 @@ exports.getArticles = async (req, res, next) => {
       ];
     }
 
+    // Status filter for admin panel
+    if (req.query.status && req.user && req.user.role === "admin") {
+      if (req.query.status === "blocked") {
+        whereClause.blocked = true;
+        delete whereClause.status; // Remove published filter for blocked articles
+      } else {
+        whereClause.status = req.query.status;
+      }
+    }
+
     console.log("Final where clause:", whereClause);
 
     // Get total count for pagination
@@ -202,7 +225,9 @@ exports.getArticles = async (req, res, next) => {
   }
 };
 
-// Get Article by ID
+// @desc    Get single article by ID
+// @route   GET /api/articles/byId/:id
+// @access  Public (but blocked articles require admin or author access)
 exports.getArticleById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -249,6 +274,21 @@ exports.getArticleById = async (req, res, next) => {
       });
     }
 
+    // For the editor (byId endpoint), we need to allow admins and authors to edit blocked articles
+    // Check if article is blocked and user has permission to edit it
+    if (article.blocked) {
+      const canEditBlocked =
+        req.user &&
+        (req.user.role === "admin" || req.user.id === article.user_id);
+
+      if (!canEditBlocked) {
+        return res.status(403).json({
+          success: false,
+          message: "This article has been blocked and cannot be edited",
+        });
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: article,
@@ -261,7 +301,7 @@ exports.getArticleById = async (req, res, next) => {
 
 // @desc    Get single article by slug
 // @route   GET /api/articles/:slug
-// @access  Public
+// @access  Public (but blocked articles require admin or author access)
 exports.getArticle = async (req, res, next) => {
   try {
     const { slug } = req.params;
@@ -278,9 +318,25 @@ exports.getArticle = async (req, res, next) => {
       });
     }
 
-    // Increment view count
-    article.view_count += 1;
-    await article.save();
+    // Check if article is blocked and user has permission to view it
+    if (article.blocked) {
+      const canViewBlocked =
+        req.user &&
+        (req.user.role === "admin" || req.user.id === article.user_id);
+
+      if (!canViewBlocked) {
+        return res.status(403).json({
+          success: false,
+          message: "This article has been blocked and is not available",
+        });
+      }
+    }
+
+    // Increment view count only for published, non-blocked articles
+    if (article.status === "published" && !article.blocked) {
+      article.view_count += 1;
+      await article.save();
+    }
 
     // Get article data
     const articleData = article.toJSON();
@@ -316,20 +372,21 @@ exports.createArticle = async (req, res, next) => {
     const user_id = req.user.id;
 
     // Generate a unique slug from the title
-    const slug = await generateUniqueSlug(title);
+    const articleSlug = await generateUniqueSlug(title);
 
-    console.log(`Generated slug for article: ${slug}`);
+    console.log(`Generated slug for article: ${articleSlug}`);
 
     // Create the article
     const article = await Article.create({
       title,
-      slug,
+      slug: articleSlug,
       content,
       excerpt: excerpt || content.substring(0, 200) + "...",
       featured_image,
       status,
       user_id,
       published_at: status === "published" ? new Date() : null,
+      blocked: false, // New articles are never blocked by default
     });
 
     // Handle tags
@@ -491,6 +548,14 @@ exports.toggleLike = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "Article not found",
+      });
+    }
+
+    // Don't allow liking blocked articles
+    if (article.blocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot like a blocked article",
       });
     }
 

@@ -22,10 +22,15 @@ const useArticleFetch = (user, isEditMode, id) => {
 
         console.log(`Attempting to fetch article with ID/Slug: ${articleId}`);
 
-        // Multiple fetch strategies
+        // Multiple fetch strategies with authentication
+        const token = localStorage.getItem("beekeeper_auth_token");
+        const config = {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        };
+
         const fetchStrategies = [
-          () => axios.get(`${API_URL}/articles/${articleId}`),
-          () => axios.get(`${API_URL}/articles/byId/${articleId}`),
+          () => axios.get(`${API_URL}/articles/${articleId}`, config),
+          () => axios.get(`${API_URL}/articles/byId/${articleId}`, config),
         ];
 
         let response;

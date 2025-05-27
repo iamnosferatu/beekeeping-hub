@@ -1,8 +1,11 @@
 // frontend/src/pages/HomePage.js - DEBUG VERSION
-import React from "react";
+
+import React, { useContext } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ArticleList from "../components/article/ArticleList";
+import { BsShieldExclamation } from "react-icons/bs";
+import ArticleList from "../components/articles/ArticleList";
+import AuthContext from "../contexts/AuthContext";
 import ApiDebugger from "../components/debug/ApiDebugger";
 import ApiTestComponent from "../components/debug/ApiTestComponent";
 import ArticleApiTester from "../components/debug/ArticleApiTester";

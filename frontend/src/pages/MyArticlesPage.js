@@ -1,6 +1,4 @@
 // frontend/src/pages/MyArticlesPage.js
-// REPLACE THE ENTIRE FILE WITH THIS COMPLETE FIXED VERSION:
-
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -36,6 +34,7 @@ import axios from "axios";
 import moment from "moment";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
+import "./MyArticlesPage.scss";
 
 const MyArticlesPage = () => {
   const { user } = useContext(AuthContext);
@@ -69,7 +68,7 @@ const MyArticlesPage = () => {
     article: null,
   });
 
-  // Calculate statistics - DEFINED FUNCTION
+  // Calculate statistics
   const updateStats = (articles) => {
     const published = articles.filter(
       (a) => a.status === "published" && !a.blocked
@@ -99,7 +98,7 @@ const MyArticlesPage = () => {
     setStats(newStats);
   };
 
-  // Fetch user's articles - FIXED useEffect (NOT CONDITIONAL)
+  // Fetch user's articles
   useEffect(() => {
     const fetchArticles = async () => {
       // Check if user exists INSIDE the effect, not as a condition for the effect
@@ -319,7 +318,7 @@ const MyArticlesPage = () => {
       {/* Statistics Cards */}
       <Row className="mb-4">
         <Col md={4} className="mb-3 mb-md-0">
-          <Card className="shadow-sm h-100">
+          <Card className="shadow-sm h-100 stats-card">
             <Card.Body className="text-center">
               <h2 className="display-4 fw-bold text-primary">{stats.total}</h2>
               <p className="text-muted mb-0">Total Articles</p>
@@ -330,12 +329,17 @@ const MyArticlesPage = () => {
                 <Badge bg="secondary" className="mx-1 p-2">
                   {stats.draft} Draft
                 </Badge>
+                {stats.blocked > 0 && (
+                  <Badge bg="danger" className="mx-1 p-2">
+                    {stats.blocked} Blocked
+                  </Badge>
+                )}
               </div>
             </Card.Body>
           </Card>
         </Col>
         <Col md={4} className="mb-3 mb-md-0">
-          <Card className="shadow-sm h-100">
+          <Card className="shadow-sm h-100 stats-card">
             <Card.Body className="text-center">
               <h2 className="display-4 fw-bold text-primary">{stats.views}</h2>
               <p className="text-muted mb-0">Total Views</p>
@@ -352,7 +356,7 @@ const MyArticlesPage = () => {
           </Card>
         </Col>
         <Col md={4}>
-          <Card className="shadow-sm h-100">
+          <Card className="shadow-sm h-100 stats-card">
             <Card.Body className="text-center">
               <div className="d-flex justify-content-around">
                 <div className="text-center">
@@ -406,15 +410,17 @@ const MyArticlesPage = () => {
                   Drafts ({stats.draft})
                 </Nav.Link>
               </Nav.Item>
-              <Nav.Item>
-                <Nav.Link
-                  active={filter === "blocked"}
-                  onClick={() => setFilter("blocked")}
-                  className="text-danger"
-                >
-                  Blocked ({stats.blocked})
-                </Nav.Link>
-              </Nav.Item>
+              {stats.blocked > 0 && (
+                <Nav.Item>
+                  <Nav.Link
+                    active={filter === "blocked"}
+                    onClick={() => setFilter("blocked")}
+                    className="text-danger"
+                  >
+                    Blocked ({stats.blocked})
+                  </Nav.Link>
+                </Nav.Item>
+              )}
             </Nav>
 
             <div className="d-flex">
@@ -476,7 +482,10 @@ const MyArticlesPage = () => {
               </thead>
               <tbody>
                 {filteredSortedArticles.map((article) => (
-                  <tr key={article.id}>
+                  <tr
+                    key={article.id}
+                    className={article.blocked ? "table-danger" : ""}
+                  >
                     <td className="align-middle">
                       <div className="d-flex align-items-center">
                         <div>
@@ -604,7 +613,11 @@ const MyArticlesPage = () => {
                           className="me-2"
                           as={Link}
                           to={`/editor/${article.id}`}
-                          title="Edit Article"
+                          title={
+                            article.blocked
+                              ? "Edit (Blocked Article)"
+                              : "Edit Article"
+                          }
                         >
                           <BsPencilSquare />
                         </Button>
