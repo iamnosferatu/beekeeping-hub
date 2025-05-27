@@ -16,6 +16,12 @@ import axios from "axios";
 import { API_URL, BASE_URL } from "../../config";
 import AuthContext from "../../contexts/AuthContext";
 
+/**
+ * DiagnosticsPage Component
+ *
+ * Admin tool for testing API endpoints and viewing system information
+ * Uses full width of the admin content area
+ */
 const DiagnosticsPage = () => {
   const { user, token } = useContext(AuthContext);
   const [endpointUrl, setEndpointUrl] = useState("/api/health");
@@ -56,14 +62,12 @@ const DiagnosticsPage = () => {
     };
 
     fetchSystemInfo();
-  }, [token]); // Add proper dependencies
-  //}, [token, API_URL]); // Add proper dependencies
+  }, [token]);
 
   // Create a separate function for the manual refresh button
   const refreshSystemInfo = async () => {
     setLoadingSystemInfo(true);
     try {
-      // This should be a protected admin-only endpoint
       const response = await axios.get(`${API_URL}/admin/diagnostics/system`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -198,14 +202,16 @@ const DiagnosticsPage = () => {
 
   return (
     <div className="diagnostics-page">
-      <h1 className="mb-4">API Diagnostics</h1>
-      <p className="text-muted mb-4">
-        Use this tool to test API endpoints and diagnose issues. This page is
-        only accessible to administrators.
-      </p>
+      <div className="mb-4">
+        <h1 className="mb-2">API Diagnostics</h1>
+        <p className="text-muted">
+          Use this tool to test API endpoints and diagnose issues. This page is
+          only accessible to administrators.
+        </p>
+      </div>
 
       <Tab.Container id="diagnostics-tabs" defaultActiveKey="endpoint-tester">
-        <Card className="mb-4">
+        <Card className="shadow-sm">
           <Card.Header>
             <Nav variant="tabs">
               <Nav.Item>
@@ -224,8 +230,8 @@ const DiagnosticsPage = () => {
             <Tab.Content>
               {/* Endpoint Tester Tab */}
               <Tab.Pane eventKey="endpoint-tester">
-                <Row>
-                  <Col md={6}>
+                <Row className="g-4">
+                  <Col xl={6}>
                     <h5 className="mb-3">Request</h5>
 
                     <Form
@@ -247,7 +253,7 @@ const DiagnosticsPage = () => {
                           <Form.Select
                             value={method}
                             onChange={(e) => setMethod(e.target.value)}
-                            style={{ maxWidth: "100px" }}
+                            style={{ maxWidth: "120px" }}
                           >
                             <option>GET</option>
                             <option>POST</option>
@@ -267,20 +273,20 @@ const DiagnosticsPage = () => {
                             value={requestBody}
                             onChange={(e) => setRequestBody(e.target.value)}
                             placeholder='{"key": "value"}'
+                            className="font-monospace"
                           />
                         </Form.Group>
                       )}
 
                       <Form.Group className="mb-3">
                         <Form.Label>Headers (JSON)</Form.Label>
-                        <div className="d-flex">
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            value={requestHeaders}
-                            onChange={(e) => setRequestHeaders(e.target.value)}
-                          />
-                        </div>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={requestHeaders}
+                          onChange={(e) => setRequestHeaders(e.target.value)}
+                          className="font-monospace"
+                        />
                       </Form.Group>
 
                       <div className="d-grid">
@@ -309,7 +315,7 @@ const DiagnosticsPage = () => {
                     </Form>
                   </Col>
 
-                  <Col md={6}>
+                  <Col xl={6}>
                     <h5 className="mb-3">Response</h5>
 
                     {loading ? (
@@ -331,7 +337,7 @@ const DiagnosticsPage = () => {
                             <p>
                               <strong>Response:</strong>
                             </p>
-                            <pre className="bg-dark p-3 rounded">
+                            <pre className="bg-dark text-light p-3 rounded">
                               {formatJson(error.response)}
                             </pre>
                           </div>
@@ -367,7 +373,7 @@ const DiagnosticsPage = () => {
                           <Card.Header>Headers</Card.Header>
                           <Card.Body className="p-0">
                             <pre
-                              className="m-0 p-3"
+                              className="m-0 p-3 bg-light"
                               style={{ maxHeight: "150px", overflow: "auto" }}
                             >
                               {formatJson(response.headers)}
@@ -379,7 +385,7 @@ const DiagnosticsPage = () => {
                           <Card.Header>Response Body</Card.Header>
                           <Card.Body className="p-0">
                             <pre
-                              className="m-0 p-3"
+                              className="m-0 p-3 bg-light"
                               style={{ maxHeight: "300px", overflow: "auto" }}
                             >
                               {formatJson(response.data)}
@@ -423,8 +429,8 @@ const DiagnosticsPage = () => {
                   </Alert>
                 ) : systemInfo ? (
                   <div>
-                    <Row className="mb-4">
-                      <Col md={6}>
+                    <Row className="g-4 mb-4">
+                      <Col xl={6}>
                         <Card className="h-100">
                           <Card.Header>Server Information</Card.Header>
                           <Card.Body>
@@ -462,7 +468,7 @@ const DiagnosticsPage = () => {
                           </Card.Body>
                         </Card>
                       </Col>
-                      <Col md={6}>
+                      <Col xl={6}>
                         <Card className="h-100">
                           <Card.Header>Resource Usage</Card.Header>
                           <Card.Body>
@@ -518,8 +524,8 @@ const DiagnosticsPage = () => {
                       </Col>
                     </Row>
 
-                    <Row>
-                      <Col md={6}>
+                    <Row className="g-4">
+                      <Col xl={6}>
                         <Card className="h-100">
                           <Card.Header>Database Connection</Card.Header>
                           <Card.Body>
@@ -562,12 +568,12 @@ const DiagnosticsPage = () => {
                           </Card.Body>
                         </Card>
                       </Col>
-                      <Col md={6}>
+                      <Col xl={6}>
                         <Card className="h-100">
                           <Card.Header>Environment Variables</Card.Header>
                           <Card.Body>
                             <pre
-                              className="m-0"
+                              className="m-0 bg-light p-3"
                               style={{ maxHeight: "200px", overflow: "auto" }}
                             >
                               {formatJson(systemInfo.env)}
@@ -648,10 +654,9 @@ const DiagnosticsPage = () => {
                             </td>
                             <td>
                               <code
-                                className="text-truncate"
+                                className="text-truncate d-inline-block"
                                 style={{
-                                  maxWidth: "300px",
-                                  display: "inline-block",
+                                  maxWidth: "400px",
                                 }}
                               >
                                 {item.url}

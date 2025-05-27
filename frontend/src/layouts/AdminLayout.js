@@ -1,150 +1,196 @@
 // frontend/src/layouts/AdminLayout.js
-import React, { useContext } from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { Container, Row, Col, Nav, Navbar, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Container, Row, Col, Nav, Button, Navbar } from "react-bootstrap";
 import {
   BsSpeedometer2,
   BsFileEarmarkText,
   BsChatSquareText,
   BsPeople,
   BsGear,
-  BsHouseDoor,
+  BsArrowLeft,
+  BsList,
+  BsX,
   BsTools,
 } from "react-icons/bs";
-import AuthContext from "../contexts/AuthContext";
-import ThemeContext from "../contexts/ThemeContext";
 import "./AdminLayout.scss";
 
+/**
+ * AdminLayout Component
+ *
+ * Provides the layout structure for all admin pages with a collapsible sidebar
+ * and full-width content area that adapts to sidebar state
+ */
 const AdminLayout = () => {
-  const { user, logout } = useContext(AuthContext);
-  const { themeConfig } = useContext(ThemeContext);
   const navigate = useNavigate();
-  const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  /**
+   * Navigation items configuration
+   */
+  const navItems = [
+    {
+      path: "/admin",
+      icon: <BsSpeedometer2 size={20} />,
+      label: "Dashboard",
+      exact: true,
+    },
+    {
+      path: "/admin/articles",
+      icon: <BsFileEarmarkText size={20} />,
+      label: "Articles",
+    },
+    {
+      path: "/admin/comments",
+      icon: <BsChatSquareText size={20} />,
+      label: "Comments",
+    },
+    {
+      path: "/admin/users",
+      icon: <BsPeople size={20} />,
+      label: "Users",
+    },
+    {
+      path: "/admin/settings",
+      icon: <BsGear size={20} />,
+      label: "Settings",
+    },
+    {
+      path: "/admin/diagnostics",
+      icon: <BsTools size={20} />,
+      label: "Diagnostics",
+    },
+  ];
+
+  /**
+   * Toggle sidebar collapse state
+   */
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  /**
+   * Toggle mobile sidebar
+   */
+  const toggleMobileSidebar = () => {
+    setMobileSidebarOpen(!mobileSidebarOpen);
+  };
+
+  /**
+   * Handle navigation for mobile
+   */
+  const handleMobileNavClick = () => {
+    setMobileSidebarOpen(false);
   };
 
   return (
-    <div
-      className="admin-layout"
-      style={{
-        backgroundColor: themeConfig.bgColor,
-        color: themeConfig.textColor,
-        fontFamily: themeConfig.fontFamily,
-        minHeight: "100vh",
-      }}
-    >
-      {/* Admin Header */}
+    <div className="admin-layout">
+      {/* Mobile Header */}
       <Navbar
-        expand="lg"
+        bg="dark"
         variant="dark"
-        className="admin-navbar"
-        style={{ backgroundColor: "#343a40" }}
+        className="d-lg-none mobile-admin-header"
+        fixed="top"
       >
         <Container fluid>
-          <Navbar.Brand as={Link} to="/admin" className="fw-bold">
-            🐝 BeeKeeper Admin
-          </Navbar.Brand>
-
-          <Navbar.Toggle aria-controls="admin-navbar-nav" />
-
-          <Navbar.Collapse id="admin-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link as={Link} to="/" className="d-flex align-items-center">
-                <BsHouseDoor className="me-1" /> Back to Site
-              </Nav.Link>
-            </Nav>
-
-            <Nav className="ms-auto">
-              {user && (
-                <>
-                  <Navbar.Text className="me-3">
-                    Signed in as: <strong>{user.username}</strong>
-                  </Navbar.Text>
-                  <Button
-                    variant="outline-light"
-                    size="sm"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </Button>
-                </>
-              )}
-            </Nav>
-          </Navbar.Collapse>
+          <Button
+            variant="link"
+            className="text-white p-0 me-3"
+            onClick={toggleMobileSidebar}
+          >
+            {mobileSidebarOpen ? <BsX size={24} /> : <BsList size={24} />}
+          </Button>
+          <Navbar.Brand>Admin Panel</Navbar.Brand>
         </Container>
       </Navbar>
 
-      <Container fluid className="admin-container">
-        <Row>
-          {/* Sidebar */}
-          <Col md={3} lg={2} className="admin-sidebar px-0">
-            <Nav className="flex-column py-3">
-              <Nav.Link
-                as={Link}
-                to="/admin"
-                className={`sidebar-link ${
-                  location.pathname === "/admin" ? "active" : ""
-                }`}
-              >
-                <BsSpeedometer2 className="me-2" /> Dashboard
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/articles"
-                className={`sidebar-link ${
-                  location.pathname === "/admin/articles" ? "active" : ""
-                }`}
-              >
-                <BsFileEarmarkText className="me-2" /> Articles
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/comments"
-                className={`sidebar-link ${
-                  location.pathname === "/admin/comments" ? "active" : ""
-                }`}
-              >
-                <BsChatSquareText className="me-2" /> Comments
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/users"
-                className={`sidebar-link ${
-                  location.pathname === "/admin/users" ? "active" : ""
-                }`}
-              >
-                <BsPeople className="me-2" /> Users
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/settings"
-                className={`sidebar-link ${
-                  location.pathname === "/admin/settings" ? "active" : ""
-                }`}
-              >
-                <BsGear className="me-2" /> Settings
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/diagnostics"
-                className={`sidebar-link ${
-                  location.pathname === "/admin/diagnostics" ? "active" : ""
-                }`}
-              >
-                <BsTools className="me-2" /> Diagnostics
-              </Nav.Link>
-            </Nav>
-          </Col>
+      <div className="admin-layout-wrapper">
+        {/* Sidebar */}
+        <aside
+          className={`admin-sidebar ${sidebarCollapsed ? "collapsed" : ""} ${
+            mobileSidebarOpen ? "mobile-open" : ""
+          }`}
+        >
+          {/* Desktop Sidebar Header */}
+          <div className="sidebar-header d-none d-lg-flex">
+            <h5 className={`mb-0 ${sidebarCollapsed ? "d-none" : ""}`}>
+              Admin Panel
+            </h5>
+            <Button
+              variant="link"
+              className="text-white ms-auto p-0"
+              onClick={toggleSidebar}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <BsList size={20} />
+            </Button>
+          </div>
 
-          {/* Main Content */}
-          <Col md={9} lg={10} className="admin-content p-4">
+          {/* Navigation */}
+          <Nav className="flex-column">
+            {navItems.map((item) => (
+              <Nav.Item key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `nav-link ${isActive && item.exact ? "active" : ""} ${
+                      !item.exact &&
+                      window.location.pathname.startsWith(item.path) &&
+                      window.location.pathname !== "/admin"
+                        ? "active"
+                        : ""
+                    }`
+                  }
+                  onClick={handleMobileNavClick}
+                  title={sidebarCollapsed ? item.label : ""}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span
+                    className={`nav-label ${sidebarCollapsed ? "d-none" : ""}`}
+                  >
+                    {item.label}
+                  </span>
+                </NavLink>
+              </Nav.Item>
+            ))}
+          </Nav>
+
+          {/* Sidebar Footer */}
+          <div className="sidebar-footer mt-auto">
+            <Button
+              variant="outline-light"
+              size="sm"
+              onClick={() => navigate("/")}
+              className={`w-100 ${sidebarCollapsed ? "px-2" : ""}`}
+            >
+              <BsArrowLeft className="me-2" />
+              <span className={sidebarCollapsed ? "d-none" : ""}>
+                Back to Site
+              </span>
+            </Button>
+          </div>
+        </aside>
+
+        {/* Mobile Overlay */}
+        {mobileSidebarOpen && (
+          <div
+            className="mobile-sidebar-overlay d-lg-none"
+            onClick={toggleMobileSidebar}
+          />
+        )}
+
+        {/* Main Content Area */}
+        <main
+          className={`admin-content ${
+            sidebarCollapsed ? "sidebar-collapsed" : ""
+          }`}
+        >
+          <Container fluid className="p-4">
             <Outlet />
-          </Col>
-        </Row>
-      </Container>
+          </Container>
+        </main>
+      </div>
     </div>
   );
 };
