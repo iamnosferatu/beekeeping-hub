@@ -1,7 +1,7 @@
 // backend/src/controllers/articleController.js
 const { Article, User, Tag, Comment, Like, sequelize } = require("../models");
 const { Op } = require("sequelize");
-const slug = require("slug"); // Make sure slug package is installed
+const slug = require("slug");
 
 // Helper function to build include options for article queries
 const getArticleIncludes = () => {
@@ -40,20 +40,14 @@ const getArticleIncludes = () => {
 
 // Helper to generate a unique slug from title
 const generateUniqueSlug = async (title) => {
-  // Create base slug from title
   let baseSlug = slug(title || "article", { lower: true });
-
-  // Check if slug exists
   let slugToUse = baseSlug;
   let counter = 1;
   let existingArticle;
 
-  // Keep checking for slug uniqueness
   do {
     existingArticle = await Article.findOne({ where: { slug: slugToUse } });
-
     if (existingArticle) {
-      // Add incremental number to slug if exists
       slugToUse = `${baseSlug}-${counter}`;
       counter++;
     }
@@ -72,38 +66,76 @@ exports.getArticles = async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     // Build where clause for filtering
-    const whereClause = { status: "published" };
+    let whereClause = { status: "published" };
+    let includeOptions = getArticleIncludes();
 
-    // Filter by tag if provided
+    // Filter by tag if provided - using a different approach
     if (req.query.tag) {
-      // Find tag ID from slug
+      console.log("Filtering by tag:", req.query.tag);
+
+      // Find the tag first
       const tag = await Tag.findOne({ where: { slug: req.query.tag } });
 
-      if (tag) {
-        // Get article IDs associated with this tag
-        const articleTags = await sequelize.model("article_tags").findAll({
-          where: { tag_id: tag.id },
-          attributes: ["article_id"],
+      if (!tag) {
+        console.log("Tag not found:", req.query.tag);
+        return res.status(200).json({
+          success: true,
+          data: [],
+          count: 0,
+          pagination: {
+            page,
+            limit,
+            totalPages: 0,
+          },
         });
-
-        const articleIds = articleTags.map((at) => at.article_id);
-
-        if (articleIds.length > 0) {
-          whereClause.id = { [Op.in]: articleIds };
-        } else {
-          // No articles with this tag, return empty result early
-          return res.status(200).json({
-            success: true,
-            data: [],
-            count: 0,
-            pagination: {
-              page,
-              limit,
-              totalPages: 0,
-            },
-          });
-        }
       }
+
+      console.log("Found tag:", tag.name, "with ID:", tag.id);
+
+      // Method 1: Use a subquery to find article IDs that have this tag
+      const articleIdsResult = await sequelize.query(
+        `SELECT DISTINCT at.article_id 
+         FROM article_tags at 
+         WHERE at.tag_id = :tagId`,
+        {
+          replacements: { tagId: tag.id },
+          type: sequelize.QueryTypes.SELECT,
+          raw: true,
+        }
+      );
+
+      console.log("Article IDs query result:", articleIdsResult);
+
+      // Extract the IDs
+      const articleIds = articleIdsResult
+        .map((row) => {
+          // Handle different possible property names
+          return (
+            row.article_id ||
+            row.ARTICLE_ID ||
+            row["article_id"] ||
+            row["ARTICLE_ID"]
+          );
+        })
+        .filter((id) => id != null);
+
+      console.log("Extracted article IDs:", articleIds);
+
+      if (articleIds.length === 0) {
+        return res.status(200).json({
+          success: true,
+          data: [],
+          count: 0,
+          pagination: {
+            page,
+            limit,
+            totalPages: 0,
+          },
+        });
+      }
+
+      // Add the article ID filter to where clause
+      whereClause.id = { [Op.in]: articleIds };
     }
 
     // Search functionality
@@ -116,8 +148,11 @@ exports.getArticles = async (req, res, next) => {
       ];
     }
 
+    console.log("Final where clause:", whereClause);
+
     // Get total count for pagination
     const count = await Article.count({ where: whereClause });
+    console.log("Total articles count:", count);
 
     // Calculate total pages
     const totalPages = Math.ceil(count / limit);
@@ -125,11 +160,13 @@ exports.getArticles = async (req, res, next) => {
     // Get articles with related data
     const articles = await Article.findAll({
       where: whereClause,
-      include: getArticleIncludes(),
+      include: includeOptions,
       order: [["published_at", "DESC"]],
       limit,
       offset,
     });
+
+    console.log("Found articles:", articles.length);
 
     // Format articles for response
     const formattedArticles = articles.map((article) => {
@@ -160,6 +197,7 @@ exports.getArticles = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error("Error in getArticles:", error);
     next(error);
   }
 };
@@ -169,49 +207,54 @@ exports.getArticleById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Use the same include strategy as your getArticle method
     const article = await Article.findByPk(id, {
       include: [
         {
           model: User,
-          as: 'author',
-          attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
+          as: "author",
+          attributes: ["id", "username", "first_name", "last_name", "avatar"],
         },
         {
           model: Tag,
-          as: 'tags',
-          attributes: ['id', 'name', 'slug'],
-          through: { attributes: [] }
+          as: "tags",
+          attributes: ["id", "name", "slug"],
+          through: { attributes: [] },
         },
         {
           model: Comment,
-          as: 'comments',
-          where: { status: 'approved' },
+          as: "comments",
+          where: { status: "approved" },
           required: false,
           include: [
             {
               model: User,
-              as: 'author',
-              attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
-            }
-          ]
-        }
-      ]
+              as: "author",
+              attributes: [
+                "id",
+                "username",
+                "first_name",
+                "last_name",
+                "avatar",
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     if (!article) {
       return res.status(404).json({
         success: false,
-        message: "Article not found"
+        message: "Article not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: article
+      data: article,
     });
   } catch (error) {
-    console.error('Error fetching article by ID:', error);
+    console.error("Error fetching article by ID:", error);
     next(error);
   }
 };
@@ -223,10 +266,8 @@ exports.getArticle = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    // Find article by slug, draft, published or blocked
     const article = await Article.findOne({
-      //where: { slug, status: "published" },
-      where: { slug  },
+      where: { slug },
       include: getArticleIncludes(),
     });
 
@@ -282,9 +323,9 @@ exports.createArticle = async (req, res, next) => {
     // Create the article
     const article = await Article.create({
       title,
-      slug, // Add the generated slug
+      slug,
       content,
-      excerpt: excerpt || content.substring(0, 200) + "...", // Generate excerpt if not provided
+      excerpt: excerpt || content.substring(0, 200) + "...",
       featured_image,
       status,
       user_id,
@@ -293,7 +334,6 @@ exports.createArticle = async (req, res, next) => {
 
     // Handle tags
     if (tags.length > 0) {
-      // Get existing tags or create new ones
       const tagObjects = await Promise.all(
         tags.map(async (tagName) => {
           const [tag] = await Tag.findOrCreate({
@@ -303,7 +343,6 @@ exports.createArticle = async (req, res, next) => {
         })
       );
 
-      // Associate tags with article
       await article.setTags(tagObjects);
     }
 
@@ -329,7 +368,6 @@ exports.updateArticle = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Find article
     const article = await Article.findByPk(id);
 
     if (!article) {
@@ -347,7 +385,6 @@ exports.updateArticle = async (req, res, next) => {
       });
     }
 
-    // Get update fields
     const {
       title,
       content,
@@ -357,15 +394,12 @@ exports.updateArticle = async (req, res, next) => {
       tags = [],
     } = req.body;
 
-    // Check if publishing for the first time
     const isPublishingNow = !article.published_at && status === "published";
 
-    // Check if title is being changed - if so, update slug
     if (title && title !== article.title) {
       article.slug = await generateUniqueSlug(title);
     }
 
-    // Update article
     article.title = title || article.title;
     article.content = content || article.content;
     article.excerpt = excerpt || article.excerpt;
@@ -373,8 +407,6 @@ exports.updateArticle = async (req, res, next) => {
 
     if (status) {
       article.status = status;
-
-      // Set published_at when publishing for the first time
       if (isPublishingNow) {
         article.published_at = new Date();
       }
@@ -384,7 +416,6 @@ exports.updateArticle = async (req, res, next) => {
 
     // Handle tags if provided
     if (tags.length > 0) {
-      // Get existing tags or create new ones
       const tagObjects = await Promise.all(
         tags.map(async (tagName) => {
           const [tag] = await Tag.findOrCreate({
@@ -394,7 +425,6 @@ exports.updateArticle = async (req, res, next) => {
         })
       );
 
-      // Replace existing tags
       await article.setTags(tagObjects);
     }
 
@@ -419,7 +449,6 @@ exports.deleteArticle = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Find article
     const article = await Article.findByPk(id);
 
     if (!article) {
@@ -437,7 +466,6 @@ exports.deleteArticle = async (req, res, next) => {
       });
     }
 
-    // Delete article (this will also delete associated comments and likes due to cascade)
     await article.destroy();
 
     res.status(200).json({
@@ -457,7 +485,6 @@ exports.toggleLike = async (req, res, next) => {
     const { id } = req.params;
     const user_id = req.user.id;
 
-    // Find article
     const article = await Article.findByPk(id);
 
     if (!article) {
@@ -467,13 +494,11 @@ exports.toggleLike = async (req, res, next) => {
       });
     }
 
-    // Check if user already liked the article
     const existingLike = await Like.findOne({
       where: { article_id: id, user_id },
     });
 
     if (existingLike) {
-      // Unlike - remove the like
       await existingLike.destroy();
 
       res.status(200).json({
@@ -482,7 +507,6 @@ exports.toggleLike = async (req, res, next) => {
         liked: false,
       });
     } else {
-      // Like - add a new like
       await Like.create({ article_id: id, user_id });
 
       res.status(200).json({
