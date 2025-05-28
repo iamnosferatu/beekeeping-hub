@@ -10,7 +10,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false,
       validate: {
-        notEmpty: true,
+        notEmpty: {
+          msg: "Comment content cannot be empty",
+        },
+        len: {
+          args: [1, 5000],
+          msg: "Comment must be between 1 and 5000 characters",
+        },
       },
     },
     status: {
@@ -20,6 +26,34 @@ module.exports = (sequelize, DataTypes) => {
     ip_address: {
       type: DataTypes.STRING(50),
       allowNull: true,
+    },
+    // Foreign key for the parent comment (for nested comments)
+    parent_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "comments",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    // Foreign keys for user and article are added via associations
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
+    article_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "articles",
+        key: "id",
+      },
     },
   });
 
