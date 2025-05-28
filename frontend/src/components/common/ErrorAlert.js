@@ -1,42 +1,28 @@
-// frontend/src/components/common/ErrorAlert.js
+// components/common/ErrorAlert.js
+/**
+ * Reusable error alert component
+ * Consistent error display across the application
+ */
 import React from "react";
 import { Alert, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { BsExclamationTriangle } from "react-icons/bs";
 
-const ErrorAlert = ({
-  title,
-  message,
-  variant = "danger",
-  actionButton = null,
-  onRetry = null,
-}) => {
-  const navigate = useNavigate();
-
+const ErrorAlert = ({ error, title = "Error", onRetry, className = "" }) => {
   return (
-    <Alert variant={variant}>
-      <Alert.Heading>{title}</Alert.Heading>
-      <p>{message}</p>
-      <div className="d-flex justify-content-end gap-2">
-        {onRetry && (
-          <Button variant={`outline-${variant}`} onClick={onRetry}>
-            Try Again
-          </Button>
-        )}
-        {actionButton &&
-          (actionButton.to ? (
-            <Link to={actionButton.to}>
-              <Button variant={`outline-${variant}`}>
-                {actionButton.text}
+    <Alert variant="danger" className={className}>
+      <div className="d-flex align-items-start">
+        <BsExclamationTriangle className="flex-shrink-0 me-3 mt-1" size={24} />
+        <div className="flex-grow-1">
+          <Alert.Heading className="h5 mb-2">{title}</Alert.Heading>
+          <p className="mb-0">{error}</p>
+          {onRetry && (
+            <div className="d-flex justify-content-end mt-3">
+              <Button variant="outline-danger" onClick={onRetry}>
+                Try Again
               </Button>
-            </Link>
-          ) : (
-            <Button
-              variant={`outline-${variant}`}
-              onClick={actionButton.onClick || (() => navigate(-1))}
-            >
-              {actionButton.text}
-            </Button>
-          ))}
+            </div>
+          )}
+        </div>
       </div>
     </Alert>
   );
