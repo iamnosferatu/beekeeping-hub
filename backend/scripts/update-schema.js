@@ -1,5 +1,5 @@
 // backend/src/scripts/update-schema.js
-const { sequelize } = require("src/models");
+const { sequelize } = require("../models");
 
 /**
  * Update database schema to add blocked fields to Articles table
