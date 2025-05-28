@@ -50,6 +50,13 @@ const Header = () => {
             <Nav.Link as={Link} to="/articles">
               Articles
             </Nav.Link>
+            {/* Add these new navigation items */}
+            <Nav.Link as={Link} to="/about">
+              About
+            </Nav.Link>
+            <Nav.Link as={Link} to="/contact">
+              Contact
+            </Nav.Link>
             {user && user.role === "author" && (
               <Nav.Link as={Link} to="/my-articles">
                 My Articles

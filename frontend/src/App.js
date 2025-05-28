@@ -33,10 +33,15 @@ import AdminTagsPage from "./pages/admin/TagsPage";
 import AdminSettingsPage from "./pages/admin/SettingsPage";
 import AdminDiagnosticsPage from "./pages/admin/DiagnosticsPage";
 
-
 // Auth Guards
 import PrivateRoute from "./components/auth/PrivateRoute";
 import RoleRoute from "./components/auth/RoleRoute";
+
+// Import the new static pages
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 
 function App() {
   return (
@@ -50,12 +55,14 @@ function App() {
         <Route path="tags/:slug" element={<TagPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+
         {/* Protected Routes */}
         <Route
           path="profile"
           element={
             <PrivateRoute>
-              <ProfilePage />
+              {" "}
+              <ProfilePage />{" "}
             </PrivateRoute>
           }
         />
@@ -63,7 +70,8 @@ function App() {
           path="my-articles"
           element={
             <PrivateRoute>
-              <MyArticlesPage />
+              {" "}
+              <MyArticlesPage />{" "}
             </PrivateRoute>
           }
         />
@@ -71,7 +79,8 @@ function App() {
           path="editor"
           element={
             <RoleRoute roles={["author", "admin"]}>
-              <ArticleEditorPage />
+              {" "}
+              <ArticleEditorPage />{" "}
             </RoleRoute>
           }
         />
@@ -79,13 +88,22 @@ function App() {
           path="editor/:id"
           element={
             <RoleRoute roles={["author", "admin"]}>
-              <ArticleEditorPage />
+              {" "}
+              <ArticleEditorPage />{" "}
             </RoleRoute>
           }
         />
+
         {/* Debug Routes */}
         <Route path="/auth-debug" element={<AuthDebugPage />} />
         <Route path="/debug" element={<DebugPage />} />
+        
+        {/* Add the new static page routes here */}
+        <Route path="about" element={<AboutPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
+
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
@@ -95,7 +113,8 @@ function App() {
         path="/admin"
         element={
           <RoleRoute roles={["admin"]}>
-            <AdminLayout />
+            {" "}
+            <AdminLayout />{" "}
           </RoleRoute>
         }
       >

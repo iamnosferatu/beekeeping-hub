@@ -1,0 +1,160 @@
+// frontend/src/pages/AboutPage.scss
+
+.about-page {
+
+    // Hero section styling
+    .hero-section {
+        background: linear-gradient(135deg, #ffa000 0%, #ffca28 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+
+        // Add subtle pattern overlay
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        h1,
+        p {
+            position: relative;
+            z-index: 1;
+        }
+
+        .display-4 {
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    // Value cards hover effect
+    .value-card {
+        transition: all 0.3s ease;
+        border: none;
+        height: 100%;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        h5 {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+    }
+
+    // Team member cards
+    .team-card {
+        border: none;
+        overflow: hidden;
+        transition: all 0.3s ease;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+
+            .team-member-image img {
+                transform: scale(1.05);
+            }
+        }
+
+        .team-member-image {
+            height: 300px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+
+            img {
+                height: 100%;
+                width: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+            }
+        }
+
+        h4 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    // Impact statistics
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    // Responsive adjustments
+    @media (max-width: 767.98px) {
+        .hero-section {
+            padding: 3rem 0 !important;
+
+            .display-4 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .team-member-image {
+            height: 250px;
+        }
+
+        .value-card {
+            margin-bottom: 1rem;
+        }
+    }
+
+    // Dark mode support
+    @media (prefers-color-scheme: dark) {
+        .card {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .bg-light {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+    }
+
+    // Button styling to match your theme
+    .btn {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+
+        &.btn-lg {
+            padding: 1rem 2.5rem;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    // Card shadows
+    .shadow-sm {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    // Section spacing
+    .mb-5 {
+        margin-bottom: 4rem !important;
+    }
+
+    @media (min-width: 768px) {
+        .mb-5 {
+            margin-bottom: 5rem !important;
+        }
+    } }

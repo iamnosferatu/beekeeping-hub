@@ -53,8 +53,17 @@ const Footer = () => {
             </ul>
           </Col>
         </Row>
-
         <hr className="my-3" />
+
+      <div className="footer-links">
+          <Link to="/about">About Us</Link>
+          <span className="mx-2">|</span>
+          <Link to="/contact">Contact</Link>
+          <span className="mx-2">|</span>
+          <Link to="/privacy">Privacy Policy</Link>
+          <span className="mx-2">|</span>
+          <Link to="/terms">Terms of Service</Link>
+        </div>
 
         <div className="text-center">
           <p className="mb-0">
