@@ -1,5 +1,5 @@
 // backend/src/controllers/tagController.js
-const { Tag, Article } = require("../models");
+const { Tag, Article, User, sequelize } = require("../models");
 const { Op } = require("sequelize");
 const slug = require("slug");
 
