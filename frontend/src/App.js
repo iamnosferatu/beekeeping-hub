@@ -29,6 +29,7 @@ import AdminDashboardPage from "./pages/admin/DashboardPage";
 import AdminArticlesPage from "./pages/admin/ArticlesPage";
 import AdminCommentsPage from "./pages/admin/CommentsPage";
 import AdminUsersPage from "./pages/admin/UsersPage";
+import AdminTagsPage from "./pages/admin/TagsPage";
 import AdminSettingsPage from "./pages/admin/SettingsPage";
 import AdminDiagnosticsPage from "./pages/admin/DiagnosticsPage";
 
@@ -101,6 +102,7 @@ function App() {
         <Route index element={<AdminDashboardPage />} />
         <Route path="articles" element={<AdminArticlesPage />} />
         <Route path="comments" element={<AdminCommentsPage />} />
+        <Route path="tags" element={<AdminTagsPage />} />
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="diagnostics" element={<AdminDiagnosticsPage />} />

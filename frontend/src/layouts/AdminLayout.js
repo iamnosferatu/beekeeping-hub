@@ -12,6 +12,7 @@ import {
   BsList,
   BsX,
   BsTools,
+  BsTag, // Add this import
 } from "react-icons/bs";
 import "./AdminLayout.scss";
 
@@ -45,6 +46,11 @@ const AdminLayout = () => {
       path: "/admin/comments",
       icon: <BsChatSquareText size={20} />,
       label: "Comments",
+    },
+    {
+      path: "/admin/tags",
+      icon: <BsTag size={20} />,
+      label: "Tags",
     },
     {
       path: "/admin/users",
