@@ -1,7 +1,7 @@
 // frontend/src/layouts/AdminLayout.js
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Nav, Button, Navbar } from "react-bootstrap";
+import { Container, Nav, Button, Navbar } from "react-bootstrap";
 import {
   BsSpeedometer2,
   BsFileEarmarkText,

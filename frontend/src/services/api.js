@@ -397,10 +397,12 @@ class ApiService {
   };
 
   // =============================================================================
-  // OTHER ENDPOINTS
+  // Comment ENDPOINTS
   // =============================================================================
-
   comments = {
+    /**
+     * Get all comments with optional filters
+     */
     getAll: async (params = {}) => {
       const queryString = new URLSearchParams(params).toString();
       return this.request({
@@ -409,7 +411,22 @@ class ApiService {
       });
     },
 
+    /**
+     * Get comments for a specific article
+     */
+    getByArticle: async (articleId) => {
+      return this.request({
+        method: "GET",
+        url: `/articles/${articleId}/comments`,
+      });
+    },
+
+    /**
+     * Create a new comment
+     */
     create: async (commentData) => {
+      console.log("💬 comments.create called with data:", commentData);
+
       return this.request({
         method: "POST",
         url: "/comments",
@@ -417,6 +434,9 @@ class ApiService {
       });
     },
 
+    /**
+     * Update an existing comment
+     */
     update: async (id, commentData) => {
       return this.request({
         method: "PUT",
@@ -425,6 +445,9 @@ class ApiService {
       });
     },
 
+    /**
+     * Delete a comment
+     */
     delete: async (id) => {
       return this.request({
         method: "DELETE",
@@ -432,6 +455,9 @@ class ApiService {
       });
     },
 
+    /**
+     * Update comment status (admin only)
+     */
     updateStatus: async (id, status) => {
       return this.request({
         method: "PUT",
@@ -439,7 +465,43 @@ class ApiService {
         data: { status },
       });
     },
+
+    /**
+     * Report a comment
+     */
+    report: async (id, reason) => {
+      return this.request({
+        method: "POST",
+        url: `/comments/${id}/report`,
+        data: { reason },
+      });
+    },
+
+    /**
+     * Get replies for a comment
+     */
+    getReplies: async (commentId) => {
+      return this.request({
+        method: "GET",
+        url: `/comments/${commentId}/replies`,
+      });
+    },
+
+    /**
+     * Create a reply to a comment
+     */
+    createReply: async (parentCommentId, replyData) => {
+      return this.request({
+        method: "POST",
+        url: `/comments/${parentCommentId}/replies`,
+        data: replyData,
+      });
+    },
   };
+  
+  // =============================================================================
+  // OTHER ENDPOINTS
+  // =============================================================================
 
   tags = {
     getAll: async () => {

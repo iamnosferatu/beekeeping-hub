@@ -1,17 +1,17 @@
-// frontend/src/pages/ArticlePage.js - Production Version
+// frontend/src/pages/ArticlePage.js - Updated with Nested Comments
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { Container, Spinner, Alert, Button } from "react-bootstrap";
 import { useArticleBySlug } from "../hooks/api/useArticles";
 import ArticleHeader from "../components/articles/ArticleHeader";
 import ArticleContent from "../components/articles/ArticleContent";
-import ArticleComments from "../components/articles/ArticleComments";
+import NestedCommentsSection from "../components/articles/Comments/NestedCommentsSection";
 import "./ArticlePage.scss";
 
 /**
  * ArticlePage Component
  *
- * Displays a single article with its full content, metadata, and comments.
+ * Displays a single article with its full content, metadata, and nested comments.
  * Handles loading states, errors, and article not found scenarios.
  */
 const ArticlePage = () => {
@@ -81,10 +81,11 @@ const ArticlePage = () => {
       {/* Article Content - the main body of the article */}
       <ArticleContent article={articleData} />
 
-      {/* Comments Section */}
-      <ArticleComments
+      {/* Nested Comments Section - New enhanced comments with threading */}
+      <NestedCommentsSection
         articleId={articleData.id}
         initialComments={articleData.comments || []}
+        showCommentForm={true}
       />
     </div>
   );

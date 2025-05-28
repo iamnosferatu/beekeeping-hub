@@ -1,0 +1,336 @@
+/* frontend/src/components/articles/comments/NestedComments.scss */
+
+.comments-section {
+    margin-bottom: 2rem;
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+
+            .badge {
+                font-size: 0.875rem;
+                font-weight: 500;
+            }
+        }
+    }
+
+    // Comment form styling
+    .comment-form {
+        margin-bottom: 1.5rem;
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            border: 1px solid #ced4da;
+
+            &:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+            }
+        }
+    }
+
+    // Comments list container
+    .comments-list {
+        max-width: 100%;
+    }
+}
+
+// Individual comment styling
+.comment-item {
+    position: relative;
+    margin-bottom: 1rem;
+
+    // Nested comment indentation and border
+    &[style*="marginLeft"] {
+        &::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 20px;
+            bottom: 0;
+            width: 1px;
+            background-color: #e9ecef;
+        }
+    }
+
+    // Comment header with author info
+    .comment-header {
+        margin-bottom: 0.5rem;
+
+        .author-avatar {
+            border: 2px solid #e9ecef;
+            transition: transform 0.2s ease;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #212529;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            font-weight: 500;
+        }
+
+        .timestamp {
+            font-size: 0.875rem;
+            color: #6c757d;
+
+            .edited-indicator {
+                font-style: italic;
+            }
+        }
+    }
+
+    // Comment content
+    .comment-content {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+        word-wrap: break-word;
+
+        p {
+            margin-bottom: 0.5rem;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    // Comment actions bar
+    .comment-actions {
+        font-size: 0.875rem;
+
+        .btn-link {
+            padding: 0;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+
+            &:hover {
+                text-decoration: none;
+                opacity: 0.8;
+            }
+
+            &.text-muted:hover {
+                color: #495057 !important;
+            }
+
+            &.text-danger:hover {
+                color: #c82333 !important;
+            }
+
+            // Vote buttons
+            &.text-success {
+                color: #28a745 !important;
+            }
+        }
+
+        // Vote count
+        .vote-count {
+            font-weight: 500;
+            min-width: 20px;
+            text-align: center;
+        }
+    }
+
+    // Reply form
+    .reply-form {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-top: 1rem;
+
+        textarea {
+            background-color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-sm {
+            font-size: 0.875rem;
+        }
+    }
+
+    // Edit form
+    .edit-form {
+        margin-top: 0.5rem;
+
+        textarea {
+            font-size: 0.95rem;
+        }
+    }
+}
+
+// Nested replies container
+.nested-replies {
+    margin-top: 1rem;
+
+    .comment-item {
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Maximum nesting visual indicator
+.comment-item[style*="90px"] {
+    .reply-button {
+        display: none; // Hide reply button at max depth
+    }
+}
+
+// Loading state
+.comments-loading {
+    text-align: center;
+    padding: 3rem 0;
+
+    .spinner-border {
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+// Empty state
+.comments-empty {
+    text-align: center;
+    padding: 3rem 0;
+
+    .empty-icon {
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+}
+
+// Sort/Filter dropdowns
+.comment-controls {
+    .dropdown-toggle {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.75rem;
+
+        &::after {
+            margin-left: 0.25rem;
+        }
+    }
+
+    .dropdown-menu {
+        min-width: 140px;
+        font-size: 0.875rem;
+    }
+}
+
+// Mobile responsive adjustments
+@media (max-width: 767.98px) {
+    .comments-section {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+
+            .comment-controls {
+                margin-top: 0.75rem;
+                width: 100%;
+
+                .dropdown {
+                    width: 48%;
+
+                    .dropdown-toggle {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+
+    .comment-item {
+
+        // Reduce indentation on mobile
+        &[style*="marginLeft"] {
+            margin-left: 20px !important;
+            max-margin-left: 60px !important;
+        }
+
+        .comment-actions {
+            flex-wrap: wrap;
+            gap: 0.5rem !important;
+
+            .btn-link {
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        .author-avatar {
+            width: 32px !important;
+            height: 32px !important;
+        }
+    }
+}
+
+// Dark mode support
+[data-bs-theme="dark"] {
+    .comments-section {
+        .card-header {
+            background-color: #212529;
+            border-bottom-color: #495057;
+        }
+
+        .comment-item {
+            &[style*="marginLeft"] {
+                border-left-color: #495057;
+
+                &::before {
+                    background-color: #495057;
+                }
+            }
+
+            .reply-form {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+        }
+    }
+}
+
+// Animation for new comments
+@keyframes commentSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.comment-item.new-comment {
+    animation: commentSlideIn 0.3s ease-out;
+}
+
+// Hover effects
+.comment-item {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: 0.375rem;
+    }
+}
