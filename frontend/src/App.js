@@ -1,6 +1,9 @@
 // frontend/src/App.js
-import React from "react";
+import React, { useContext } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useSiteSettings } from "./contexts/SiteSettingsContext";
+import AuthContext from "./contexts/AuthContext";
+import MaintenanceMode from "./components/MaintenanceMode";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout";
@@ -30,8 +33,8 @@ import AdminArticlesPage from "./pages/admin/ArticlesPage";
 import AdminCommentsPage from "./pages/admin/CommentsPage";
 import AdminUsersPage from "./pages/admin/UsersPage";
 import AdminTagsPage from "./pages/admin/TagsPage";
-import AdminSettingsPage from "./pages/admin/SettingsPage";
 import AdminDiagnosticsPage from "./pages/admin/DiagnosticsPage";
+import AdminSiteSettingsPage from "./pages/admin/SiteSettingsPage";
 
 // Auth Guards
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -44,6 +47,18 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 
 function App() {
+  const { settings, loading } = useSiteSettings();
+  const { user } = useContext(AuthContext);
+  
+  // Check if site is in maintenance mode
+  const isInMaintenance = settings?.maintenance_mode;
+  const isAdmin = user?.role === 'admin';
+  
+  // Show maintenance page for non-admin users when maintenance is active
+  if (!loading && isInMaintenance && !isAdmin) {
+    return <MaintenanceMode settings={settings} />;
+  }
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -123,7 +138,7 @@ function App() {
         <Route path="comments" element={<AdminCommentsPage />} />
         <Route path="tags" element={<AdminTagsPage />} />
         <Route path="users" element={<AdminUsersPage />} />
-        <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="settings" element={<AdminSiteSettingsPage />} />
         <Route path="diagnostics" element={<AdminDiagnosticsPage />} />
       </Route>
     </Routes>

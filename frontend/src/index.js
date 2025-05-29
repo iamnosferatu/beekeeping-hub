@@ -6,6 +6,7 @@ import "./index.scss";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SiteSettingsProvider } from "./contexts/SiteSettingsContext";
 import reportWebVitals from "./reportWebVitals";
 
 
@@ -15,7 +16,9 @@ root.render(
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <App />
+          <SiteSettingsProvider>
+            <App />
+          </SiteSettingsProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

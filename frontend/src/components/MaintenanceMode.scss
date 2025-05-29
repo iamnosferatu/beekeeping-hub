@@ -1,0 +1,26 @@
+// frontend/src/components/MaintenanceMode.scss
+.maintenance-mode-page {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  
+  .maintenance-card {
+    border: none;
+    border-radius: 15px;
+    
+    .maintenance-icon {
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

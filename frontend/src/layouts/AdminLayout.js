@@ -14,6 +14,7 @@ import {
   BsTools,
   BsTag, // Add this import
 } from "react-icons/bs";
+import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
 
 /**
@@ -91,7 +92,9 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="admin-layout">
+    <>
+      <AlertBanner />
+      <div className="admin-layout">
       {/* Mobile Header */}
       <Navbar
         bg="dark"
@@ -198,6 +201,7 @@ const AdminLayout = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

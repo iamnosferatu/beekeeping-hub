@@ -7,6 +7,7 @@ import Footer from "../components/layout/Footer";
 import Sidebar from "../components/layout/Sidebar";
 import ThemeSelector from "../components/theme/ThemeSelector";
 import ApiStatusBar from "../components/common/ApiStatusBar";
+import AlertBanner from "../components/common/AlertBanner";
 import ThemeContext from "../contexts/ThemeContext";
 import "./MainLayout.scss";
 
@@ -19,6 +20,7 @@ const MainLayout = () => {
   const sidebarComponent = <Sidebar />;
   const themeSelectorComponent = <ThemeSelector />;
   const apiStatusBarComponent = <ApiStatusBar />;
+  const alertBannerComponent = <AlertBanner />;
 
   return (
     <div
@@ -30,6 +32,7 @@ const MainLayout = () => {
       }}
     >
       {apiStatusBarComponent}
+      {alertBannerComponent}
       {headerComponent}
 
       <Container fluid className="main-container py-4">

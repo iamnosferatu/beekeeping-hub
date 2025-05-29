@@ -8,6 +8,8 @@ const Article = require("./Article")(sequelize, DataTypes);
 const Comment = require("./Comment")(sequelize, DataTypes);
 const Tag = require("./Tag")(sequelize, DataTypes);
 const Like = require("./Like")(sequelize, DataTypes);
+const SiteSettings = require("./SiteSettings")(sequelize, DataTypes);
+
 
 // Define relationships
 User.hasMany(Article, { foreignKey: "user_id", as: "articles" });
@@ -34,6 +36,9 @@ Like.belongsTo(User, { foreignKey: "user_id" });
 Article.hasMany(Like, { foreignKey: "article_id" });
 Like.belongsTo(Article, { foreignKey: "article_id" });
 
+// Site Settings relationship with User (who updated it)
+SiteSettings.belongsTo(User, { foreignKey: "updated_by", as: "updatedBy" });
+
 module.exports = {
   sequelize,
   User,
@@ -41,4 +46,5 @@ module.exports = {
   Comment,
   Tag,
   Like,
+  SiteSettings,
 };
