@@ -52,15 +52,210 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-// Public routes with optional authentication
-// This allows the controller to check if user is admin to show blocked articles
+/**
+ * @swagger
+ * /articles:
+ *   get:
+ *     summary: Get all articles
+ *     tags: [Articles]
+ *     security:
+ *       - {}
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *         description: Filter by tag slug
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: integer
+ *         description: Filter by author ID
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search in title and content
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [draft, published]
+ *         description: Filter by article status (admin only)
+ *     responses:
+ *       200:
+ *         description: Articles retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 articles:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Article'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *                     itemsPerPage:
+ *                       type: integer
+ */
 router.get("/", optionalAuth, articleController.getArticles);
+/**
+ * @swagger
+ * /articles/{slug}:
+ *   get:
+ *     summary: Get single article by slug
+ *     tags: [Articles]
+ *     security:
+ *       - {}
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Article slug
+ *     responses:
+ *       200:
+ *         description: Article retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 article:
+ *                   $ref: '#/components/schemas/Article'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
 router.get("/:slug", optionalAuth, articleController.getArticle);
 
-// Protected route for editing - requires authentication
+/**
+ * @swagger
+ * /articles/byId/{id}:
+ *   get:
+ *     summary: Get article by ID for editing
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Article ID
+ *     responses:
+ *       200:
+ *         description: Article retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 article:
+ *                   $ref: '#/components/schemas/Article'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
 router.get("/byId/:id", protect, articleController.getArticleById);
 
-// Protected routes
+/**
+ * @swagger
+ * /articles:
+ *   post:
+ *     summary: Create a new article
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Introduction to Beekeeping
+ *               content:
+ *                 type: string
+ *                 example: Beekeeping is a fascinating hobby...
+ *               excerpt:
+ *                 type: string
+ *                 example: Learn the basics of beekeeping
+ *               featured_image:
+ *                 type: string
+ *                 example: https://example.com/bee-image.jpg
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published]
+ *                 default: draft
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [beginner, equipment, hive-management]
+ *     responses:
+ *       201:
+ *         description: Article created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 article:
+ *                   $ref: '#/components/schemas/Article'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ */
 router.post(
   "/",
   protect,
@@ -68,6 +263,70 @@ router.post(
   articleController.createArticle
 );
 
+/**
+ * @swagger
+ * /articles/{id}:
+ *   put:
+ *     summary: Update an article
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Article ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Updated Title
+ *               content:
+ *                 type: string
+ *                 example: Updated content...
+ *               excerpt:
+ *                 type: string
+ *                 example: Updated excerpt
+ *               featured_image:
+ *                 type: string
+ *                 example: https://example.com/new-image.jpg
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published]
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [advanced, honey-production]
+ *     responses:
+ *       200:
+ *         description: Article updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 article:
+ *                   $ref: '#/components/schemas/Article'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
 router.put(
   "/:id",
   protect,
@@ -75,6 +334,42 @@ router.put(
   articleController.updateArticle
 );
 
+/**
+ * @swagger
+ * /articles/{id}:
+ *   delete:
+ *     summary: Delete an article
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Article ID
+ *     responses:
+ *       200:
+ *         description: Article deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Article deleted successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
 router.delete(
   "/:id",
   protect,
@@ -82,6 +377,46 @@ router.delete(
   articleController.deleteArticle
 );
 
+/**
+ * @swagger
+ * /articles/{id}/like:
+ *   post:
+ *     summary: Toggle like on an article
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Article ID
+ *     responses:
+ *       200:
+ *         description: Like toggled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Article liked
+ *                 isLiked:
+ *                   type: boolean
+ *                   example: true
+ *                 likes:
+ *                   type: integer
+ *                   example: 42
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
 router.post("/:id/like", protect, articleController.toggleLike);
 
 module.exports = router;

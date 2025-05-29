@@ -4,6 +4,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 const { errorHandler } = require("./middleware/errorHandler");
 const { sequelize, connectWithRetry } = require("./config/database");
 
@@ -42,6 +44,12 @@ app.get("/health", (req, res) => {
     environment: process.env.NODE_ENV,
   });
 });
+
+// Swagger API documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "Beekeeping Hub API Documentation"
+}));
 
 // Debug route for backend
 app.use("/debug", (req, res) => {
