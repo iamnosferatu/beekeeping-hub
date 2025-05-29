@@ -260,24 +260,11 @@ class ApiService {
     getBySlug: async (slug) => {
       console.log("📄 articles.getBySlug called with slug:", slug);
 
-      // IMPORTANT: This should fetch by slug, not ID
-      // The backend should have a route that handles slug-based queries
+      // The backend route is /articles/:slug not /articles/bySlug/:slug
       const result = await this.request({
         method: "GET",
-        url: `/articles/bySlug/${slug}`, // Explicit slug endpoint
+        url: `/articles/${slug}`,
       });
-
-      // If the above fails, try the default endpoint which might handle both
-      if (!result.success) {
-        console.log("📄 Trying alternative endpoint for slug:", slug);
-
-        const alternativeResult = await this.request({
-          method: "GET",
-          url: `/articles/${slug}`, // This might work if backend handles it
-        });
-
-        return alternativeResult;
-      }
 
       console.log("📄 articles.getBySlug result:", result);
       return result;

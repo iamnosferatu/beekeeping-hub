@@ -13,8 +13,7 @@ import { BsChat, BsPlus } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import AuthContext from "../../contexts/AuthContext";
 import moment from "moment";
-import axios from "axios";
-import { API_URL } from "../../config";
+import api from "../../services/api";
 
 /**
  * ArticleComments Component
@@ -55,12 +54,6 @@ const ArticleComments = ({
       setSubmitting(true);
       setSubmitError(null);
 
-      // Get auth token
-      const token = localStorage.getItem("beekeeper_auth_token");
-      if (!token) {
-        throw new Error("You must be logged in to comment");
-      }
-
       // Prepare comment data
       const commentData = {
         article_id: articleId,
@@ -70,28 +63,39 @@ const ArticleComments = ({
       console.log("Submitting comment:", commentData);
 
       // Make API call to create comment
-      const response = await axios.post(`${API_URL}/comments`, commentData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.comments.create(commentData);
 
-      console.log("Comment response:", response.data);
+      console.log("Comment response:", response);
 
+      // The api service returns the axios response, so we need to check response.data
+      const responseData = response?.data || response;
+      
       // Check if submission was successful
-      if (response.data.success) {
+      if (responseData.success || response.status === 201) {
         // Add the new comment to the list
-        const newComment = response.data.data || response.data.comment;
+        const newComment = responseData.data || responseData.comment || responseData;
 
         // Ensure the comment has the current user's info
+        // Only include necessary author fields to avoid circular references
         const enrichedComment = {
           ...newComment,
-          author: newComment.author || user,
+          author: newComment.author || {
+            id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            avatar: user.avatar
+          },
           created_at: newComment.created_at || new Date().toISOString(),
         };
 
-        setComments((prevComments) => [enrichedComment, ...prevComments]);
+        // Safely update comments to avoid any circular references
+        setComments(prevComments => {
+          // Create a new array to avoid mutations
+          const updatedComments = [enrichedComment, ...(prevComments || [])];
+          console.log("Updated comments:", updatedComments.length);
+          return updatedComments;
+        });
 
         // Clear the comment form
         setCommentText("");
@@ -99,7 +103,7 @@ const ArticleComments = ({
         // Show success message briefly
         setSubmitError(null);
       } else {
-        throw new Error(response.data.message || "Failed to post comment");
+        throw new Error(responseData.message || "Failed to post comment");
       }
     } catch (error) {
       console.error("Failed to submit comment:", error);
@@ -125,7 +129,7 @@ const ArticleComments = ({
             status: "pending",
           };
 
-          setComments((prevComments) => [tempComment, ...prevComments]);
+          setComments(prevComments => [tempComment, ...prevComments]);
           setCommentText("");
           setSubmitError("Comment saved locally (demo mode)");
 
@@ -149,6 +153,7 @@ const ArticleComments = ({
 
       setSubmitError(errorMessage);
     } finally {
+      // Always reset submitting state
       setSubmitting(false);
     }
   };

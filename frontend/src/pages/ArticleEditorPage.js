@@ -2,8 +2,7 @@
 import React, { useEffect, useContext, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Alert, Spinner, Button } from "react-bootstrap";
-import axios from "axios";
-import { API_URL } from "../config";
+import api from "../services/api";
 import AuthContext from "../contexts/AuthContext";
 
 // Component Imports
@@ -75,8 +74,8 @@ const ArticleEditorPage = () => {
 
       try {
         const response = isEditMode
-          ? await axios.put(`${API_URL}/articles/${id}`, articleData)
-          : await axios.post(`${API_URL}/articles`, articleData);
+          ? await api.articles.update(id, articleData)
+          : await api.articles.create(articleData);
 
         if (response.data.success) {
           // Navigate or show success message
@@ -103,7 +102,7 @@ const ArticleEditorPage = () => {
     if (!isEditMode) return;
 
     try {
-      const response = await axios.delete(`${API_URL}/articles/${id}`);
+      const response = await api.articles.delete(id);
 
       if (response.data.success) {
         navigate("/my-articles", {

@@ -20,7 +20,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
 
   const execute = useCallback(
     async (...args) => {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
       try {
         const response = await apiCall(...args);
@@ -37,7 +37,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
           return { success: true, data };
         } else {
           const error = response.error;
-          setState((prev) => ({ ...prev, loading: false, error }));
+          setState(prev => ({ ...prev, loading: false, error }));
 
           if (onError) {
             onError(error);
@@ -47,7 +47,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
         }
       } catch (error) {
         console.error("useApi execute error:", error);
-        setState((prev) => ({ ...prev, loading: false, error }));
+        setState(prev => ({ ...prev, loading: false, error }));
 
         if (onError) {
           onError(error);
@@ -104,7 +104,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
   const execute = useCallback(
     async (newParams = {}) => {
       const mergedParams = { ...params, ...newParams };
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
       console.log("usePaginatedApi execute with params:", mergedParams);
 
@@ -167,7 +167,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
         } else {
           const error = response.error;
           console.error("usePaginatedApi error response:", error);
-          setState((prev) => ({ ...prev, loading: false, error }));
+          setState(prev => ({ ...prev, loading: false, error }));
 
           if (onError) {
             onError(error);
@@ -177,7 +177,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
         }
       } catch (error) {
         console.error("usePaginatedApi catch error:", error);
-        setState((prev) => ({ ...prev, loading: false, error }));
+        setState(prev => ({ ...prev, loading: false, error }));
 
         if (onError) {
           onError(error);

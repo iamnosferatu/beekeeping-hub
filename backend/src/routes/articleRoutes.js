@@ -419,4 +419,37 @@ router.delete(
  */
 router.post("/:id/like", protect, articleController.toggleLike);
 
+// Alternative endpoint for article comments
+router.get("/:articleId/comments", async (req, res) => {
+  try {
+    const { Comment, User } = require("../models");
+    const { articleId } = req.params;
+    
+    const comments = await Comment.findAll({
+      where: {
+        article_id: articleId,
+        status: "approved"
+      },
+      include: [
+        {
+          model: User,
+          as: "author",
+          attributes: ["id", "username", "first_name", "last_name", "avatar"]
+        }
+      ],
+      order: [["created_at", "DESC"]]
+    });
+    
+    res.json({
+      success: true,
+      data: comments
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

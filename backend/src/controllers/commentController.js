@@ -98,38 +98,19 @@ const commentController = {
         });
       }
 
-      // Get approved comments for the article with nested replies
+      // Get approved comments for the article
+      // Temporarily remove nested replies to fix the association error
       const comments = await Comment.findAll({
         where: {
           article_id: articleId,
-          status: "approved",
-          parent_id: null, // Only get top-level comments
+          status: "approved"
         },
         include: [
           {
             model: User,
             as: "author",
             attributes: ["id", "username", "first_name", "last_name", "avatar"],
-          },
-          {
-            model: Comment,
-            as: "replies",
-            where: { status: "approved" },
-            required: false,
-            include: [
-              {
-                model: User,
-                as: "author",
-                attributes: [
-                  "id",
-                  "username",
-                  "first_name",
-                  "last_name",
-                  "avatar",
-                ],
-              },
-            ],
-          },
+          }
         ],
         order: [["created_at", "DESC"]],
       });

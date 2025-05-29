@@ -504,6 +504,12 @@ exports.updateArticle = async (req, res, next) => {
 // @access  Private (Owner, Admin)
 exports.deleteArticle = async (req, res, next) => {
   try {
+    console.log('deleteArticle - Request user:', {
+      id: req.user?.id,
+      role: req.user?.role,
+      username: req.user?.username
+    });
+    
     const { id } = req.params;
 
     const article = await Article.findByPk(id);
@@ -516,6 +522,15 @@ exports.deleteArticle = async (req, res, next) => {
     }
 
     // Check ownership
+    console.log('deleteArticle - Authorization check:', {
+      articleOwnerId: article.user_id,
+      requestUserId: req.user.id,
+      isOwner: article.user_id === req.user.id,
+      userRole: req.user.role,
+      isAdmin: req.user.role === "admin",
+      willAllow: article.user_id === req.user.id || req.user.role === "admin"
+    });
+    
     if (article.user_id !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,

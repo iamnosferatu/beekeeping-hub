@@ -583,11 +583,12 @@ const TagsPage = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                    slug: generateSlug(e.target.value),
-                  });
+                  const newName = e.target.value;
+                  setFormData(prevData => ({
+                    ...prevData,
+                    name: newName,
+                    slug: generateSlug(newName),
+                  }));
                 }}
                 placeholder="Enter tag name"
                 required
@@ -600,7 +601,7 @@ const TagsPage = () => {
                 type="text"
                 value={formData.slug}
                 onChange={(e) =>
-                  setFormData({ ...formData, slug: e.target.value })
+                  setFormData(prevData => ({ ...prevData, slug: e.target.value }))
                 }
                 placeholder="tag-slug"
               />
@@ -617,7 +618,7 @@ const TagsPage = () => {
                 rows={3}
                 value={formData.description}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData(prevData => ({ ...prevData, description: e.target.value }))
                 }
                 placeholder="Optional description for this tag"
               />
@@ -661,7 +662,7 @@ const TagsPage = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData(prevData => ({ ...prevData, name: e.target.value }))
                 }
                 placeholder="Enter tag name"
                 required
@@ -674,7 +675,7 @@ const TagsPage = () => {
                 type="text"
                 value={formData.slug}
                 onChange={(e) =>
-                  setFormData({ ...formData, slug: e.target.value })
+                  setFormData(prevData => ({ ...prevData, slug: e.target.value }))
                 }
                 placeholder="tag-slug"
               />
@@ -690,7 +691,7 @@ const TagsPage = () => {
                 rows={3}
                 value={formData.description}
                 onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                  setFormData(prevData => ({ ...prevData, description: e.target.value }))
                 }
                 placeholder="Optional description for this tag"
               />

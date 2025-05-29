@@ -10,6 +10,12 @@ exports.protect = async (req, res, next) => {
   try {
     let token;
 
+    // Debug logging
+    console.log('Auth middleware - headers:', {
+      authorization: req.headers.authorization ? 'Present' : 'Missing',
+      authHeader: req.headers.authorization?.substring(0, 50) + '...'
+    });
+
     // Check for token in Authorization header
     if (
       req.headers.authorization &&
@@ -20,6 +26,7 @@ exports.protect = async (req, res, next) => {
 
     // Check if token exists
     if (!token) {
+      console.log('Auth middleware - No token found');
       return res.status(401).json({
         success: false,
         message: "Not authorized to access this route",
@@ -44,6 +51,11 @@ exports.protect = async (req, res, next) => {
 
       // Set user in request
       req.user = user;
+      console.log('Auth middleware - User authenticated:', {
+        id: user.id,
+        username: user.username,
+        role: user.role
+      });
       next();
     } catch (error) {
       console.error("JWT verification error:", error);
@@ -75,6 +87,12 @@ exports.protect = async (req, res, next) => {
 // Middleware to check role-based permissions
 exports.authorize = (...roles) => {
   return (req, res, next) => {
+    console.log('Authorize middleware:', {
+      requiredRoles: roles,
+      userRole: req.user?.role,
+      hasUser: !!req.user
+    });
+    
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -83,12 +101,14 @@ exports.authorize = (...roles) => {
     }
 
     if (!roles.includes(req.user.role)) {
+      console.log('Authorize failed - role not in allowed list');
       return res.status(403).json({
         success: false,
         message: `User role ${req.user.role} is not authorized to access this route`,
       });
     }
 
+    console.log('Authorize passed');
     next();
   };
 };

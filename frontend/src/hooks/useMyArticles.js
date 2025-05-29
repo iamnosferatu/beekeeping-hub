@@ -139,8 +139,8 @@ export const useMyArticles = () => {
 
       if (response.data?.success) {
         // Update local state
-        setArticles((prev) =>
-          prev.filter((article) => article.id !== articleId)
+        setArticles(prev =>
+          prev.filter(article => article.id !== articleId)
         );
         setSuccessMessage("Article deleted successfully");
         return { success: true };

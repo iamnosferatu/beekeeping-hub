@@ -210,7 +210,7 @@ export const useUserManagement = () => {
       console.log("🏁 fetchUsers completed");
       setLoading(false);
     }
-  }, [currentUser, currentPage, searchTerm, roleFilter]); // FIXED: Only essential dependencies
+  }, [currentUser?.id, currentPage, searchTerm, roleFilter]); // Use only stable primitive values
 
   /**
    * Simple search handler - no complex state updates
@@ -263,8 +263,8 @@ export const useUserManagement = () => {
 
         if (response.data?.success) {
           // Update local state
-          setUsers((prevUsers) =>
-            prevUsers.map((user) =>
+          setUsers(prevUsers =>
+            prevUsers.map(user =>
               user.id === userId ? { ...user, role: newRole } : user
             )
           );
@@ -309,8 +309,8 @@ export const useUserManagement = () => {
 
         if (response.data?.success) {
           // Remove from local state
-          setUsers((prevUsers) =>
-            prevUsers.filter((user) => user.id !== userId)
+          setUsers(prevUsers =>
+            prevUsers.filter(user => user.id !== userId)
           );
           return { success: true, message: "User deleted successfully" };
         } else {
@@ -352,7 +352,7 @@ export const useUserManagement = () => {
   useEffect(() => {
     console.log("🔄 useEffect triggered - calling fetchUsers");
     fetchUsers();
-  }, [currentPage, searchTerm, roleFilter, currentUser?.id]); // FIXED: Only include stable values
+  }, [fetchUsers]); // Only depend on fetchUsers which has all the necessary dependencies
 
   console.log("📊 useUserManagement returning:", {
     usersCount: users.length,

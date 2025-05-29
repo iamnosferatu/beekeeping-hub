@@ -41,7 +41,7 @@ const NestedCommentsSection = ({
   const { user } = useContext(AuthContext);
 
   // State management
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState(Array.isArray(initialComments) ? initialComments : []);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,7 +77,7 @@ const NestedCommentsSection = ({
     if (!initialComments.length && articleId) {
       fetchComments();
     }
-  }, [articleId]);
+  }, [articleId, initialComments.length]);
 
   /**
    * Handle comment submission
@@ -101,16 +101,38 @@ const NestedCommentsSection = ({
       });
 
       if (response.success) {
-        // Add the new comment to the list
+        console.log("Comment creation response:", response.data);
+        
+        // Ensure we have valid data structure
+        if (!response.data || typeof response.data !== 'object') {
+          throw new Error("Invalid response format from server");
+        }
+        
+        // Add the new comment to the list with safe defaults
         const newComment = {
-          ...response.data,
-          author: user, // Add current user as author
-          replies: [],
+          id: response.data.id || Date.now(), // Ensure unique ID
+          content: response.data.content || commentText.trim(),
+          article_id: articleId,
+          user_id: user?.id,
+          parent_id: null,
+          status: response.data.status || 'pending',
+          created_at: response.data.created_at || new Date().toISOString(),
+          updated_at: response.data.updated_at || new Date().toISOString(),
+          author: {
+            id: user?.id,
+            username: user?.username,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            avatar: user?.avatar,
+            role: user?.role
+          },
+          replies: [], // Always start with empty replies array
           upvotes: 0,
           downvotes: 0,
         };
 
-        setComments([newComment, ...comments]);
+        // Update state with new comment at the beginning
+        setComments(prevComments => [newComment, ...(prevComments || [])]);
         setCommentText("");
 
         // Show success message
@@ -133,20 +155,38 @@ const NestedCommentsSection = ({
   const handleReply = async (replyData) => {
     try {
       const response = await apiService.comments.create(replyData);
+      console.log("Reply response:", response);
 
-      if (response.success) {
+      // Check for successful response (status 201 or success flag)
+      if (response.status === 201 || response.data?.success) {
+        const responseData = response.data || response;
+        // Create a clean reply object without circular references
+        const commentData = responseData.data || responseData;
         const newReply = {
-          ...response.data,
-          author: user,
+          id: commentData.id || Date.now(),
+          content: commentData.content || replyData.content,
+          article_id: commentData.article_id || replyData.article_id,
+          user_id: commentData.user_id || user?.id,
+          parent_id: commentData.parent_id || replyData.parent_id,
+          status: commentData.status || 'pending',
+          created_at: commentData.created_at || new Date().toISOString(),
+          updated_at: commentData.updated_at || new Date().toISOString(),
+          author: commentData.author || {
+            id: user?.id,
+            username: user?.username,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            avatar: user?.avatar
+          },
           replies: [],
           upvotes: 0,
           downvotes: 0,
         };
 
-        // Add the reply to the comments list
-        setComments([...comments, newReply]);
+        // Add the reply to the comments list using functional update
+        setComments(prevComments => [...(prevComments || []), newReply]);
 
-        return response.data;
+        return newReply;
       } else {
         throw new Error(response.error?.message || "Failed to post reply");
       }
@@ -164,11 +204,11 @@ const NestedCommentsSection = ({
       const response = await apiService.comments.update(commentId, updateData);
 
       if (response.success) {
-        // Update the comment in the list
-        setComments(
-          comments.map((comment) =>
+        // Update the comment in the list using functional update
+        setComments(prevComments =>
+          prevComments.map(comment =>
             comment.id === commentId
-              ? { ...comment, ...updateData, updated_at: new Date() }
+              ? { ...comment, ...updateData, updated_at: new Date().toISOString() }
               : comment
           )
         );
@@ -200,7 +240,7 @@ const NestedCommentsSection = ({
           });
         };
 
-        setComments(removeCommentAndReplies(comments, commentId));
+        setComments(prevComments => removeCommentAndReplies(prevComments || [], commentId));
       } else {
         throw new Error(response.error?.message || "Failed to delete comment");
       }
@@ -246,9 +286,9 @@ const NestedCommentsSection = ({
       });
 
       if (response.success) {
-        // Update vote counts in the comment
-        setComments(
-          comments.map((comment) => {
+        // Update vote counts in the comment using functional update
+        setComments(prevComments =>
+          (prevComments || []).map(comment => {
             if (comment.id === commentId) {
               const updatedComment = { ...comment };
 
@@ -280,10 +320,13 @@ const NestedCommentsSection = ({
    * Get sorted and filtered comments
    */
   const getSortedAndFilteredComments = () => {
+    // Ensure comments is an array
+    const commentsArray = Array.isArray(comments) ? comments : [];
+    
     // Filter comments
-    let filtered = comments;
+    let filtered = commentsArray;
     if (filterStatus !== "all") {
-      filtered = comments.filter((comment) => comment.status === filterStatus);
+      filtered = commentsArray.filter((comment) => comment.status === filterStatus);
     }
 
     // Get only top-level comments (no parent_id)

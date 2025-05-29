@@ -22,7 +22,7 @@ export const useArticles = (filters = {}, options = {}) => {
 
   const fetchArticles = async () => {
     try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
       console.log("🔄 useArticles: Starting fetch...");
 
@@ -113,7 +113,8 @@ export const useArticles = (filters = {}, options = {}) => {
   // Fetch articles when component mounts or filters change
   useEffect(() => {
     fetchArticles();
-  }, [filters.tag, filters.search, filters.limit]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.tag, filters.search, filters.limit]); // Only re-fetch when filters actually change
 
   // Function to change page (simplified for now)
   const changePage = (newPage) => {
@@ -160,7 +161,7 @@ export const useArticle = (id, options = {}) => {
 
     const fetchArticle = async () => {
       try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
+        setState(prev => ({ ...prev, loading: true, error: null }));
 
         const response = await apiService.articles.getById(id);
 
@@ -206,7 +207,7 @@ export const useArticleBySlug = (slug, options = {}) => {
 
     const fetchArticle = async () => {
       try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
+        setState(prev => ({ ...prev, loading: true, error: null }));
 
         const response = await apiService.articles.getBySlug(slug);
 

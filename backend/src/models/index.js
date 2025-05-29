@@ -19,6 +19,10 @@ Comment.belongsTo(User, { foreignKey: "user_id", as: "author" });
 Article.hasMany(Comment, { foreignKey: "article_id", as: "comments" });
 Comment.belongsTo(Article, { foreignKey: "article_id", as: "article" });
 
+// Self-referencing association for nested comments
+Comment.hasMany(Comment, { foreignKey: "parent_id", as: "replies" });
+Comment.belongsTo(Comment, { foreignKey: "parent_id", as: "parent" });
+
 // ArticleTags junction table
 Article.belongsToMany(Tag, { through: "article_tags", as: "tags" });
 Tag.belongsToMany(Article, { through: "article_tags", as: "articles" });
