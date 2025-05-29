@@ -384,6 +384,92 @@ class ApiService {
   };
 
   // =============================================================================
+  // Newsletter ENDPOINTS
+  // =============================================================================
+  newsletter = {
+    /**
+     * Subscribe to newsletter
+     */
+    subscribe: async (email) => {
+      const response = await this.request({
+        method: "POST",
+        url: "/newsletter/subscribe",
+        data: { email },
+      });
+      
+      // Extract the actual data from the wrapped response
+      if (response.success && response.data) {
+        return response.data;
+      }
+      
+      throw new Error(response.error?.message || "Failed to subscribe");
+    },
+
+    /**
+     * Unsubscribe from newsletter
+     */
+    unsubscribe: async (token) => {
+      const response = await this.request({
+        method: "GET",
+        url: `/newsletter/unsubscribe/${token}`,
+      });
+      
+      if (response.success && response.data) {
+        return response.data;
+      }
+      
+      throw new Error(response.error?.message || "Failed to unsubscribe");
+    },
+
+    /**
+     * Check subscription status
+     */
+    checkStatus: async (email) => {
+      const response = await this.request({
+        method: "GET",
+        url: `/newsletter/status/${encodeURIComponent(email)}`,
+      });
+      
+      if (response.success && response.data) {
+        return response.data;
+      }
+      
+      throw new Error(response.error?.message || "Failed to check status");
+    },
+
+    /**
+     * Get subscribers (admin only)
+     */
+    getSubscribers: async (params = {}) => {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await this.request({
+        method: "GET",
+        url: `/newsletter/subscribers${queryString ? `?${queryString}` : ""}`,
+      });
+      
+      // Extract the actual data from the wrapped response
+      if (response.success && response.data) {
+        return response.data;
+      }
+      
+      throw new Error(response.error?.message || "Failed to fetch subscribers");
+    },
+
+    /**
+     * Export subscribers (admin only)
+     */
+    exportSubscribers: async (status = "active") => {
+      const response = await this.client({
+        method: "GET",
+        url: `/newsletter/export?status=${status}`,
+        responseType: "blob",
+      });
+      
+      return response.data;
+    },
+  };
+
+  // =============================================================================
   // Comment ENDPOINTS
   // =============================================================================
   comments = {

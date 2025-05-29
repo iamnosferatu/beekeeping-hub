@@ -32,12 +32,13 @@ const MainLayout = () => {
       }}
     >
       {apiStatusBarComponent}
-      {alertBannerComponent}
       {headerComponent}
 
       <Container fluid className="main-container py-4">
         <div className="row">
           <div className="col-lg-8 content-area">
+            {alertBannerComponent}
+            <br></br>
             <Outlet />
           </div>
 

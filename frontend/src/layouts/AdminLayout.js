@@ -12,7 +12,8 @@ import {
   BsList,
   BsX,
   BsTools,
-  BsTag, // Add this import
+  BsTag,
+  BsEnvelope,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
@@ -57,6 +58,11 @@ const AdminLayout = () => {
       path: "/admin/users",
       icon: <BsPeople size={20} />,
       label: "Users",
+    },
+    {
+      path: "/admin/newsletter",
+      icon: <BsEnvelope size={20} />,
+      label: "Newsletter",
     },
     {
       path: "/admin/settings",

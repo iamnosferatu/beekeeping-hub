@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { BsShieldExclamation } from "react-icons/bs";
 import ArticleList from "../components/articles/ArticleList";
 import AuthContext from "../contexts/AuthContext";
+import BackToTopButton from "../components/common/BackToTopButton";
 
 /**
  * HomePage Component
@@ -95,6 +96,9 @@ const HomePage = () => {
           Login
         </Button>
       </div>
+      
+      {/* Back to Top Button */}
+      <BackToTopButton />
     </div>
   );
 };

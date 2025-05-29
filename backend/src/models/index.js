@@ -9,6 +9,7 @@ const Comment = require("./Comment")(sequelize, DataTypes);
 const Tag = require("./Tag")(sequelize, DataTypes);
 const Like = require("./Like")(sequelize, DataTypes);
 const SiteSettings = require("./SiteSettings")(sequelize, DataTypes);
+const Newsletter = require("./Newsletter")(sequelize, DataTypes);
 
 
 // Define relationships
@@ -47,4 +48,5 @@ module.exports = {
   Tag,
   Like,
   SiteSettings,
+  Newsletter,
 };

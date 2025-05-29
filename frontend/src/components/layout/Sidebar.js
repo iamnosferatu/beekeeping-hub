@@ -1,9 +1,10 @@
 // frontend/src/components/layout/Sidebar.js
 import React, { useState, useEffect } from "react";
-import { Card, ListGroup, Badge, Alert, Spinner } from "react-bootstrap";
+import { Card, ListGroup, Badge, Alert, Spinner, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
+import api from "../../services/api";
 
 /**
  * Sidebar Component
@@ -21,6 +22,12 @@ const Sidebar = () => {
   const [recentArticles, setRecentArticles] = useState([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
   const [articlesError, setArticlesError] = useState(null);
+
+  // State for newsletter
+  const [email, setEmail] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState(null);
+  const [newsletterError, setNewsletterError] = useState(null);
 
   /**
    * Fetch tags from the API
@@ -100,6 +107,47 @@ const Sidebar = () => {
       setRecentArticles([]);
     } finally {
       setArticlesLoading(false);
+    }
+  };
+
+  /**
+   * Handle newsletter subscription
+   */
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Clear previous messages
+    setNewsletterMessage(null);
+    setNewsletterError(null);
+    
+    if (!email) {
+      setNewsletterError("Please enter your email address");
+      return;
+    }
+    
+    try {
+      setNewsletterLoading(true);
+      const response = await api.newsletter.subscribe(email);
+      
+      if (response.success) {
+        setNewsletterMessage(response.message || "Thank you for subscribing!");
+        setEmail(""); // Clear the form
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setNewsletterMessage(null);
+        }, 5000);
+      } else {
+        setNewsletterError(response.message || "Failed to subscribe");
+      }
+    } catch (error) {
+      console.error("Newsletter subscription error:", error);
+      setNewsletterError(
+        error.response?.data?.message || 
+        "Unable to subscribe. Please try again later."
+      );
+    } finally {
+      setNewsletterLoading(false);
     }
   };
 
@@ -257,26 +305,53 @@ const Sidebar = () => {
           <p className="mb-3">
             Subscribe to our newsletter for the latest beekeeping tips and news.
           </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              // Handle newsletter signup
-              alert("Newsletter signup coming soon!");
-            }}
-          >
+          
+          {newsletterMessage && (
+            <Alert variant="success" className="mb-3" dismissible onClose={() => setNewsletterMessage(null)}>
+              {newsletterMessage}
+            </Alert>
+          )}
+          
+          {newsletterError && (
+            <Alert variant="danger" className="mb-3" dismissible onClose={() => setNewsletterError(null)}>
+              {newsletterError}
+            </Alert>
+          )}
+          
+          <Form onSubmit={handleNewsletterSubmit}>
             <div className="input-group">
-              <input
+              <Form.Control
                 type="email"
-                className="form-control"
                 placeholder="Your email"
                 aria-label="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={newsletterLoading}
                 required
               />
-              <button className="btn btn-primary" type="submit">
-                Subscribe
+              <button 
+                className="btn btn-primary" 
+                type="submit"
+                disabled={newsletterLoading || !email}
+              >
+                {newsletterLoading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-1"
+                    />
+                    Subscribing...
+                  </>
+                ) : (
+                  "Subscribe"
+                )}
               </button>
             </div>
-          </form>
+          </Form>
           <small className="text-muted d-block mt-2">
             We respect your privacy. Unsubscribe at any time.
           </small>

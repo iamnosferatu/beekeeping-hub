@@ -11,11 +11,13 @@ import {
   Image,
   Modal,
   Badge,
+  Spinner,
 } from "react-bootstrap";
-import { BsPencil, BsShieldLock, BsUpload, BsTrash } from "react-icons/bs";
+import { BsPencil, BsShieldLock, BsUpload, BsTrash, BsEnvelope, BsCheckCircle, BsXCircle } from "react-icons/bs";
 import AuthContext from "../contexts/AuthContext";
 import * as Yup from "yup";
 import { Formik } from "formik";
+import api from "../services/api";
 import "./ProfilePage.scss";
 
 const ProfilePage = () => {
@@ -27,6 +29,12 @@ const ProfilePage = () => {
   );
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
+  
+  // Newsletter subscription state
+  const [newsletterStatus, setNewsletterStatus] = useState(null);
+  const [newsletterLoading, setNewsletterLoading] = useState(true);
+  const [newsletterError, setNewsletterError] = useState(null);
+  const [newsletterActionLoading, setNewsletterActionLoading] = useState(false);
 
   // Profile update validation schema
   const profileValidationSchema = Yup.object().shape({
@@ -114,6 +122,62 @@ const ProfilePage = () => {
   const handleRemoveImage = () => {
     setProfileImage("/api/placeholder/200/200");
   };
+
+  // Check newsletter subscription status
+  const checkNewsletterStatus = async () => {
+    if (!user?.email) return;
+    
+    try {
+      setNewsletterLoading(true);
+      setNewsletterError(null);
+      const response = await api.newsletter.checkStatus(user.email);
+      setNewsletterStatus(response.data);
+    } catch (error) {
+      console.error("Error checking newsletter status:", error);
+      setNewsletterError("Unable to check newsletter status");
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
+
+  // Handle newsletter subscribe
+  const handleNewsletterSubscribe = async () => {
+    try {
+      setNewsletterActionLoading(true);
+      setNewsletterError(null);
+      await api.newsletter.subscribe(user.email);
+      setSuccessMessage("Successfully subscribed to newsletter!");
+      await checkNewsletterStatus(); // Refresh status
+    } catch (error) {
+      console.error("Newsletter subscribe error:", error);
+      setNewsletterError("Failed to subscribe to newsletter");
+    } finally {
+      setNewsletterActionLoading(false);
+    }
+  };
+
+  // Handle newsletter unsubscribe
+  const handleNewsletterUnsubscribe = async () => {
+    if (!newsletterStatus?.token) return;
+    
+    try {
+      setNewsletterActionLoading(true);
+      setNewsletterError(null);
+      await api.newsletter.unsubscribe(newsletterStatus.token);
+      setSuccessMessage("Successfully unsubscribed from newsletter");
+      await checkNewsletterStatus(); // Refresh status
+    } catch (error) {
+      console.error("Newsletter unsubscribe error:", error);
+      setNewsletterError("Failed to unsubscribe from newsletter");
+    } finally {
+      setNewsletterActionLoading(false);
+    }
+  };
+
+  // Check newsletter status on component mount
+  React.useEffect(() => {
+    checkNewsletterStatus();
+  }, [user?.email]);
 
   return (
     <Container className="profile-page py-5">
@@ -298,7 +362,7 @@ const ProfilePage = () => {
                 </Card>
 
                 {/* Account Security Section */}
-                <Card className="shadow-sm">
+                <Card className="shadow-sm mb-4">
                   <Card.Header>
                     <h5 className="mb-0">Account Security</h5>
                   </Card.Header>
@@ -319,6 +383,90 @@ const ProfilePage = () => {
                         Change Password
                       </Button>
                     </div>
+                  </Card.Body>
+                </Card>
+
+                {/* Newsletter Subscription Section */}
+                <Card className="shadow-sm">
+                  <Card.Header>
+                    <h5 className="mb-0">Newsletter Subscription</h5>
+                  </Card.Header>
+                  <Card.Body>
+                    {newsletterError && (
+                      <Alert variant="danger" dismissible onClose={() => setNewsletterError(null)} className="mb-3">
+                        {newsletterError}
+                      </Alert>
+                    )}
+                    
+                    {newsletterLoading ? (
+                      <div className="text-center py-3">
+                        <Spinner animation="border" size="sm" />
+                        <p className="mt-2 mb-0">Checking subscription status...</p>
+                      </div>
+                    ) : (
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 className="mb-1 d-flex align-items-center">
+                            <BsEnvelope className="me-2" />
+                            Newsletter Status
+                          </h6>
+                          {newsletterStatus?.isSubscribed ? (
+                            <>
+                              <p className="text-success mb-1 d-flex align-items-center">
+                                <BsCheckCircle className="me-2" />
+                                You are subscribed to our newsletter
+                              </p>
+                              <small className="text-muted">
+                                Subscribed since {new Date(newsletterStatus.subscribed_at).toLocaleDateString()}
+                              </small>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-muted mb-1 d-flex align-items-center">
+                                <BsXCircle className="me-2" />
+                                You are not subscribed to our newsletter
+                              </p>
+                              <small className="text-muted">
+                                Stay updated with the latest beekeeping tips and news
+                              </small>
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          {newsletterStatus?.isSubscribed ? (
+                            <Button
+                              variant="outline-danger"
+                              onClick={handleNewsletterUnsubscribe}
+                              disabled={newsletterActionLoading}
+                            >
+                              {newsletterActionLoading ? (
+                                <>
+                                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Unsubscribe"
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="primary"
+                              onClick={handleNewsletterSubscribe}
+                              disabled={newsletterActionLoading}
+                            >
+                              {newsletterActionLoading ? (
+                                <>
+                                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Subscribe"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>

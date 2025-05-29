@@ -1,6 +1,7 @@
 // frontend/src/pages/ArticleListPage.js
 import React from "react";
 import ArticleList from "../components/articles/ArticleList";
+import BackToTopButton from "../components/common/BackToTopButton";
 
 const ArticleListPage = () => {
   return (
@@ -12,6 +13,9 @@ const ArticleListPage = () => {
       </p>
 
       <ArticleList />
+      
+      {/* Back to Top Button */}
+      <BackToTopButton />
     </div>
   );
 };
