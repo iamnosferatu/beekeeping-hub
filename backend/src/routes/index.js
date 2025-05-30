@@ -10,6 +10,8 @@ const tagRoutes = require("./tagRoutes");
 const adminRoutes = require("./adminRoutes");
 const siteSettingsRoutes = require("./siteSettingsRoutes");
 const newsletterRoutes = require("./newsletterRoutes");
+const contactRoutes = require("./contactRoutes");
+const likeRoutes = require("./likeRoutes");
 
 // API root
 router.get("/", (req, res) => {
@@ -26,6 +28,9 @@ router.get("/", (req, res) => {
       "/tags",
       "/admin",
       "/site-settings",
+      "/newsletter",
+      "/contact",
+      "/likes",
       "/health",
     ],
   });
@@ -39,6 +44,8 @@ router.use("/tags", tagRoutes);
 router.use("/admin", adminRoutes);
 router.use("/site-settings", siteSettingsRoutes);
 router.use("/newsletter", newsletterRoutes);
+router.use("/contact", contactRoutes);
+router.use("/likes", likeRoutes);
 
 // API health check
 router.get("/health", (req, res) => {

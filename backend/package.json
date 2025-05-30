@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "test": "jest",
-    "seed": "node src/seeds/seed.js",
+    "seed": "node src/seeds/seed-data.js",
     "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "axios": "^1.9.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",

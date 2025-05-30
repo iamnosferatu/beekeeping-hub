@@ -1,9 +1,8 @@
 // frontend/src/components/articles/ArticleHeader.js
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { Card, Badge, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import {
-  BsFillHeartFill,
   BsEye,
   BsChat,
   BsPerson,
@@ -12,6 +11,7 @@ import {
 } from "react-icons/bs";
 import moment from "moment";
 import AuthContext from "../../contexts/AuthContext";
+import LikeButton from "./LikeButton";
 
 /**
  * ArticleHeader Component
@@ -23,43 +23,6 @@ import AuthContext from "../../contexts/AuthContext";
  */
 const ArticleHeader = ({ article }) => {
   const { user } = useContext(AuthContext);
-
-  // Initialize like state based on user's previous like
-  const [liked, setLiked] = useState(
-    article.likes?.some((like) => like.user_id === user?.id) || false
-  );
-  const [likeCount, setLikeCount] = useState(article.like_count || 0);
-  const [liking, setLiking] = useState(false);
-
-  /**
-   * Handle like/unlike toggle
-   */
-  const handleLikeToggle = async () => {
-    // Check if user is authenticated
-    if (!user) {
-      // Redirect to login with return URL
-      window.location.href = `/login?redirect=/articles/${article.slug}`;
-      return;
-    }
-
-    try {
-      setLiking(true);
-
-      // TODO: Implement actual API call when backend is ready
-      console.log("Toggling like for article:", article.id);
-
-      // For now, just toggle the local state
-      setLiked(!liked);
-      setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      // Revert state on error
-      setLiked(liked);
-      setLikeCount(article.like_count || 0);
-    } finally {
-      setLiking(false);
-    }
-  };
 
   /**
    * Format author display name
@@ -170,25 +133,14 @@ const ArticleHeader = ({ article }) => {
               </span>
 
               {/* Likes */}
-              <span
-                className={`me-3 ${liked ? "text-danger" : ""} ${
-                  !liking ? "cursor-pointer" : ""
-                }`}
-                onClick={!liking ? handleLikeToggle : undefined}
-                style={{ cursor: liking ? "wait" : "pointer" }}
-                title={liked ? "Unlike" : "Like"}
-                role="button"
-                tabIndex={0}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleLikeToggle();
-                  }
-                }}
-              >
-                <BsFillHeartFill className="me-1" />
-                {likeCount}
-              </span>
+              <div className="me-3">
+                <LikeButton
+                  articleId={article.id}
+                  initialLikeCount={article.like_count || 0}
+                  initialIsLiked={article.is_liked || false}
+                  size="sm"
+                />
+              </div>
 
               {/* Comments */}
               <span title="Comments">

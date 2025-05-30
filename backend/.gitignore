@@ -24,3 +24,6 @@ node_modules/
 # Build outputs
 dist/
 build/
+
+# Upload directories
+uploads/

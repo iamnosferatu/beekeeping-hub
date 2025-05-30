@@ -1,0 +1,48 @@
+// frontend/src/components/articles/LikeButton.scss
+.like-button {
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.05);
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  
+  &.like-animating {
+    animation: likeAnimation 0.3s ease-out;
+  }
+  
+  .like-count {
+    font-weight: 500;
+    min-width: 20px;
+    text-align: left;
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Heart fill animation
+.like-button svg {
+  transition: transform 0.2s ease;
+}
+
+.like-button:hover svg {
+  transform: scale(1.1);
+}

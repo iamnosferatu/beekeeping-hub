@@ -15,3 +15,4 @@ export * from "./api/useAuth";
 export * from "./api/useComments";
 export * from "./api/useTags";
 export * from "./api/useAdmin";
+export * from "./api/useLikes";

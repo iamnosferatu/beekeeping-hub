@@ -2,6 +2,8 @@
 const express = require("express");
 const { protect } = require("../middleware/auth");
 const authController = require("../controllers/authController");
+const uploadController = require("../controllers/uploadController");
+const { uploadAvatar } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -230,5 +232,9 @@ router.put("/profile", protect, authController.updateProfile);
  *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.put("/password", protect, authController.changePassword);
+
+// Avatar upload routes
+router.post("/avatar", protect, uploadAvatar.single("avatar"), uploadController.uploadAvatar);
+router.delete("/avatar", protect, uploadController.deleteAvatar);
 
 module.exports = router;

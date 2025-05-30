@@ -36,6 +36,7 @@ import AdminTagsPage from "./pages/admin/TagsPage";
 import AdminDiagnosticsPage from "./pages/admin/DiagnosticsPage";
 import AdminSiteSettingsPage from "./pages/admin/SiteSettingsPage";
 import AdminNewsletterPage from "./pages/admin/NewsletterPage";
+import AdminContactMessagesPage from "./pages/admin/ContactMessagesPage";
 
 // Auth Guards
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -140,6 +141,7 @@ function App() {
         <Route path="tags" element={<AdminTagsPage />} />
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="newsletter" element={<AdminNewsletterPage />} />
+        <Route path="contact" element={<AdminContactMessagesPage />} />
         <Route path="settings" element={<AdminSiteSettingsPage />} />
         <Route path="diagnostics" element={<AdminDiagnosticsPage />} />
       </Route>

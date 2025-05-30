@@ -12,10 +12,20 @@ const seedDatabase = async () => {
 
     // Import models and sequelize instance
     // This is the key fix - we need to import from the models/index.js file
-    const { sequelize, User, Article, Tag, Comment } = require("../models");
+    const { 
+      sequelize, 
+      User, 
+      Article, 
+      Tag, 
+      Comment, 
+      Like, 
+      Newsletter, 
+      Contact, 
+      SiteSettings 
+    } = require("../models");
 
     // Verify models are loaded
-    if (!User || !Article || !Tag || !Comment) {
+    if (!User || !Article || !Tag || !Comment || !Like || !Newsletter || !Contact || !SiteSettings) {
       throw new Error(
         "Models not properly loaded. Check your models/index.js file."
       );

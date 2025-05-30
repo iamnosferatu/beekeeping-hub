@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { formatAuthorName } from "../../utils/formatters";
 import { getAuthorUrl } from "../../utils/urlHelpers";
+import { getAvatarUrl } from "../../utils/imageHelpers";
 import { ARIA_LABELS } from "../../constants";
 
 /**
@@ -26,9 +27,9 @@ const ArticleAuthor = ({
       className={`author-info d-flex align-items-center ${className}`}
       aria-label={ARIA_LABELS.ARTICLE.AUTHOR}
     >
-      {showAvatar && author.avatar && (
+      {showAvatar && (
         <img
-          src={author.avatar}
+          src={getAvatarUrl(author.avatar)}
           alt={`${authorName} avatar`}
           className={`rounded-circle me-2 ${
             size === "sm" ? "author-avatar-sm" : "author-avatar"

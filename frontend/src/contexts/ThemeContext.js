@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect } from "react";
 
 // Available themes
 const themes = {
-  default: {
+/*   default: {
     name: "Default",
     primaryColor: "#ffc107", // Honey yellow
     secondaryColor: "#6c757d",
@@ -17,7 +17,7 @@ const themes = {
     navbarText: "#212529",
     footerBg: "#f8f9fa",
     footerText: "#6c757d",
-  },
+  }, */
   dark: {
     name: "Dark",
     primaryColor: "#ffc107", // Honey yellow
@@ -48,7 +48,7 @@ const themes = {
     footerBg: "#28a745",
     footerText: "#ffffff",
   },
-  elegant: {
+/*   elegant: {
     name: "Elegant",
     primaryColor: "#d4af37", // Gold
     secondaryColor: "#343a40",
@@ -62,7 +62,7 @@ const themes = {
     navbarText: "#d4af37",
     footerBg: "#343a40",
     footerText: "#d4af37",
-  },
+  }, */
 };
 
 // Create context

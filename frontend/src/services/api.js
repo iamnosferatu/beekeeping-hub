@@ -381,6 +381,27 @@ class ApiService {
         data: passwordData,
       });
     },
+
+    uploadAvatar: async (file) => {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      return this.request({
+        method: "POST",
+        url: "/auth/avatar",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
+
+    deleteAvatar: async () => {
+      return this.request({
+        method: "DELETE",
+        url: "/auth/avatar",
+      });
+    },
   };
 
   // =============================================================================
@@ -572,6 +593,53 @@ class ApiService {
     },
   };
   
+  // =============================================================================
+  // LIKES ENDPOINTS
+  // =============================================================================
+  likes = {
+    /**
+     * Toggle like on an article
+     */
+    toggleLike: async (articleId) => {
+      return this.request({
+        method: "POST",
+        url: `/likes/articles/${articleId}/toggle`,
+      });
+    },
+
+    /**
+     * Get like status for a specific article
+     */
+    getLikeStatus: async (articleId) => {
+      return this.request({
+        method: "GET",
+        url: `/likes/articles/${articleId}/status`,
+      });
+    },
+
+    /**
+     * Get all articles liked by the current user
+     */
+    getUserLikedArticles: async (page = 1, limit = 10) => {
+      const params = new URLSearchParams({ page, limit }).toString();
+      return this.request({
+        method: "GET",
+        url: `/likes/user/liked-articles?${params}`,
+      });
+    },
+
+    /**
+     * Get users who liked a specific article
+     */
+    getArticleLikers: async (articleId, page = 1, limit = 20) => {
+      const params = new URLSearchParams({ page, limit }).toString();
+      return this.request({
+        method: "GET",
+        url: `/likes/articles/${articleId}/likers?${params}`,
+      });
+    },
+  };
+
   // =============================================================================
   // OTHER ENDPOINTS
   // =============================================================================

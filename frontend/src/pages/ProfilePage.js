@@ -18,15 +18,17 @@ import AuthContext from "../contexts/AuthContext";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import api from "../services/api";
+import { getAvatarUrl, getPlaceholderAvatar } from "../utils/imageHelpers";
 import "./ProfilePage.scss";
 
 const ProfilePage = () => {
-  const { user, updateProfile, changePassword, error, clearError } =
+  const { user, updateProfile, changePassword, updateUserData, error: authError, clearError } =
     useContext(AuthContext);
+  const [error, setError] = useState(null);
 
-  const [profileImage, setProfileImage] = useState(
-    user?.avatar || "/api/placeholder/200/200"
-  );
+  const [profileImage, setProfileImage] = useState(() => {
+    return getAvatarUrl(user?.avatar);
+  });
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   
@@ -65,15 +67,42 @@ const ProfilePage = () => {
       .oneOf([Yup.ref("newPassword")], "Passwords must match"),
   });
 
-  // Handle image upload simulation
-  const handleImageUpload = (event) => {
+  // Handle image upload
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        clearError();
+        setSuccessMessage(null);
+        
+        // Show loading state
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to server
+        const response = await api.auth.uploadAvatar(file);
+        
+        if (response.success) {
+          // Update profile image with server URL
+          const serverUrl = getAvatarUrl(response.data.avatar);
+          setProfileImage(serverUrl);
+          
+          // Update user context with new data
+          if (response.data.user) {
+            updateUserData({ avatar: response.data.avatar });
+          }
+          
+          setSuccessMessage("Avatar uploaded successfully");
+        }
+      } catch (error) {
+        console.error("Avatar upload error:", error);
+        setError(error.message || "Failed to upload avatar");
+        // Reset to previous image
+        setProfileImage(getAvatarUrl(user?.avatar));
+      }
     }
   };
 
@@ -86,7 +115,7 @@ const ProfilePage = () => {
         lastName: values.lastName,
         email: values.email,
         bio: values.bio,
-        avatar: profileImage,
+        // Note: avatar is now handled separately via upload
       });
 
       setSuccessMessage("Profile updated successfully");
@@ -119,9 +148,31 @@ const ProfilePage = () => {
   };
 
   // Remove profile image
-  const handleRemoveImage = () => {
-    setProfileImage("/api/placeholder/200/200");
+  const handleRemoveImage = async () => {
+    try {
+      clearError();
+      setSuccessMessage(null);
+      
+      const response = await api.auth.deleteAvatar();
+      
+      if (response.success) {
+        setProfileImage(getPlaceholderAvatar());
+        
+        // Update user context
+        updateUserData({ avatar: null });
+        
+        setSuccessMessage("Avatar removed successfully");
+      }
+    } catch (error) {
+      console.error("Avatar delete error:", error);
+      setError(error.message || "Failed to remove avatar");
+    }
   };
+
+  // Update profile image when user changes
+  React.useEffect(() => {
+    setProfileImage(getAvatarUrl(user?.avatar));
+  }, [user?.avatar]);
 
   // Check newsletter subscription status
   const checkNewsletterStatus = async () => {
@@ -195,9 +246,12 @@ const ProfilePage = () => {
       )}
 
       {/* Error Message */}
-      {error && (
-        <Alert variant="danger" dismissible onClose={clearError}>
-          {error}
+      {(error || authError) && (
+        <Alert variant="danger" dismissible onClose={() => {
+          setError(null);
+          clearError();
+        }}>
+          {error || authError}
         </Alert>
       )}
 

@@ -220,6 +220,13 @@ export const AuthProvider = ({ children }) => {
 
   // Clear error
   const clearError = () => setError(null);
+  
+  // Update user data (for avatar updates, etc.)
+  const updateUserData = (updates) => {
+    if (user) {
+      setUser({ ...user, ...updates });
+    }
+  };
 
   // Check if user is authenticated
   const isAuthenticated = !!user && !!token;
@@ -243,6 +250,7 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     hasRole,
     clearError,
+    updateUserData,
     isAuthenticated,
     isAdmin,
     canCreateContent,

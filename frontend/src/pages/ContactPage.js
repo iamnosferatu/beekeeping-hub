@@ -408,7 +408,7 @@ const ContactPage = () => {
               </Card>
 
               {/* Quick Links */}
-              <Card className="mt-4">
+              {/*<Card className="mt-4">
                 <Card.Body>
                   <h6 className="mb-3">Quick Links</h6>
                   <ul className="list-unstyled mb-0">
@@ -434,13 +434,13 @@ const ContactPage = () => {
                     </li>
                   </ul>
                 </Card.Body>
-              </Card>
+              </Card> */}
             </div>
           </Col>
         </Row>
 
         {/* Map Section (Optional) */}
-        <Row className="mb-5">
+{/*         <Row className="mb-5">
           <Col>
             <Card className="shadow-sm">
               <Card.Body className="p-0">
@@ -459,7 +459,7 @@ const ContactPage = () => {
               </Card.Body>
             </Card>
           </Col>
-        </Row>
+        </Row> */}
       </Container>
     </div>
   );

@@ -174,7 +174,7 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { firstName, lastName, bio, email } = req.body;
+    const { firstName, lastName, bio, email, avatar } = req.body;
 
     console.log(`Profile update for user ID: ${req.user.id}`);
 
@@ -204,6 +204,7 @@ exports.updateProfile = async (req, res, next) => {
     user.last_name = lastName || user.last_name;
     user.bio = bio !== undefined ? bio : user.bio;
     user.email = email || user.email;
+    // Note: avatar is now handled via separate upload endpoint
 
     // Save changes
     await user.save();

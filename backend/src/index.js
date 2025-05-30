@@ -17,10 +17,21 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing for images
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "http://localhost:3000", "http://localhost:8080"],
+    },
+  },
+})); // Security headers
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded requests
+
+// Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Logging
 if (process.env.NODE_ENV === "development") {

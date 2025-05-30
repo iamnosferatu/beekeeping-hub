@@ -200,10 +200,21 @@ exports.getArticles = async (req, res, next) => {
         articleJson.comment_count = articleJson.comments.length;
       }
 
-      // Count likes
+      // Count likes and check if current user has liked
       if (articleJson.Likes) {
         articleJson.like_count = articleJson.Likes.length;
+        // Check if current user has liked this article
+        if (req.user) {
+          articleJson.is_liked = articleJson.Likes.some(
+            (like) => like.user_id === req.user.id
+          );
+        } else {
+          articleJson.is_liked = false;
+        }
         delete articleJson.Likes; // Remove likes array from response
+      } else {
+        articleJson.like_count = 0;
+        articleJson.is_liked = false;
       }
 
       return articleJson;
@@ -264,6 +275,11 @@ exports.getArticleById = async (req, res, next) => {
             },
           ],
         },
+        {
+          model: Like,
+          attributes: ["id", "user_id"],
+          required: false,
+        },
       ],
     });
 
@@ -289,9 +305,29 @@ exports.getArticleById = async (req, res, next) => {
       }
     }
 
+    // Get article data and format likes
+    const articleData = article.toJSON();
+    
+    // Format likes for easier frontend handling
+    if (articleData.Likes) {
+      articleData.like_count = articleData.Likes.length;
+      // Check if current user has liked this article
+      if (req.user) {
+        articleData.is_liked = articleData.Likes.some(
+          (like) => like.user_id === req.user.id
+        );
+      } else {
+        articleData.is_liked = false;
+      }
+      delete articleData.Likes; // Remove likes array from response
+    } else {
+      articleData.like_count = 0;
+      articleData.is_liked = false;
+    }
+
     res.status(200).json({
       success: true,
-      data: article,
+      data: articleData,
     });
   } catch (error) {
     console.error("Error fetching article by ID:", error);
@@ -344,6 +380,18 @@ exports.getArticle = async (req, res, next) => {
     // Format likes for easier frontend handling
     if (articleData.Likes) {
       articleData.like_count = articleData.Likes.length;
+      // Check if current user has liked this article
+      if (req.user) {
+        articleData.is_liked = articleData.Likes.some(
+          (like) => like.user_id === req.user.id
+        );
+      } else {
+        articleData.is_liked = false;
+      }
+      delete articleData.Likes; // Remove likes array from response
+    } else {
+      articleData.like_count = 0;
+      articleData.is_liked = false;
     }
 
     res.status(200).json({

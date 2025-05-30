@@ -14,6 +14,7 @@ import {
   BsTools,
   BsTag,
   BsEnvelope,
+  BsInboxFill,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
@@ -63,6 +64,11 @@ const AdminLayout = () => {
       path: "/admin/newsletter",
       icon: <BsEnvelope size={20} />,
       label: "Newsletter",
+    },
+    {
+      path: "/admin/contact",
+      icon: <BsInboxFill size={20} />,
+      label: "Contact Messages",
     },
     {
       path: "/admin/settings",
