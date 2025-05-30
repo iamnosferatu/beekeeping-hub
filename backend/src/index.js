@@ -27,8 +27,8 @@ app.use(helmet({
   },
 })); // Security headers
 app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON requests
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded requests
+app.use(express.json({ limit: '50mb' })); // Parse JSON requests with increased limit
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Parse URL-encoded requests with increased limit
 
 // Serve static files from uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));

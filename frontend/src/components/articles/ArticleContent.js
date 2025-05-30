@@ -3,6 +3,7 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 import DOMPurify from "dompurify";
+import { ASSETS_URL } from "../../config";
 
 /**
  * ArticleContent Component
@@ -24,6 +25,17 @@ const ArticleContent = ({ article }) => {
     );
   }
 
+  // Configure DOMPurify hooks to fix relative image URLs
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'IMG' && node.hasAttribute('src')) {
+      const src = node.getAttribute('src');
+      // If the src starts with /uploads/, prepend the backend URL
+      if (src && src.startsWith('/uploads/')) {
+        node.setAttribute('src', `${ASSETS_URL}${src}`);
+      }
+    }
+  });
+
   // Sanitize HTML content to prevent XSS attacks
   const sanitizedContent = DOMPurify.sanitize(article.content, {
     // Allow common HTML tags and attributes
@@ -39,6 +51,9 @@ const ArticleContent = ({ article }) => {
     // Allow safe URL schemes
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
   });
+
+  // Remove the hook after use to prevent affecting other components
+  DOMPurify.removeHook('afterSanitizeAttributes');
 
   return (
     <Card className="mb-4 shadow-sm">

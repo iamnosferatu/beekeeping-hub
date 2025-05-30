@@ -1,7 +1,7 @@
 // backend/src/controllers/uploadController.js
 const fs = require("fs").promises;
 const path = require("path");
-const { User } = require("../models");
+const { User, Article } = require("../models");
 
 // @desc    Upload user avatar
 // @route   POST /api/auth/avatar
@@ -117,6 +117,82 @@ exports.deleteAvatar = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Avatar delete error:", error);
+    next(error);
+  }
+};
+
+// @desc    Upload article image
+// @route   POST /api/articles/upload-image
+// @access  Private (Authors and Admins)
+exports.uploadArticleImage = async (req, res, next) => {
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    // Return the uploaded image URL
+    const imageUrl = `/uploads/articles/${req.file.filename}`;
+    
+    res.status(200).json({
+      success: true,
+      message: "Image uploaded successfully",
+      url: imageUrl,
+      filename: req.file.filename,
+    });
+  } catch (error) {
+    // Delete uploaded file on error
+    if (req.file) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (unlinkError) {
+        console.error("Error deleting file:", unlinkError);
+      }
+    }
+    console.error("Article image upload error:", error);
+    next(error);
+  }
+};
+
+// @desc    Delete article image
+// @route   DELETE /api/articles/delete-image/:filename
+// @access  Private (Authors and Admins)
+exports.deleteArticleImage = async (req, res, next) => {
+  try {
+    const { filename } = req.params;
+    
+    // Validate filename to prevent directory traversal
+    if (!filename || filename.includes("..") || filename.includes("/")) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid filename",
+      });
+    }
+
+    const imagePath = path.join(__dirname, "../../uploads/articles", filename);
+    
+    // Check if file exists
+    try {
+      await fs.access(imagePath);
+    } catch (error) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found",
+      });
+    }
+
+    // Delete the file
+    await fs.unlink(imagePath);
+
+    res.status(200).json({
+      success: true,
+      message: "Image deleted successfully",
+    });
+  } catch (error) {
+    console.error("Article image delete error:", error);
     next(error);
   }
 };

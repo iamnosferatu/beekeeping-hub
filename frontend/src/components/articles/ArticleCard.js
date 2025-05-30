@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, Button, Badge, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { BsShieldExclamation } from "react-icons/bs";
 import AuthContext from "../../contexts/AuthContext";
+import { getImageUrl } from "../../utils/imageHelpers";
 // Import sub-components
 import ArticleImage from "./ArticleImage";
 import ArticleTags from "./ArticleTags";
@@ -120,7 +121,7 @@ const ArticleCard = ({
       {showImage && article.featured_image && (
         <div className="position-relative">
           <ArticleImage
-            src={article.featured_image}
+            src={getImageUrl(article.featured_image)}
             alt={article.title}
             articleUrl={articleUrl}
             loading={ARTICLE_CONFIG.IMAGE_LOADING}

@@ -1,9 +1,11 @@
 // frontend/src/components/editor/ArticleMetadata.js
 import React, { useState, useEffect } from "react";
-import { Card, Form, Badge } from "react-bootstrap";
+import { Card, Form, Badge, InputGroup } from "react-bootstrap";
 import { BsX } from "react-icons/bs";
 import axios from "axios";
 import { API_URL } from "../../config";
+import ImageUploadButton from "./ImageUploadButton";
+import { getImageUrl } from "../../utils/imageHelpers";
 
 /**
  * ArticleMetadata Component
@@ -69,6 +71,13 @@ const ArticleMetadata = ({ formData, onInputChange, onTagsChange }) => {
       !formData.tags.includes(tag.name)
   );
 
+  /**
+   * Handle featured image upload
+   */
+  const handleFeaturedImageUploaded = ({ url }) => {
+    onInputChange({ target: { name: 'featured_image', value: url } });
+  };
+
   return (
     <Card className="mb-4">
       <Card.Header>
@@ -77,21 +86,30 @@ const ArticleMetadata = ({ formData, onInputChange, onTagsChange }) => {
       <Card.Body>
         {/* Featured Image URL */}
         <Form.Group className="mb-4">
-          <Form.Label>Featured Image URL</Form.Label>
-          <Form.Control
-            type="url"
-            name="featured_image"
-            value={formData.featured_image}
-            onChange={onInputChange}
-            placeholder="https://example.com/image.jpg"
-          />
+          <Form.Label>Featured Image</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type="url"
+              name="featured_image"
+              value={formData.featured_image}
+              onChange={onInputChange}
+              placeholder="https://example.com/image.jpg or upload"
+            />
+            <ImageUploadButton 
+              onImageUploaded={handleFeaturedImageUploaded}
+              variant="outline-secondary"
+            />
+          </InputGroup>
           {formData.featured_image && (
             <div className="mt-2">
               <img
-                src={formData.featured_image}
+                src={getImageUrl(formData.featured_image)}
                 alt="Featured"
                 className="img-fluid rounded"
                 style={{ maxHeight: "150px" }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
               />
             </div>
           )}

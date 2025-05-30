@@ -12,6 +12,7 @@ import {
 import moment from "moment";
 import AuthContext from "../../contexts/AuthContext";
 import LikeButton from "./LikeButton";
+import { getImageUrl } from "../../utils/imageHelpers";
 
 /**
  * ArticleHeader Component
@@ -67,7 +68,7 @@ const ArticleHeader = ({ article }) => {
         {article.featured_image && (
           <div className="article-image-container">
             <img
-              src={article.featured_image}
+              src={getImageUrl(article.featured_image)}
               className="card-img-top article-featured-image"
               alt={article.title}
               style={{

@@ -3,6 +3,7 @@ import React from "react";
 import { Card, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { BsQuestionCircle } from "react-icons/bs";
 import TagSelector from "./TagSelector";
+import { getImageUrl } from "../../utils/imageHelpers";
 
 const ArticleMetadataPanel = ({
   formData,
@@ -37,7 +38,7 @@ const ArticleMetadataPanel = ({
       <Card.Body>
         <div className="featured-image-preview mb-3">
           <img
-            src={formData.featured_image || placeholderImage}
+            src={formData.featured_image ? getImageUrl(formData.featured_image) : placeholderImage}
             alt="Featured preview"
             className="img-fluid rounded"
             style={{

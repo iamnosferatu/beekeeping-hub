@@ -1,6 +1,7 @@
 // frontend/src/components/articles/ArticleImage.js
 import React from "react";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageHelpers";
 
 /**
  * ArticleImage Component
@@ -16,10 +17,14 @@ const ArticleImage = ({
   <div className={className}>
     <Link to={articleUrl}>
       <img
-        src={src}
+        src={getImageUrl(src)}
         className="card-img-top article-image"
         alt={alt}
         loading={loading}
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = '/api/placeholder/400/300';
+        }}
       />
     </Link>
   </div>

@@ -16,6 +16,7 @@ import {
   BsLayoutSplit,
   BsQuestionCircle,
 } from "react-icons/bs";
+import ImageUploadButton from "./ImageUploadButton";
 import "./MarkdownEditor.scss";
 
 const MarkdownEditor = ({ value, onChange, height = "400px" }) => {
@@ -176,6 +177,11 @@ function hello() {
       onChange(editorValue ? `${editorValue}\n\n${helpText}` : helpText);
   };
 
+  // Handle image upload
+  const handleImageUploaded = ({ markdown }) => {
+    insertAtCursor(markdown, "", "");
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-5" style={{ height }}>
@@ -248,6 +254,14 @@ function hello() {
         >
           <BsQuestionCircle />
         </Button>
+
+        <div className="ms-2 mb-1 d-inline-block">
+          <ImageUploadButton 
+            onImageUploaded={handleImageUploaded}
+            size="sm"
+            variant="light"
+          />
+        </div>
       </div>
 
       {/* Editor */}

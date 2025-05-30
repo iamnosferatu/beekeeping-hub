@@ -2,6 +2,8 @@
 const express = require("express");
 const { protect, authorize } = require("../middleware/auth");
 const articleController = require("../controllers/articleController");
+const { uploadArticleImage } = require("../middleware/upload");
+const uploadController = require("../controllers/uploadController");
 
 const router = express.Router();
 
@@ -451,5 +453,153 @@ router.get("/:articleId/comments", async (req, res) => {
     });
   }
 });
+
+/**
+ * @swagger
+ * /articles/upload-image:
+ *   post:
+ *     summary: Upload an image for an article
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: The image file to upload (JPEG, PNG, GIF, or WebP)
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Image uploaded successfully
+ *                 url:
+ *                   type: string
+ *                   example: /uploads/articles/article-1234567890-123456789.jpg
+ *                 filename:
+ *                   type: string
+ *                   example: article-1234567890-123456789.jpg
+ *       400:
+ *         description: Bad request - No file uploaded or invalid file type
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: No file uploaded
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       413:
+ *         description: File too large (max 10MB)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: File too large
+ */
+router.post(
+  "/upload-image",
+  protect,
+  authorize("author", "admin"),
+  uploadArticleImage.single("image"),
+  uploadController.uploadArticleImage
+);
+
+/**
+ * @swagger
+ * /articles/delete-image/{filename}:
+ *   delete:
+ *     summary: Delete an uploaded article image
+ *     tags: [Articles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The filename of the image to delete
+ *         example: article-1234567890-123456789.jpg
+ *     responses:
+ *       200:
+ *         description: Image deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Image deleted successfully
+ *       400:
+ *         description: Bad request - Invalid filename
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid filename
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         description: Image not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Image not found
+ */
+router.delete(
+  "/delete-image/:filename",
+  protect,
+  authorize("author", "admin"),
+  uploadController.deleteArticleImage
+);
 
 module.exports = router;

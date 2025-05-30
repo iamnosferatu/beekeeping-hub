@@ -33,6 +33,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.11.2",
     "express-validator": "^7.2.1",
+    "form-data": "^4.0.2",
     "helmet": "^6.1.5",
     "hpp": "^0.2.3",
     "ioredis": "^5.6.1",

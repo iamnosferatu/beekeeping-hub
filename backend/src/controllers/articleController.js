@@ -517,7 +517,20 @@ exports.updateArticle = async (req, res, next) => {
       }
     }
 
-    await article.save();
+    try {
+      await article.save();
+    } catch (saveError) {
+      console.error('Article save error details:', {
+        error: saveError.message,
+        sql: saveError.sql,
+        sqlMessage: saveError.parent?.sqlMessage,
+        errno: saveError.parent?.errno,
+        code: saveError.parent?.code,
+        contentLength: content ? content.length : 0,
+        featuredImageLength: featured_image ? featured_image.length : 0
+      });
+      throw saveError;
+    }
 
     // Handle tags if provided
     if (tags.length > 0) {

@@ -1,5 +1,5 @@
 // frontend/src/pages/ProfilePage.js
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import {
   Container,
   Row,
@@ -175,7 +175,7 @@ const ProfilePage = () => {
   }, [user?.avatar]);
 
   // Check newsletter subscription status
-  const checkNewsletterStatus = async () => {
+  const checkNewsletterStatus = useCallback(async () => {
     if (!user?.email) return;
     
     try {
@@ -189,7 +189,7 @@ const ProfilePage = () => {
     } finally {
       setNewsletterLoading(false);
     }
-  };
+  }, [user?.email, api.newsletter]);
 
   // Handle newsletter subscribe
   const handleNewsletterSubscribe = async () => {

@@ -26,6 +26,35 @@ export const getAvatarUrl = (avatarPath) => {
 };
 
 /**
+ * Get the full URL for any image (featured images, content images, etc.)
+ * @param {string} imagePath - The image path from the database
+ * @returns {string} The full URL to the image
+ */
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return '';
+  }
+
+  // If it's a relative path starting with /uploads/, prepend the backend URL
+  if (imagePath.startsWith('/uploads/')) {
+    return `${ASSETS_URL}${imagePath}`;
+  }
+
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // For any other relative paths, prepend ASSETS_URL
+  if (imagePath.startsWith('/')) {
+    return `${ASSETS_URL}${imagePath}`;
+  }
+
+  // Return as is for other cases
+  return imagePath;
+};
+
+/**
  * Get placeholder avatar URL
  * @returns {string} The placeholder avatar URL
  */
