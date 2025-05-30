@@ -33,9 +33,18 @@ const DiagnosticsPage = () => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => {
+    // Load history from localStorage on component mount
+    const savedHistory = localStorage.getItem('apiRequestHistory');
+    return savedHistory ? JSON.parse(savedHistory) : [];
+  });
   const [systemInfo, setSystemInfo] = useState(null);
   const [loadingSystemInfo, setLoadingSystemInfo] = useState(false);
+
+  // Save history to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('apiRequestHistory', JSON.stringify(history));
+  }, [history]);
 
   // Define fetchSystemInfo inside useEffect to avoid dependency issues
   useEffect(() => {
@@ -87,6 +96,8 @@ const DiagnosticsPage = () => {
     setLoading(true);
     setError(null);
 
+    let options = {}; // Declare options in outer scope
+
     try {
       // Parse headers
       let headers = {};
@@ -102,7 +113,7 @@ const DiagnosticsPage = () => {
       }
 
       // Prepare request options
-      const options = {
+      options = {
         method,
         headers,
         url: endpointUrl.startsWith("http")
@@ -149,9 +160,12 @@ const DiagnosticsPage = () => {
           url: options.url,
           method,
           status: response.status,
+          statusText: response.statusText,
           time: new Date().toLocaleTimeString(),
+          timestamp: new Date().toISOString(),
+          responseTime: responseTime.toFixed(2),
         },
-        ...prev.slice(0, 9), // Keep last 10 requests
+        ...prev.slice(0, 49), // Keep last 50 requests
       ]);
     } catch (error) {
       console.error("Request error:", error);
@@ -161,6 +175,23 @@ const DiagnosticsPage = () => {
         response: error.response?.data || "No response data",
         status: error.response?.status || "No status code",
       });
+
+      // Add failed requests to history too
+      const requestUrl = options.url || `${BASE_URL}${endpointUrl.startsWith("/") ? "" : "/"}${endpointUrl}`;
+      setHistory((prev) => [
+        {
+          id: Date.now(),
+          url: requestUrl,
+          method,
+          status: error.response?.status || 0,
+          statusText: error.response?.statusText || 'Error',
+          time: new Date().toLocaleTimeString(),
+          timestamp: new Date().toISOString(),
+          responseTime: 'N/A',
+          error: true,
+        },
+        ...prev.slice(0, 49), // Keep last 50 requests
+      ]);
     } finally {
       setLoading(false);
     }
@@ -185,6 +216,7 @@ const DiagnosticsPage = () => {
 
   const clearHistory = () => {
     setHistory([]);
+    localStorage.removeItem('apiRequestHistory');
   };
 
   // Ensure only admins can access this page
@@ -373,7 +405,7 @@ const DiagnosticsPage = () => {
                           <Card.Header>Headers</Card.Header>
                           <Card.Body className="p-0">
                             <pre
-                              className="m-0 p-3 bg-light"
+                              className="m-0 p-3 bg-dark"
                               style={{ maxHeight: "150px", overflow: "auto" }}
                             >
                               {formatJson(response.headers)}
@@ -385,7 +417,7 @@ const DiagnosticsPage = () => {
                           <Card.Header>Response Body</Card.Header>
                           <Card.Body className="p-0">
                             <pre
-                              className="m-0 p-3 bg-light"
+                              className="m-0 p-3 bg-dark"
                               style={{ maxHeight: "300px", overflow: "auto" }}
                             >
                               {formatJson(response.data)}
@@ -573,7 +605,7 @@ const DiagnosticsPage = () => {
                           <Card.Header>Environment Variables</Card.Header>
                           <Card.Body>
                             <pre
-                              className="m-0 bg-light p-3"
+                              className="m-0 bg-dark p-3"
                               style={{ maxHeight: "200px", overflow: "auto" }}
                             >
                               {formatJson(systemInfo.env)}
@@ -603,7 +635,12 @@ const DiagnosticsPage = () => {
               {/* Request History Tab */}
               <Tab.Pane eventKey="request-history">
                 <div className="d-flex justify-content-between mb-3">
-                  <h5>Recent Requests</h5>
+                  <div>
+                    <h5>Recent Requests</h5>
+                    <p className="text-muted">
+                      Showing {history.length} of last 50 requests from this session
+                    </p>
+                  </div>
                   <Button
                     variant="outline-danger"
                     size="sm"
@@ -616,25 +653,32 @@ const DiagnosticsPage = () => {
 
                 {history.length === 0 ? (
                   <Alert variant="info">
-                    No requests have been made yet. Use the endpoint tester to
-                    make API requests.
+                    <Alert.Heading>No Request History</Alert.Heading>
+                    <p>
+                      No requests have been made yet. Use the endpoint tester tab to
+                      make API requests. Request history is stored locally and persists
+                      across page refreshes.
+                    </p>
                   </Alert>
                 ) : (
                   <div className="table-responsive">
-                    <table className="table table-hover">
+                    <table className="table table-hover table-sm">
                       <thead>
                         <tr>
-                          <th>Time</th>
-                          <th>Method</th>
+                          <th style={{ width: "120px" }}>Time</th>
+                          <th style={{ width: "80px" }}>Method</th>
                           <th>URL</th>
-                          <th>Status</th>
-                          <th>Action</th>
+                          <th style={{ width: "100px" }}>Status</th>
+                          <th style={{ width: "100px" }}>Response Time</th>
+                          <th style={{ width: "80px" }}>Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {history.map((item) => (
-                          <tr key={item.id}>
-                            <td>{item.time}</td>
+                          <tr key={item.id} className={item.error ? "table-danger" : ""}>
+                            <td>
+                              <small>{item.time}</small>
+                            </td>
                             <td>
                               <span
                                 className={`badge bg-${
@@ -658,6 +702,7 @@ const DiagnosticsPage = () => {
                                 style={{
                                   maxWidth: "400px",
                                 }}
+                                title={item.url}
                               >
                                 {item.url}
                               </code>
@@ -665,17 +710,25 @@ const DiagnosticsPage = () => {
                             <td>
                               <span
                                 className={`badge bg-${
-                                  item.status < 400 ? "success" : "danger"
+                                  item.error
+                                    ? "danger"
+                                    : item.status < 400
+                                    ? "success"
+                                    : "warning"
                                 }`}
                               >
-                                {item.status}
+                                {item.status || "Error"} {item.statusText && `(${item.statusText})`}
                               </span>
+                            </td>
+                            <td>
+                              <small>{item.responseTime}{item.responseTime !== 'N/A' ? 'ms' : ''}</small>
                             </td>
                             <td>
                               <Button
                                 variant="outline-primary"
                                 size="sm"
                                 onClick={() => loadRequestFromHistory(item)}
+                                title="Load this request in the endpoint tester"
                               >
                                 Load
                               </Button>
