@@ -1,6 +1,6 @@
 # Database Management Guide
 
-This guide explains how to manage the database for the BeeKeeper Blog application in development and production environments.
+This guide explains how to manage the database for the BeeKeeper's Blog application in development and production environments.
 
 ## Database Architecture
 

@@ -228,7 +228,7 @@ const ProfilePage = () => {
   // Check newsletter status on component mount
   React.useEffect(() => {
     checkNewsletterStatus();
-  }, [user?.email]);
+  }, [user?.email, checkNewsletterStatus]);
 
   return (
     <Container className="profile-page py-5">

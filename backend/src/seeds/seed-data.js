@@ -62,7 +62,7 @@ const seedDatabase = async () => {
         first_name: "Admin",
         last_name: "User",
         role: "admin",
-        bio: "System administrator for BeeKeeper Blog",
+        bio: "System administrator for BeeKeeper's Blog",
         is_active: true,
       },
       {
@@ -749,7 +749,7 @@ const seedDatabase = async () => {
     console.log(`   - ${tags.length} tags created`);
     console.log(`   - ${articles.length} articles created`);
     console.log(`   - ${comments.length} comments created`);
-    console.log("\n✅ Your BeeKeeper Blog is ready to use!");
+    console.log("\n✅ Your BeeKeeper's Blog is ready to use!");
     console.log("\n🔐 Login credentials:");
     console.log("   Admin: admin@beekeeper.com / Admin123!");
     console.log("   Author: john@example.com / Password123!");

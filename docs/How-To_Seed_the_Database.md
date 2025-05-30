@@ -1,4 +1,4 @@
-# Database Seeding Guide for BeeKeeper Blog
+# Database Seeding Guide for BeeKeeper's Blog
 
 ## Prerequisites
 
@@ -126,7 +126,7 @@ After successful seeding, you should see output like:
    - 8 articles created
    - 8 comments created
 
-✅ Your BeeKeeper Blog is ready to use!
+✅ Your BeeKeeper's Blog is ready to use!
 
 🔐 Login credentials:
    Admin: admin@beekeeper.com / Admin123!

@@ -40,7 +40,7 @@ const LoginPage = () => {
     <div className="login-page py-5">
       <Card className="mx-auto" style={{ maxWidth: "500px" }}>
         <Card.Header className="bg-primary text-white text-center">
-          <h4 className="mb-0">Login to BeeKeeper Blog</h4>
+          <h4 className="mb-0">Login to BeeKeeper's Blog</h4>
         </Card.Header>
 
         <Card.Body>

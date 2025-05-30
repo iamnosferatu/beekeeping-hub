@@ -12,7 +12,7 @@ console.log("API URL:", API_URL);
 console.log("Base URL:", BASE_URL);
 
 // App Configuration
-export const APP_NAME = process.env.REACT_APP_NAME || "BeeKeeper Blog";
+export const APP_NAME = process.env.REACT_APP_NAME || "BeeKeeper's Blog";
 export const APP_DESCRIPTION =
   process.env.REACT_APP_DESCRIPTION ||
   "A modern blog for beekeeping enthusiasts";

@@ -42,7 +42,7 @@ if (process.env.NODE_ENV === "development") {
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "BeeKeeper Blog API Server",
+    message: "BeeKeeper's Blog API Server",
     apiEndpoint: "/api",
   });
 });

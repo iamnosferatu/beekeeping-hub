@@ -1,4 +1,5 @@
 // frontend/src/pages/HomePage.js - Production Version
+
 import React, { useContext } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -10,7 +11,7 @@ import BackToTopButton from "../components/common/BackToTopButton";
 /**
  * HomePage Component
  *
- * The main landing page of the BeeKeeper Blog.
+ * The main landing page of the BeeKeeper's Blog.
  * Features a hero section, introduction, and latest articles.
  */
 const HomePage = () => {
@@ -34,7 +35,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <Card className="text-center bg-dark text-white mb-4 border-0">
         <Card.Img
-          src="https://images.unsplash.com/photo-1576594770476-b1bed9a42275?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
+          src="/images/heroes/openart-image_6lnGx5V4_1748601542121_raw.jpg"
           alt="Bees on honeycomb"
           className="hero-image"
           style={{ height: "400px", objectFit: "cover", opacity: 0.7 }}
@@ -47,7 +48,7 @@ const HomePage = () => {
               borderRadius: "10px",
             }}
           >
-            <h1 className="display-4 fw-bold">Welcome to BeeKeeper Blog</h1>
+            <h1 className="display-4 fw-bold">Welcome to BeeKeeper's Blog</h1>
             <p className="lead">A modern resource for beekeeping enthusiasts</p>
             <Link to="/articles">
               <Button variant="warning" size="lg" className="mt-3">
@@ -62,7 +63,7 @@ const HomePage = () => {
       <div className="bg-dark p-4 rounded-3 mb-4">
         <h2>About Our Blog</h2>
         <p>
-          BeeKeeper Blog is dedicated to sharing knowledge about beekeeping,
+          BeeKeeper's Blog is dedicated to sharing knowledge about beekeeping,
           honey production, and the crucial role of bees in our ecosystem.
           Whether you're a beginner looking to start your first hive or an
           experienced beekeeper seeking advanced techniques, our articles

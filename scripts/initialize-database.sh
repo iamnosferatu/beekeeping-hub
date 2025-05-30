@@ -1,5 +1,5 @@
 #!/bin/bash
-# Database initialization script for BeeKeeper Blog
+# Database initialization script for BeeKeeper's Blog
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -7,7 +7,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}BeeKeeper Blog Database Initialization${NC}"
+echo -e "${YELLOW}BeeKeeper's Blog Database Initialization${NC}"
 echo "This script will initialize the database for development."
 
 # Check if Docker is running

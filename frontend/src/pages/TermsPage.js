@@ -7,13 +7,13 @@ import "./StaticPages.scss";
 /**
  * TermsPage Component
  *
- * Displays the terms of service for BeeKeeper Blog.
+ * Displays the terms of service for BeeKeeper's Blog.
  * Outlines the rules and agreements for using the website.
  */
 const TermsPage = () => {
   // Update page title
   useEffect(() => {
-    document.title = "Terms of Service - BeeKeeper Blog";
+    document.title = "Terms of Service - BeeKeeper's Blog";
   }, []);
 
   // Get current date for effective date
@@ -39,9 +39,9 @@ const TermsPage = () => {
             <Card className="mb-4">
               <Card.Body>
                 <p className="lead">
-                  Welcome to BeeKeeper Blog! These Terms of Service ("Terms")
+                  Welcome to BeeKeeper's Blog! These Terms of Service ("Terms")
                   govern your use of our website and services. By accessing or
-                  using BeeKeeper Blog, you agree to be bound by these Terms.
+                  using BeeKeeper's Blog, you agree to be bound by these Terms.
                 </p>
               </Card.Body>
             </Card>
@@ -61,7 +61,7 @@ const TermsPage = () => {
               <section className="mb-5">
                 <h2>1. Acceptance of Terms</h2>
                 <p>
-                  By creating an account, accessing, or using BeeKeeper Blog,
+                  By creating an account, accessing, or using BeeKeeper's Blog,
                   you acknowledge that you have read, understood, and agree to
                   be bound by these Terms and our Privacy Policy. If you are
                   using our services on behalf of an organization, you agree to
@@ -74,7 +74,7 @@ const TermsPage = () => {
                 <h3>2.1 Eligibility</h3>
                 <p>
                   You must be at least 13 years old to use our services. By
-                  using BeeKeeper Blog, you represent and warrant that you meet
+                  using BeeKeeper's Blog, you represent and warrant that you meet
                   this age requirement.
                 </p>
 
@@ -117,7 +117,7 @@ const TermsPage = () => {
                 <h3>3.1 Your Content</h3>
                 <p>
                   You retain ownership of content you create and post on
-                  BeeKeeper Blog. However, by posting content, you grant us a
+                  BeeKeeper's Blog. However, by posting content, you grant us a
                   worldwide, non-exclusive, royalty-free license to:
                 </p>
                 <ul>
@@ -144,8 +144,8 @@ const TermsPage = () => {
               <section className="mb-5">
                 <h2>4. Intellectual Property</h2>
                 <p>
-                  The BeeKeeper Blog service, including its original content,
-                  features, and functionality, is owned by BeeKeeper Blog and is
+                  The BeeKeeper's Blog service, including its original content,
+                  features, and functionality, is owned by BeeKeeper's Blog and is
                   protected by international copyright, trademark, patent, trade
                   secret, and other intellectual property laws.
                 </p>
@@ -193,7 +193,7 @@ const TermsPage = () => {
               <section className="mb-5">
                 <h2>7. Limitation of Liability</h2>
                 <p>
-                  IN NO EVENT SHALL BEEKEEPER BLOG, ITS DIRECTORS, EMPLOYEES, OR
+                  IN NO EVENT SHALL BeeKeeper's Blog, ITS DIRECTORS, EMPLOYEES, OR
                   AGENTS BE LIABLE FOR ANY INDIRECT, CONSEQUENTIAL, SPECIAL,
                   INCIDENTAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO
                   YOUR USE OF THE SERVICES.
@@ -260,7 +260,7 @@ const TermsPage = () => {
                 <Card className="bg-light">
                   <Card.Body>
                     <p className="mb-1">
-                      <strong>BeeKeeper Blog Legal Department</strong>
+                      <strong>BeeKeeper's Blog Legal Department</strong>
                     </p>
                     <p className="mb-1">Email: legal@beekeeperblog.com</p>
                     <p className="mb-1">Phone: +1 (555) 123-4567</p>
@@ -277,7 +277,7 @@ const TermsPage = () => {
               <Card.Body className="text-center">
                 <p className="mb-0">
                   <strong>
-                    By using BeeKeeper Blog, you acknowledge that you have read,
+                    By using BeeKeeper's Blog, you acknowledge that you have read,
                     understood, and agree to be bound by these Terms of Service.
                   </strong>
                 </p>

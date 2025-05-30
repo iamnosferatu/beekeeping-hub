@@ -1,5 +1,5 @@
 #!/bin/bash
-# Restore script for BeeKeeper Blog database
+# Restore script for BeeKeeper's Blog database
 
 # Check if backup file is provided
 if [ -z "$1" ]; then

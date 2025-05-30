@@ -14,14 +14,14 @@ import "./AboutPage.scss";
 /**
  * AboutPage Component
  *
- * Displays information about the BeeKeeper Blog, including mission,
+ * Displays information about the BeeKeeper's Blog, including mission,
  * values, team, and history. Uses Bootstrap components for consistent
  * styling with the rest of the application.
  */
 const AboutPage = () => {
   // Update page title when component mounts
   useEffect(() => {
-    document.title = "About Us - BeeKeeper Blog";
+    document.title = "About Us - BeeKeeper's Blog";
   }, []);
 
   // Team members data - in a real app, this might come from an API
@@ -31,7 +31,7 @@ const AboutPage = () => {
       role: "Founder & Master Beekeeper",
       image:
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
-      bio: "With over 20 years of beekeeping experience, Sarah founded BeeKeeper Blog to share knowledge with the community.",
+      bio: "With over 20 years of beekeeping experience, Sarah founded BeeKeeper's Blog to share knowledge with the community.",
     },
     {
       name: "Michael Chen",
@@ -82,7 +82,7 @@ const AboutPage = () => {
       {/* Hero Section */}
       <div className="hero-section text-center py-5 mb-5">
         <Container>
-          <h1 className="display-4 mb-4">About BeeKeeper Blog</h1>
+          <h1 className="display-4 mb-4">About BeeKeeper's Blog</h1>
           <p className="lead">
             Connecting beekeepers worldwide through knowledge, experience, and
             passion
@@ -121,7 +121,7 @@ const AboutPage = () => {
                   <Card.Body>
                     <h4>The Beginning</h4>
                     <p>
-                      BeeKeeper Blog started in 2018 when a group of passionate
+                      BeeKeeper's Blog started in 2018 when a group of passionate
                       beekeepers realized there was a need for a centralized
                       platform where both beginners and experienced beekeepers
                       could share knowledge, ask questions, and learn from each
@@ -141,7 +141,7 @@ const AboutPage = () => {
                   <Card.Body>
                     <h4>Today</h4>
                     <p>
-                      Today, BeeKeeper Blog is one of the most trusted resources
+                      Today, BeeKeeper's Blog is one of the most trusted resources
                       for beekeeping information online. We publish articles on
                       everything from hive management and honey harvesting to
                       bee health and environmental conservation.

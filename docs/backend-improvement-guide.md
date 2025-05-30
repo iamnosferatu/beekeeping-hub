@@ -1829,7 +1829,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'BeeKeeper Blog API',
+      title: 'BeeKeeper's Blog API',
       version: '1.0.0',
       description: 'A comprehensive blogging platform API for beekeeping enthusiasts',
       contact: {
@@ -1980,7 +1980,7 @@ const router = express.Router();
 // Swagger UI options
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'BeeKeeper Blog API Documentation',
+  customSiteTitle: 'BeeKeeper's Blog API Documentation',
 };
 
 router.use('/', swaggerUi.serve);

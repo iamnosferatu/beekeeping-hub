@@ -56,7 +56,7 @@ const HomePage = () => {
               borderRadius: "10px",
             }}
           >
-            <h1 className="display-4 fw-bold">Welcome to BeeKeeper Blog</h1>
+            <h1 className="display-4 fw-bold">Welcome to BeeKeeper's Blog</h1>
             <p className="lead">A modern resource for beekeeping enthusiasts</p>
             <Link to="/articles">
               <Button variant="warning" size="lg" className="mt-3">
@@ -71,7 +71,7 @@ const HomePage = () => {
       <div className="bg-dark p-4 rounded-3 mb-4">
         <h2>About Our Blog</h2>
         <p>
-          BeeKeeper Blog is dedicated to sharing knowledge about beekeeping,
+          BeeKeeper's Blog is dedicated to sharing knowledge about beekeeping,
           honey production, and the crucial role of bees in our ecosystem.
           Whether you're a beginner looking to start your first hive or an
           experienced beekeeper seeking advanced techniques, our articles

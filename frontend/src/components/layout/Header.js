@@ -37,7 +37,7 @@ const Header = () => {
     >
       <Container>
         <Navbar.Brand as={Link} to="/" className="fw-bold">
-          🐝 BeeKeeper Blog
+          🐝 BeeKeeper's Blog
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

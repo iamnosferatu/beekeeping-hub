@@ -1,5 +1,5 @@
 #!/bin/bash
-# Backup script for BeeKeeper Blog database
+# Backup script for BeeKeeper's Blog database
 
 # Ensure backup directory exists
 BACKUP_DIR="../database-backups"

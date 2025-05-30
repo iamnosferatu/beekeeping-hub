@@ -19,7 +19,7 @@ const Footer = () => {
       <Container>
         <Row>
           <Col md={4} className="mb-3 mb-md-0">
-            <h5 className="mb-3">🐝 BeeKeeper Blog</h5>
+            <h5 className="mb-3">🐝 BeeKeeper's Blog</h5>
             <p className="mb-0">
               A modern blog for beekeeping enthusiasts, sharing knowledge and
               experience about bees and honey production.
@@ -67,7 +67,7 @@ const Footer = () => {
 
         <div className="text-center">
           <p className="mb-0">
-            &copy; {year} BeeKeeper Blog. All rights reserved.
+            &copy; {year} BeeKeeper's Blog. All rights reserved.
           </p>
         </div>
       </Container>

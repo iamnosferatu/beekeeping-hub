@@ -404,7 +404,7 @@ const config = {
   
   app: {
     port: envVars.PORT,
-    name: 'BeeKeeper Blog API',
+    name: 'BeeKeeper's Blog API',
     version: require('../../package.json').version,
   },
   
@@ -452,7 +452,7 @@ const config = {
       },
     },
     from: {
-      name: 'BeeKeeper Blog',
+      name: 'BeeKeeper's Blog',
       email: envVars.SMTP_USER || 'noreply@beekeeperblog.com',
     },
   },
@@ -602,7 +602,7 @@ class AuthService {
     await this.emailService.send({
       to: user.email,
       from: config.email.from,
-      subject: 'Welcome to BeeKeeper Blog',
+      subject: 'Welcome to BeeKeeper's Blog',
       // ...
     });
   }

@@ -71,7 +71,7 @@ const RegisterPage = () => {
     <div className="register-page py-5">
       <Card className="mx-auto" style={{ maxWidth: "800px" }}>
         <Card.Header className="bg-primary text-white text-center">
-          <h4 className="mb-0">Register for BeeKeeper Blog</h4>
+          <h4 className="mb-0">Register for BeeKeeper's Blog</h4>
         </Card.Header>
 
         <Card.Body>

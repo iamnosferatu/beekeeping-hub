@@ -7,13 +7,13 @@ import "./StaticPages.scss";
 /**
  * PrivacyPage Component
  *
- * Displays the privacy policy for BeeKeeper Blog.
+ * Displays the privacy policy for BeeKeeper's Blog.
  * This is a legal requirement for websites that collect user data.
  */
 const PrivacyPage = () => {
   // Update page title
   useEffect(() => {
-    document.title = "Privacy Policy - BeeKeeper Blog";
+    document.title = "Privacy Policy - BeeKeeper's Blog";
   }, []);
 
   // Get current date for last updated
@@ -39,7 +39,7 @@ const PrivacyPage = () => {
             <Card className="mb-4">
               <Card.Body>
                 <p className="lead">
-                  At BeeKeeper Blog, we take your privacy seriously. This
+                  At BeeKeeper's Blog, we take your privacy seriously. This
                   Privacy Policy explains how we collect, use, disclose, and
                   safeguard your information when you visit our website and use
                   our services.
@@ -166,7 +166,7 @@ const PrivacyPage = () => {
                 <Card className="bg-light">
                   <Card.Body>
                     <p className="mb-1">
-                      <strong>BeeKeeper Blog</strong>
+                      <strong>BeeKeeper's Blog</strong>
                     </p>
                     <p className="mb-1">Email: privacy@beekeeperblog.com</p>
                     <p className="mb-1">Phone: +1 (555) 123-4567</p>
