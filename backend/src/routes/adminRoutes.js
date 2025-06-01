@@ -3,6 +3,7 @@ const express = require("express");
 const { protect, authorize } = require("../middleware/auth");
 const diagnosticsRoutes = require("./adminDiagnosticsRoutes");
 const adminArticleRoutes = require("./adminArticleRoutes");
+const { rateLimiters } = require("../middleware/enhancedRateLimiter");
 const {
   getDashboardStats,
   getRecentActivity,
@@ -16,6 +17,7 @@ const {
 const router = express.Router();
 
 // Apply middleware to all admin routes
+router.use(rateLimiters.adminOperations);
 router.use(protect);
 router.use(authorize("admin"));
 

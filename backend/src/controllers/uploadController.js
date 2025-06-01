@@ -2,6 +2,8 @@
 const fs = require("fs").promises;
 const path = require("path");
 const { User, Article } = require("../models");
+const { validateFile } = require("../middleware/fileValidation");
+const { logInfo, logError } = require("../utils/logger");
 
 // @desc    Upload user avatar
 // @route   POST /api/auth/avatar
@@ -13,6 +15,24 @@ exports.uploadAvatar = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: "No file uploaded",
+      });
+    }
+
+    // Perform comprehensive file validation
+    const validation = await validateFile(req.file, 'avatar');
+    
+    if (!validation.isValid) {
+      // Delete the invalid file
+      try {
+        await fs.unlink(req.file.path);
+      } catch (deleteError) {
+        logError('Failed to delete invalid avatar file', deleteError);
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: "File validation failed",
+        errors: validation.errors
       });
     }
 
@@ -43,6 +63,15 @@ exports.uploadAvatar = async (req, res, next) => {
     user.avatar = avatarUrl;
     await user.save();
 
+    // Log successful upload
+    logInfo('Avatar uploaded successfully', {
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      userId: user.id,
+      validation: validation.fileInfo
+    });
+
     res.status(200).json({
       success: true,
       message: "Avatar uploaded successfully",
@@ -57,6 +86,7 @@ exports.uploadAvatar = async (req, res, next) => {
         avatar: user.avatar,
         role: user.role,
       },
+      validation: validation.warnings.length > 0 ? { warnings: validation.warnings } : undefined
     });
   } catch (error) {
     // Delete uploaded file on error
@@ -134,6 +164,33 @@ exports.uploadArticleImage = async (req, res, next) => {
       });
     }
 
+    // Perform comprehensive file validation
+    const validation = await validateFile(req.file, 'article');
+    
+    if (!validation.isValid) {
+      // Delete the invalid file
+      try {
+        await fs.unlink(req.file.path);
+      } catch (deleteError) {
+        logError('Failed to delete invalid article image file', deleteError);
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: "File validation failed",
+        errors: validation.errors
+      });
+    }
+
+    // Log successful upload
+    logInfo('Article image uploaded successfully', {
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      userId: req.user?.id,
+      validation: validation.fileInfo
+    });
+
     // Return the uploaded image URL
     const imageUrl = `/uploads/articles/${req.file.filename}`;
     
@@ -142,6 +199,7 @@ exports.uploadArticleImage = async (req, res, next) => {
       message: "Image uploaded successfully",
       url: imageUrl,
       filename: req.file.filename,
+      validation: validation.warnings.length > 0 ? { warnings: validation.warnings } : undefined
     });
   } catch (error) {
     // Delete uploaded file on error

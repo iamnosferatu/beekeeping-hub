@@ -5,9 +5,20 @@ const { User } = require("../models");
 const { Op } = require("sequelize");
 const emailService = require("../services/emailService");
 const { generateVerificationToken, isTokenExpired } = require("../utils/tokenGenerator");
+const { 
+  ValidationError, 
+  ConflictError, 
+  AuthenticationError,
+  NotFoundError,
+  asyncHandler 
+} = require("../utils/errors");
 
-// Get JWT secret from environment with fallback
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key_here";
+// Get JWT secret from environment - fail if not set
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable not set");
+  process.exit(1);
+}
 
 // Helper to generate JWT token
 const generateToken = (id) => {
@@ -32,28 +43,38 @@ const generateToken = (id) => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-exports.register = async (req, res, next) => {
-  try {
-    const { username, email, password, firstName, lastName } = req.body;
+exports.register = asyncHandler(async (req, res, next) => {
+  const { username, email, password, firstName, lastName } = req.body;
 
-    console.log(`Registration attempt for: ${email}`);
+  // Validate required fields
+  if (!username || !email || !password) {
+    throw new ValidationError("Username, email, and password are required");
+  }
 
-    // Check if user already exists
-    const userExists = await User.findOne({
-      where: {
-        [Op.or]: [{ email }, { username }],
-      },
-    });
+  if (!firstName || !lastName) {
+    throw new ValidationError("First name and last name are required");
+  }
 
-    if (userExists) {
-      console.log(
-        `Registration failed: User already exists with email ${email} or username ${username}`
-      );
-      return res.status(400).json({
-        success: false,
-        message: "User with that email or username already exists",
-      });
+  console.log(`Registration attempt for: ${email}`);
+
+  // Check if user already exists
+  const userExists = await User.findOne({
+    where: {
+      [Op.or]: [{ email }, { username }],
+    },
+  });
+
+  if (userExists) {
+    console.log(
+      `Registration failed: User already exists with email ${email} or username ${username}`
+    );
+    
+    if (userExists.email === email) {
+      throw new ConflictError("An account with this email already exists");
+    } else {
+      throw new ConflictError("This username is already taken");
     }
+  }
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
@@ -114,53 +135,44 @@ exports.register = async (req, res, next) => {
     }
 
     res.status(201).json(response);
-  } catch (error) {
-    console.error("Registration error:", error);
-    next(error);
-  }
-};
+});
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-exports.login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+exports.login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
 
-    console.log(`Login attempt for: ${email}`);
+  // Validate required fields
+  if (!email || !password) {
+    throw new ValidationError("Email and password are required");
+  }
 
-    // Check if user exists
-    const user = await User.findOne({ where: { email } });
+  console.log(`Login attempt for: ${email}`);
 
-    if (!user) {
-      console.log(`Login failed: No user found with email ${email}`);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+  // Check if user exists
+  const user = await User.findOne({ where: { email } });
 
-    // Check if password matches
-    const isMatch = await bcrypt.compare(password, user.password);
+  if (!user) {
+    console.log(`Login failed: No user found with email ${email}`);
+    throw new AuthenticationError("Invalid email or password");
+  }
 
-    if (!isMatch) {
-      console.log(`Login failed: Invalid password for user ${email}`);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
+  // Check if password matches
+  const isMatch = await bcrypt.compare(password, user.password);
 
-    // Check if email is verified
-    if (!user.email_verified) {
-      console.log(`Login failed: Email not verified for user ${email}`);
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your email before logging in. Check your inbox for the verification link.",
-        needsVerification: true,
-        email: user.email
-      });
-    }
+  if (!isMatch) {
+    console.log(`Login failed: Invalid password for user ${email}`);
+    throw new AuthenticationError("Invalid email or password");
+  }
+
+  // Check if email is verified
+  if (!user.email_verified) {
+    console.log(`Login failed: Email not verified for user ${email}`);
+    const error = new AuthenticationError("Please verify your email before logging in. Check your inbox for the verification link.");
+    error.details = { needsVerification: true, email: user.email };
+    throw error;
+  }
 
     // Update last login time
     user.last_login = new Date();
@@ -173,44 +185,32 @@ exports.login = async (req, res, next) => {
     const userData = user.toJSON();
     delete userData.password;
 
-    console.log(`Login successful for user ${email}`);
-    res.status(200).json({
-      success: true,
-      token,
-      user: userData,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    next(error);
-  }
-};
+  console.log(`Login successful for user ${email}`);
+  res.status(200).json({
+    success: true,
+    token,
+    user: userData,
+  });
+});
 
 // @desc    Get current user
 // @route   GET /api/auth/me
 // @access  Private
-exports.getMe = async (req, res, next) => {
-  try {
-    // req.user is set by the protect middleware
-    const user = await User.findByPk(req.user.id, {
-      attributes: { exclude: ["password"] },
-    });
+exports.getMe = asyncHandler(async (req, res, next) => {
+  // req.user is set by the protect middleware
+  const user = await User.findByPk(req.user.id, {
+    attributes: { exclude: ["password"] },
+  });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    console.error("Get user profile error:", error);
-    next(error);
+  if (!user) {
+    throw new NotFoundError("User");
   }
-};
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
 
 // @desc    Update user profile
 // @route   PUT /api/auth/profile

@@ -1,9 +1,14 @@
 // backend/src/middleware/auth.js
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
+const { AuthenticationError, AuthorizationError } = require("../utils/errors");
 
-// Get JWT secret from environment variables with fallback
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key_here";
+// Get JWT secret from environment variables - fail if not set
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable not set in auth middleware");
+  process.exit(1);
+}
 
 // Middleware to protect routes - requires valid JWT
 exports.protect = async (req, res, next) => {
@@ -27,10 +32,7 @@ exports.protect = async (req, res, next) => {
     // Check if token exists
     if (!token) {
       console.log('Auth middleware - No token found');
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized to access this route",
-      });
+      throw new AuthenticationError("Access token required");
     }
 
     try {
@@ -43,10 +45,7 @@ exports.protect = async (req, res, next) => {
       });
 
       if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "User not found",
-        });
+        throw new AuthenticationError("User no longer exists");
       }
 
       // Set user in request
@@ -57,26 +56,11 @@ exports.protect = async (req, res, next) => {
         role: user.role
       });
       next();
-    } catch (error) {
-      console.error("JWT verification error:", error);
-
-      // More specific error messages based on error type
-      if (error.name === "JsonWebTokenError") {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid token",
-        });
-      } else if (error.name === "TokenExpiredError") {
-        return res.status(401).json({
-          success: false,
-          message: "Token expired",
-        });
-      } else {
-        return res.status(401).json({
-          success: false,
-          message: "Authentication error",
-        });
-      }
+    } catch (jwtError) {
+      console.error("JWT verification error:", jwtError);
+      
+      // JWT errors are automatically handled by the enhanced error handler
+      throw jwtError;
     }
   } catch (error) {
     console.error("Auth middleware error:", error);
@@ -94,18 +78,12 @@ exports.authorize = (...roles) => {
     });
     
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized to access this route",
-      });
+      throw new AuthenticationError("Authentication required");
     }
 
     if (!roles.includes(req.user.role)) {
       console.log('Authorize failed - role not in allowed list');
-      return res.status(403).json({
-        success: false,
-        message: `User role ${req.user.role} is not authorized to access this route`,
-      });
+      throw new AuthorizationError(`Role '${req.user.role}' is not authorized to access this resource`);
     }
 
     console.log('Authorize passed');

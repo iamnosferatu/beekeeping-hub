@@ -4,6 +4,8 @@ const { protect, authorize } = require("../middleware/auth");
 const articleController = require("../controllers/articleController");
 const { uploadArticleImage } = require("../middleware/upload");
 const uploadController = require("../controllers/uploadController");
+const { rateLimiters } = require("../middleware/enhancedRateLimiter");
+const { validateUploadedFile } = require("../middleware/fileValidation");
 
 const router = express.Router();
 
@@ -419,7 +421,7 @@ router.delete(
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.post("/:id/like", protect, articleController.toggleLike);
+router.post("/:id/like", rateLimiters.likeOperations, protect, articleController.toggleLike);
 
 /**
  * @swagger
@@ -569,9 +571,11 @@ router.get("/:articleId/comments", async (req, res) => {
  */
 router.post(
   "/upload-image",
+  rateLimiters.fileUpload,
   protect,
   authorize("author", "admin"),
   uploadArticleImage.single("image"),
+  validateUploadedFile('article'),
   uploadController.uploadArticleImage
 );
 

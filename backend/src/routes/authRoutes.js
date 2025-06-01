@@ -4,6 +4,12 @@ const { protect } = require("../middleware/auth");
 const authController = require("../controllers/authController");
 const uploadController = require("../controllers/uploadController");
 const { uploadAvatar } = require("../middleware/upload");
+const { 
+  rateLimiters, 
+  accountLockout, 
+  trackFailedLogin 
+} = require("../middleware/enhancedRateLimiter");
+const { validateUploadedFile } = require("../middleware/fileValidation");
 
 const router = express.Router();
 
@@ -58,7 +64,7 @@ const router = express.Router();
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  */
-router.post("/register", authController.register);
+router.post("/register", rateLimiters.registration, authController.register);
 
 /**
  * @swagger
@@ -106,7 +112,7 @@ router.post("/register", authController.register);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/login", authController.login);
+router.post("/login", rateLimiters.authentication, accountLockout, trackFailedLogin, authController.login);
 
 /**
  * @swagger
@@ -231,7 +237,7 @@ router.put("/profile", protect, authController.updateProfile);
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-router.put("/password", protect, authController.changePassword);
+router.put("/password", rateLimiters.passwordReset, protect, authController.changePassword);
 
 /**
  * @swagger
@@ -315,7 +321,7 @@ router.put("/password", protect, authController.changePassword);
  *                   type: string
  *                   example: File too large
  */
-router.post("/avatar", protect, uploadAvatar.single("avatar"), uploadController.uploadAvatar);
+router.post("/avatar", rateLimiters.fileUpload, protect, uploadAvatar.single("avatar"), validateUploadedFile('avatar'), uploadController.uploadAvatar);
 
 /**
  * @swagger
@@ -398,7 +404,7 @@ router.delete("/avatar", protect, uploadController.deleteAvatar);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/verify-email", authController.verifyEmail);
+router.post("/verify-email", rateLimiters.emailVerification, authController.verifyEmail);
 
 /**
  * @swagger
@@ -440,7 +446,7 @@ router.post("/verify-email", authController.verifyEmail);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/resend-verification", authController.resendVerification);
+router.post("/resend-verification", rateLimiters.emailVerification, authController.resendVerification);
 
 /**
  * @swagger
@@ -482,7 +488,7 @@ router.post("/resend-verification", authController.resendVerification);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/forgot-password", authController.forgotPassword);
+router.post("/forgot-password", rateLimiters.passwordReset, authController.forgotPassword);
 
 /**
  * @swagger
@@ -529,7 +535,7 @@ router.post("/forgot-password", authController.forgotPassword);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/reset-password", authController.resetPassword);
+router.post("/reset-password", rateLimiters.passwordReset, authController.resetPassword);
 
 // Test email endpoint (for debugging)
 router.post("/test-email", authController.testEmail);

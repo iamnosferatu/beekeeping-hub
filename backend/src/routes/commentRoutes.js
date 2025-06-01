@@ -3,6 +3,7 @@
 const express = require("express");
 const { protect, authorize } = require("../middleware/auth");
 const commentController = require("../controllers/commentController");
+const { rateLimiters } = require("../middleware/enhancedRateLimiter");
 
 const router = express.Router();
 
@@ -153,7 +154,7 @@ router.get("/article/:articleId", commentController.getArticleComments);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/", protect, commentController.createComment);
+router.post("/", rateLimiters.commentCreation, protect, commentController.createComment);
 /**
  * @swagger
  * /comments/{id}:

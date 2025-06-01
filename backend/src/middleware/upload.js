@@ -2,6 +2,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { createFileFilter, MAX_FILE_SIZES } = require("./fileValidation");
 
 // Ensure upload directories exist
 const uploadDirs = {
@@ -41,34 +42,33 @@ const articleStorage = multer.diskStorage({
   }
 });
 
-// File filter for images
-const imageFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+// Enhanced file filters using the validation module
+const avatarFilter = createFileFilter('avatar');
+const articleFilter = createFileFilter('article');
 
-  if (mimetype && extname) {
-    return cb(null, true);
-  } else {
-    cb(new Error("Only image files are allowed (jpeg, jpg, png, gif, webp)"));
-  }
-};
-
-// Create multer instances
+// Create multer instances with enhanced validation
 const uploadAvatar = multer({
   storage: avatarStorage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: MAX_FILE_SIZES.avatar,
+    files: 1, // Only allow 1 file
+    fields: 1, // Only allow 1 field
+    fieldNameSize: 100, // Limit field name length
+    fieldSize: 1024 * 1024 // Limit field value size to 1MB
   },
-  fileFilter: imageFilter
+  fileFilter: avatarFilter
 });
 
 const uploadArticleImage = multer({
   storage: articleStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: MAX_FILE_SIZES.article,
+    files: 1, // Only allow 1 file
+    fields: 1, // Only allow 1 field  
+    fieldNameSize: 100, // Limit field name length
+    fieldSize: 1024 * 1024 // Limit field value size to 1MB
   },
-  fileFilter: imageFilter
+  fileFilter: articleFilter
 });
 
 module.exports = {

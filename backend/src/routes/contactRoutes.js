@@ -3,6 +3,7 @@ const express = require("express");
 const { protect, authorize } = require("../middleware/auth");
 const { validate } = require("../middleware/vaildator");
 const { contactFormValidation } = require("../validators/contactValidator");
+const { rateLimiters } = require("../middleware/enhancedRateLimiter");
 const {
   submitContactForm,
   getContactMessages,
@@ -15,7 +16,7 @@ const {
 const router = express.Router();
 
 // Public routes
-router.post("/", contactFormValidation, validate, submitContactForm);
+router.post("/", rateLimiters.contactForm, contactFormValidation, validate, submitContactForm);
 
 // Admin routes
 router.get("/admin/contacts", protect, authorize("admin"), getContactMessages);

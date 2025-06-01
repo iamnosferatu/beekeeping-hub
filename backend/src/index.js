@@ -1,6 +1,10 @@
 // Load environment variables first
 require("dotenv").config();
 
+// Validate environment variables
+const { validateEnvironment } = require("./config/validateEnv");
+validateEnvironment();
+
 // Backend entry point
 const express = require("express");
 const cors = require("cors");
@@ -9,7 +13,8 @@ const morgan = require("morgan");
 const path = require("path");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
-const { errorHandler } = require("./middleware/errorHandler");
+const { setupErrorHandlers } = require("./middleware/enhancedErrorHandler");
+const { sanitizeInput } = require("./middleware/sanitizer");
 const { sequelize, connectWithRetry } = require("./config/database");
 
 // Initialize express app
@@ -26,9 +31,18 @@ app.use(helmet({
     },
   },
 })); // Security headers
-app.use(cors()); // Enable CORS
+// Configure CORS properly
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400 // 24 hours
+};
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Parse JSON requests with increased limit
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Parse URL-encoded requests with increased limit
+app.use(sanitizeInput); // Sanitize all inputs to prevent XSS
 
 // Serve static files from uploads directory with caching
 app.use("/uploads", express.static(path.join(__dirname, "../uploads"), {
@@ -111,16 +125,8 @@ const startServer = async () => {
     // Mount API routes
     app.use("/api", routes);
 
-    // Error handling middleware
-    app.use(errorHandler);
-
-    // Catch-all route for 404s
-    app.use("*", (req, res) => {
-      res.status(404).json({
-        success: false,
-        message: `Route not found: ${req.originalUrl}`,
-      });
-    });
+    // Setup enhanced error handling (includes 404 handler)
+    setupErrorHandlers(app);
 
     // Sync models with database - only in development and only if DB_SYNC is true
     if (process.env.NODE_ENV === "development") {

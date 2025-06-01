@@ -1,6 +1,10 @@
 // backend/src/routes/index.js
 const express = require("express");
+const { rateLimiters } = require("../middleware/enhancedRateLimiter");
 const router = express.Router();
+
+// Apply general API rate limiting to all routes
+router.use(rateLimiters.generalApi);
 
 // Import route files
 const authRoutes = require("./authRoutes");

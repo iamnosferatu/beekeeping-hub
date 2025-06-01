@@ -8,13 +8,19 @@ console.log("DB_HOST:", process.env.DB_HOST || "localhost");
 console.log("DB_NAME:", process.env.DB_NAME || "beekeeper_db");
 console.log("DB_USER:", process.env.DB_USER || "root");
 
-// Create Sequelize instance with fallback values
+// Validate required environment variables
+if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_HOST) {
+  console.error("❌ Missing required database environment variables");
+  process.exit(1);
+}
+
+// Create Sequelize instance with environment variables only
 const sequelize = new Sequelize(
-  process.env.DB_NAME || "beekeeper_db",
-  process.env.DB_USER || "root",
-  process.env.DB_PASSWORD || "deadfred",
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST || "127.0.0.1",
+    host: process.env.DB_HOST,
     dialect: "mysql",
     logging: process.env.NODE_ENV === "development" ? console.log : false,
     pool: {
