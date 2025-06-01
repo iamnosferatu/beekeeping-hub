@@ -1,10 +1,26 @@
 // frontend/src/config.js
 
+// Function to determine API URL based on current location
+const getApiUrl = () => {
+  // If explicitly set in environment, use that
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // If running on localhost, use localhost backend
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return "http://localhost:8080/api";
+  }
+  
+  // Otherwise, assume backend is on same host but port 8080
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  return `${protocol}//${hostname}:8080/api`;
+};
+
 // API Configuration
-export const API_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:8080/api";
-export const ASSETS_URL =
-  process.env.REACT_APP_ASSETS_URL || "http://localhost:8080";
+export const API_URL = getApiUrl();
+export const ASSETS_URL = API_URL.replace(/\/api$/, "");
 export const BASE_URL = API_URL.replace(/\/api$/, ""); // Base URL without /api
 
 // Log the API URL for debugging

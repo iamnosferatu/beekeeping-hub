@@ -5,8 +5,10 @@ import { checkApiStatus } from "../../utils/apiUtils";
 import { API_URL } from "../../config";
 
 const ApiStatusBar = () => {
-  const [apiStatus, setApiStatus] = useState(null);
+  // Start with assumed success to prevent flicker
+  const [apiStatus, setApiStatus] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
 
   const checkStatus = async () => {
     setIsChecking(true);
@@ -14,26 +16,33 @@ const ApiStatusBar = () => {
       const isAvailable = await checkApiStatus();
       console.log("API status:", isAvailable ? "available" : "unavailable");
       setApiStatus(isAvailable);
+      setHasChecked(true);
     } catch (error) {
       console.error("Error checking API status:", error);
       setApiStatus(false);
+      setHasChecked(true);
     } finally {
       setIsChecking(false);
     }
   };
 
   useEffect(() => {
-    // Check immediately on mount
-    checkStatus();
+    // Check after a short delay to prevent flicker on fast connections
+    const timeout = setTimeout(() => {
+      checkStatus();
+    }, 1000);
 
     // Check periodically
     const interval = setInterval(checkStatus, 30000); // Check every 30 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, []);
 
-  // Don't show anything when status is still being checked initially
-  if (apiStatus === null && !isChecking) {
+  // Don't show anything initially or when API is available
+  if (!hasChecked || apiStatus === true) {
     return null;
   }
 

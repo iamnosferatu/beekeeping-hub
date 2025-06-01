@@ -7,17 +7,41 @@ import React from "react";
 import { Alert, Button } from "react-bootstrap";
 import { BsExclamationTriangle } from "react-icons/bs";
 
-const ErrorAlert = ({ error, title = "Error", onRetry, className = "" }) => {
+const ErrorAlert = ({ 
+  error, 
+  title = "Error", 
+  variant = "danger",
+  onRetry, 
+  onDismiss,
+  dismissible = true,
+  className = "",
+  showIcon = true 
+}) => {
+  if (!error) return null;
+
   return (
-    <Alert variant="danger" className={className}>
+    <Alert 
+      variant={variant} 
+      className={className}
+      dismissible={dismissible}
+      onClose={onDismiss}
+    >
       <div className="d-flex align-items-start">
-        <BsExclamationTriangle className="flex-shrink-0 me-3 mt-1" size={24} />
+        {showIcon && (
+          <BsExclamationTriangle className="flex-shrink-0 me-3 mt-1" size={20} />
+        )}
         <div className="flex-grow-1">
-          <Alert.Heading className="h5 mb-2">{title}</Alert.Heading>
+          {title && title !== "Error" && (
+            <Alert.Heading className="h6 mb-2">{title}</Alert.Heading>
+          )}
           <p className="mb-0">{error}</p>
           {onRetry && (
             <div className="d-flex justify-content-end mt-3">
-              <Button variant="outline-danger" onClick={onRetry}>
+              <Button 
+                variant={variant === "danger" ? "outline-danger" : `outline-${variant}`} 
+                size="sm"
+                onClick={onRetry}
+              >
                 Try Again
               </Button>
             </div>

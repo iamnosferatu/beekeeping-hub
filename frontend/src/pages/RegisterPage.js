@@ -2,6 +2,7 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Button, Card, Alert, Row, Col } from "react-bootstrap";
+import { BsEnvelopeFill } from "react-icons/bs";
 import AuthContext from "../contexts/AuthContext";
 
 const RegisterPage = () => {
@@ -15,6 +16,7 @@ const RegisterPage = () => {
   });
   const [validated, setValidated] = useState(false);
   const [passwordMatch, setPasswordMatch] = useState(true);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const { register, error, clearError } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -53,14 +55,16 @@ const RegisterPage = () => {
     }
 
     try {
-      await register({
+      const response = await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
       });
-      navigate("/");
+      
+      // Show success message instead of redirecting
+      setRegistrationSuccess(true);
     } catch (err) {
       // Error is handled by AuthContext
       console.error("Registration error:", err);
@@ -70,6 +74,25 @@ const RegisterPage = () => {
   return (
     <div className="register-page py-5">
       <Card className="mx-auto" style={{ maxWidth: "800px" }}>
+        {registrationSuccess ? (
+          // Success message
+          <Card.Body className="text-center py-5">
+            <BsEnvelopeFill size={60} className="text-success mb-3" />
+            <h3 className="text-success mb-3">Registration Successful!</h3>
+            <p className="lead">
+              We've sent a verification email to <strong>{formData.email}</strong>
+            </p>
+            <p>
+              Please check your inbox and click the verification link to activate your account.
+            </p>
+            <hr className="my-4" />
+            <p className="text-muted">
+              Didn't receive the email? Check your spam folder or{" "}
+              <Link to="/login">go to login</Link> to resend the verification email.
+            </p>
+          </Card.Body>
+        ) : (
+          <>
         <Card.Header className="bg-primary text-white text-center">
           <h4 className="mb-0">Register for BeeKeeper's Blog</h4>
         </Card.Header>
@@ -208,6 +231,8 @@ const RegisterPage = () => {
             Already have an account? <Link to="/login">Login</Link>
           </p>
         </Card.Footer>
+        </>
+        )}
       </Card>
     </div>
   );

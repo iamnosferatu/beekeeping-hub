@@ -17,6 +17,9 @@ import SearchResultsPage from "./pages/SearchResultsPage";
 import TagPage from "./pages/TagPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 import AuthDebugPage from "./pages/AuthDebugPage";
@@ -45,8 +48,11 @@ import RoleRoute from "./components/auth/RoleRoute";
 // Import the new static pages
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import RelatedArticlesDebugger from './components/debug/RelatedArticlesDebugger';
+import ArticlePageDebug from './pages/ArticlePageDebug';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import SitemapPage from './pages/SitemapPage';
 
 function App() {
   const { settings, loading } = useSiteSettings();
@@ -72,6 +78,9 @@ function App() {
         <Route path="tags/:slug" element={<TagPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected Routes */}
         <Route
@@ -114,12 +123,15 @@ function App() {
         {/* Debug Routes */}
         <Route path="/auth-debug" element={<AuthDebugPage />} />
         <Route path="/debug" element={<DebugPage />} />
+        <Route path="/debug/related-articles" element={<RelatedArticlesDebugger />} />
+        <Route path="/debug/article/:slug" element={<ArticlePageDebug />} />
         
         {/* Add the new static page routes here */}
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
+        <Route path="sitemap" element={<SitemapPage />} />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />

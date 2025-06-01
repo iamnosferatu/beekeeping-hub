@@ -12,6 +12,114 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>BeeKeeper's Blog</title>
+    
+    <!-- Prevent FOUC and theme flicker -->
+    <style>
+      /* Initial theme styles to prevent flicker */
+      :root {
+        --primary-color: #ffc107;
+        --secondary-color: #6c757d;
+        --bg-color: #ffffff;
+        --text-color: #212529;
+        --link-color: #007bff;
+        --navbar-bg: #ffc107;
+        --navbar-text: #212529;
+        --footer-bg: #f8f9fa;
+        --footer-text: #6c757d;
+      }
+      
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #ffffff;
+        color: #212529;
+        overflow-x: hidden;
+      }
+      
+      /* Loading state */
+      #root:empty {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      #root:empty::after {
+        content: "Loading...";
+        color: #6c757d;
+        font-size: 1.2rem;
+      }
+      
+      /* Prevent layout shift */
+      .main-layout {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+    
+    <!-- Load theme from localStorage immediately -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'default';
+        const themes = {
+          default: {
+            bgColor: '#ffffff',
+            textColor: '#212529',
+            navbarBg: '#ffc107',
+            navbarText: '#212529',
+            footerBg: '#f8f9fa',
+            footerText: '#6c757d'
+          },
+          dark: {
+            bgColor: '#212529',
+            textColor: '#f8f9fa',
+            navbarBg: '#343a40',
+            navbarText: '#f8f9fa',
+            footerBg: '#343a40',
+            footerText: '#f8f9fa'
+          },
+          nature: {
+            bgColor: '#f8f9fa',
+            textColor: '#212529',
+            navbarBg: '#28a745',
+            navbarText: '#ffffff',
+            footerBg: '#28a745',
+            footerText: '#ffffff'
+          },
+          elegant: {
+            bgColor: '#ffffff',
+            textColor: '#343a40',
+            navbarBg: '#343a40',
+            navbarText: '#d4af37',
+            footerBg: '#343a40',
+            footerText: '#d4af37'
+          }
+        };
+        
+        const selectedTheme = themes[theme] || themes.default;
+        const root = document.documentElement;
+        
+        // Apply theme immediately
+        root.style.setProperty('--bg-color', selectedTheme.bgColor);
+        root.style.setProperty('--text-color', selectedTheme.textColor);
+        root.style.setProperty('--navbar-bg', selectedTheme.navbarBg);
+        root.style.setProperty('--navbar-text', selectedTheme.navbarText);
+        root.style.setProperty('--footer-bg', selectedTheme.footerBg);
+        root.style.setProperty('--footer-text', selectedTheme.footerText);
+        
+        document.body.style.backgroundColor = selectedTheme.bgColor;
+        document.body.style.color = selectedTheme.textColor;
+        
+        if (theme === 'dark') {
+          document.body.setAttribute('data-bs-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

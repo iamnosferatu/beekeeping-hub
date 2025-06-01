@@ -1,3 +1,6 @@
+// Load environment variables first
+require("dotenv").config();
+
 // Backend entry point
 const express = require("express");
 const cors = require("cors");
@@ -8,9 +11,6 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const { errorHandler } = require("./middleware/errorHandler");
 const { sequelize, connectWithRetry } = require("./config/database");
-
-// Load environment variables
-require("dotenv").config();
 
 // Initialize express app
 const app = express();
@@ -30,8 +30,17 @@ app.use(cors()); // Enable CORS
 app.use(express.json({ limit: '50mb' })); // Parse JSON requests with increased limit
 app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Parse URL-encoded requests with increased limit
 
-// Serve static files from uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve static files from uploads directory with caching
+app.use("/uploads", express.static(path.join(__dirname, "../uploads"), {
+  maxAge: '7d', // Cache images for 7 days
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.gif')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+  }
+}));
 
 // Logging
 if (process.env.NODE_ENV === "development") {
@@ -126,7 +135,8 @@ const startServer = async () => {
       console.log(
         `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
       );
-      console.log(`API available at http://localhost:${PORT}/api`);
+      const apiUrl = process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/api` : `http://localhost:${PORT}/api`;
+      console.log(`API available at ${apiUrl}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

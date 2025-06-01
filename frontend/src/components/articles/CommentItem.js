@@ -4,6 +4,7 @@ import { Button, Alert, Spinner } from "react-bootstrap";
 import { BsReply, BsPencil, BsTrash, BsFlag } from "react-icons/bs";
 import moment from "moment";
 import AuthContext from "../../contexts/AuthContext";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const CommentItem = ({
   comment,
@@ -20,6 +21,7 @@ const CommentItem = ({
   const [replyText, setReplyText] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
   const [error, setError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Check if current user can edit this comment
   const canEdit =
@@ -57,9 +59,11 @@ const CommentItem = ({
 
   // Handle delete with confirmation
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this comment?")) {
-      onDelete(comment.id);
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    onDelete(comment.id);
   };
 
   // Calculate indentation based on depth
@@ -90,6 +94,7 @@ const CommentItem = ({
   };
 
   return (
+    <>
     <div className="comment-item" style={indentStyle}>
       <div className="d-flex mb-3">
         {/* Author Avatar */}
@@ -279,6 +284,17 @@ const CommentItem = ({
         </div>
       </div>
     </div>
+
+    <ConfirmDialog
+      show={showDeleteConfirm}
+      onHide={() => setShowDeleteConfirm(false)}
+      onConfirm={confirmDelete}
+      title="Delete Comment"
+      message="Are you sure you want to delete this comment? This action cannot be undone."
+      confirmText="Delete"
+      variant="danger"
+    />
+    </>
   );
 };
 

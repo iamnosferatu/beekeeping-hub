@@ -660,3 +660,99 @@ exports.toggleLike = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get related articles
+// @route   GET /api/articles/:id/related
+// @access  Public
+exports.getRelatedArticles = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // First, get the current article with its tags and author
+    const currentArticle = await Article.findByPk(id, {
+      include: [
+        {
+          model: Tag,
+          as: "tags",
+          attributes: ["id"],
+        },
+      ],
+    });
+
+    if (!currentArticle) {
+      return res.status(404).json({
+        success: false,
+        message: "Article not found",
+      });
+    }
+
+    // Get tag IDs from current article
+    const tagIds = currentArticle.tags.map(tag => tag.id);
+
+    // Build query to find related articles
+    const whereClause = {
+      id: { [Op.ne]: id }, // Exclude current article
+      status: "published",
+      blocked: false,
+    };
+
+    // Find articles with matching tags or same author
+    const relatedArticles = await Article.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: "author",
+          attributes: ["id", "username", "first_name", "last_name", "avatar"],
+        },
+        {
+          model: Tag,
+          as: "tags",
+          attributes: ["id", "name", "slug"],
+          through: { attributes: [] },
+        },
+      ],
+      attributes: [
+        "id",
+        "title",
+        "slug",
+        "excerpt",
+        "featured_image",
+        "created_at",
+        "view_count",
+        "user_id",
+      ],
+      order: [
+        ['view_count', 'DESC'],
+        ['created_at', 'DESC']
+      ],
+      limit,
+    });
+    
+    // Sort by relevance in JavaScript to avoid SQL issues
+    const articlesWithRelevance = relatedArticles.map(article => {
+      const articleTagIds = article.tags.map(t => t.id);
+      const tagMatchCount = tagIds.filter(id => articleTagIds.includes(id)).length;
+      const sameAuthor = article.user_id === currentArticle.user_id ? 1 : 0;
+      
+      return {
+        ...article.get({ plain: true }),
+        tagMatchCount,
+        sameAuthor,
+        relevanceScore: (tagMatchCount * 10) + (sameAuthor * 5)
+      };
+    });
+    
+    // Sort by relevance score
+    articlesWithRelevance.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+    res.status(200).json({
+      success: true,
+      data: articlesWithRelevance,
+    });
+  } catch (error) {
+    console.error("Error fetching related articles:", error);
+    next(error);
+  }
+};

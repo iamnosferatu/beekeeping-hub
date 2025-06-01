@@ -337,6 +337,18 @@ class ApiService {
         url: `/author/articles${queryString ? `?${queryString}` : ""}`,
       });
     },
+
+    /**
+     * Get related articles
+     */
+    getRelated: async (id, limit = 5) => {
+      console.log("🔗 articles.getRelated called with id:", id, "limit:", limit);
+
+      return this.request({
+        method: "GET",
+        url: `/articles/${id}/related?limit=${limit}`,
+      });
+    },
   };
 
   // =============================================================================
@@ -592,6 +604,75 @@ class ApiService {
       });
     },
   };
+
+  // =============================================================================
+  // TAGS ENDPOINTS
+  // =============================================================================
+  tags = {
+    /**
+     * Get all tags
+     */
+    getAll: (params = {}) => {
+      const queryString = new URLSearchParams(params).toString();
+      return this.request({
+        method: "GET",
+        url: `/tags${queryString ? `?${queryString}` : ""}`,
+      });
+    },
+
+    /**
+     * Get popular tags (by article count)
+     */
+    getPopular: (limit = 20) => {
+      return this.request({
+        method: "GET",
+        url: `/tags/popular?limit=${limit}`,
+      });
+    },
+
+    /**
+     * Get single tag by slug
+     */
+    getBySlug: (slug, params = {}) => {
+      const queryString = new URLSearchParams(params).toString();
+      return this.request({
+        method: "GET",
+        url: `/tags/${slug}${queryString ? `?${queryString}` : ""}`,
+      });
+    },
+
+    /**
+     * Create new tag (admin only)
+     */
+    create: (tagData) => {
+      return this.request({
+        method: "POST",
+        url: "/tags",
+        data: tagData,
+      });
+    },
+
+    /**
+     * Update tag (admin only)
+     */
+    update: (id, tagData) => {
+      return this.request({
+        method: "PUT",
+        url: `/tags/${id}`,
+        data: tagData,
+      });
+    },
+
+    /**
+     * Delete tag (admin only)
+     */
+    delete: (id) => {
+      return this.request({
+        method: "DELETE",
+        url: `/tags/${id}`,
+      });
+    },
+  };
   
   // =============================================================================
   // LIKES ENDPOINTS
@@ -643,30 +724,6 @@ class ApiService {
   // =============================================================================
   // OTHER ENDPOINTS
   // =============================================================================
-
-  tags = {
-    getAll: async () => {
-      return this.request({
-        method: "GET",
-        url: "/tags",
-      });
-    },
-
-    getBySlug: async (slug) => {
-      return this.request({
-        method: "GET",
-        url: `/tags/${slug}`,
-      });
-    },
-
-    create: async (tagData) => {
-      return this.request({
-        method: "POST",
-        url: "/tags",
-        data: tagData,
-      });
-    },
-  };
 
   admin = {
     getDashboardStats: async () => {

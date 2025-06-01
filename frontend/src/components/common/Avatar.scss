@@ -1,0 +1,73 @@
+// frontend/src/components/common/Avatar.scss
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  
+  &.avatar-image {
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+    background-color: #f8f9fa;
+  }
+  
+  &.avatar-initials {
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    user-select: none;
+    border: 2px solid transparent;
+    
+    // Add subtle gradient for depth
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+    background-blend-mode: overlay;
+  }
+  
+  // Hover effect
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    
+    &.avatar-image {
+      border-color: var(--primary-color, #0066cc);
+    }
+  }
+}
+
+// Size variants
+.avatar-sm {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+}
+
+.avatar-lg {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 22px !important;
+}
+
+.avatar-xl {
+  width: 80px !important;
+  height: 80px !important;
+  font-size: 32px !important;
+}
+
+// Dark mode support
+[data-bs-theme="dark"] {
+  .avatar {
+    &.avatar-image {
+      border-color: #495057;
+      background-color: #212529;
+    }
+  }
+}

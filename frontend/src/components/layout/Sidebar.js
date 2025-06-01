@@ -1,10 +1,12 @@
 // frontend/src/components/layout/Sidebar.js
 import React, { useState, useEffect } from "react";
 import { Card, ListGroup, Badge, Alert, Spinner, Form } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
 import api from "../../services/api";
+import TagCloud from "../common/TagCloud";
+import RelatedArticles from "../articles/RelatedArticles";
 
 /**
  * Sidebar Component
@@ -13,11 +15,10 @@ import api from "../../services/api";
  * Fetches real data from the API and handles loading/error states.
  */
 const Sidebar = () => {
-  // State for tags
-  const [tags, setTags] = useState([]);
-  const [tagsLoading, setTagsLoading] = useState(true);
-  const [tagsError, setTagsError] = useState(null);
-
+  const location = useLocation();
+  const [currentArticleId, setCurrentArticleId] = useState(null);
+  const [currentArticleData, setCurrentArticleData] = useState(null);
+  
   // State for recent articles
   const [recentArticles, setRecentArticles] = useState([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
@@ -28,41 +29,6 @@ const Sidebar = () => {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterMessage, setNewsletterMessage] = useState(null);
   const [newsletterError, setNewsletterError] = useState(null);
-
-  /**
-   * Fetch tags from the API
-   */
-  const fetchTags = async () => {
-    try {
-      setTagsLoading(true);
-      setTagsError(null);
-
-      console.log("Fetching tags from:", `${API_URL}/tags`);
-
-      const response = await axios.get(`${API_URL}/tags`);
-
-      console.log("Tags response:", response.data);
-
-      if (response.data.success && response.data.data) {
-        // The API returns tags with id, name, and slug properties
-        // We'll display all tags that have a name
-        const validTags = response.data.data.filter(
-          (tag) => tag.name && tag.slug
-        );
-        console.log("Valid tags found:", validTags.length);
-        setTags(validTags);
-      } else {
-        console.warn("Unexpected tags response structure:", response.data);
-        setTags([]);
-      }
-    } catch (error) {
-      console.error("Error fetching tags:", error);
-      setTagsError("Unable to load tags");
-      setTags([]);
-    } finally {
-      setTagsLoading(false);
-    }
-  };
 
   /**
    * Fetch recent articles from the API
@@ -152,82 +118,59 @@ const Sidebar = () => {
   };
 
   /**
+   * Check if we're on an article page and get the article ID
+   */
+  useEffect(() => {
+    // Check if we're on an article page (URL pattern: /articles/:slug)
+    const pathParts = location.pathname.split('/');
+    if (pathParts[1] === 'articles' && pathParts[2] && !pathParts[3]) {
+      // We're on an article page, fetch the article to get its ID
+      const slug = pathParts[2];
+      fetchArticleBySlug(slug);
+    } else {
+      // Not on an article page
+      setCurrentArticleId(null);
+      setCurrentArticleData(null);
+    }
+  }, [location.pathname]);
+
+  /**
+   * Fetch article data by slug to get the ID
+   */
+  const fetchArticleBySlug = async (slug) => {
+    try {
+      const response = await api.articles.getBySlug(slug);
+      if (response.success && response.data) {
+        // Handle nested response structure
+        const article = response.data.data || response.data.article || response.data;
+        if (article && article.id) {
+          setCurrentArticleId(article.id);
+          setCurrentArticleData(article);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching article for sidebar:', error);
+      setCurrentArticleId(null);
+      setCurrentArticleData(null);
+    }
+  };
+
+  /**
    * Fetch data on component mount
    */
   useEffect(() => {
-    // Fetch both tags and articles independently
-    fetchTags();
     fetchRecentArticles();
   }, []);
 
   return (
     <>
-      {/* Popular Tags Card */}
-      <Card className="mb-4 shadow-sm">
-        <Card.Header>
-          <h5 className="mb-0">Popular Tags</h5>
-        </Card.Header>
-        <Card.Body>
-          {tagsLoading ? (
-            // Loading state
-            <div className="text-center py-3">
-              <Spinner animation="border" size="sm" variant="primary" />
-              <p className="mt-2 mb-0 small text-muted">Loading tags...</p>
-            </div>
-          ) : tagsError ? (
-            // Error state
-            <Alert variant="warning" className="mb-0">
-              <small>{tagsError}</small>
-            </Alert>
-          ) : tags.length > 0 ? (
-            // Tags display
-            <div className="d-flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <Link
-                  to={`/tags/${tag.slug}`}
-                  key={tag.id}
-                  className="text-decoration-none"
-                  title={`View articles tagged with ${tag.name}`}
-                >
-                  <Badge
-                    bg="secondary"
-                    className="p-2 tag-badge"
-                    style={{
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 4px rgba(0,0,0,0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    {tag.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            // Empty state
-            <p className="text-muted mb-0 text-center">
-              <small>No tags available yet</small>
-            </p>
-          )}
-
-          {/* Debug info in development */}
-          {process.env.NODE_ENV === "development" && !tagsLoading && (
-            <div className="mt-3 p-2 bg-light rounded">
-              <small className="text-muted">
-                Debug: Found {tags.length} tags from API
-              </small>
-            </div>
-          )}
-        </Card.Body>
-      </Card>
+      {/* Related Articles - Only show on article pages */}
+      {currentArticleId && (
+        <RelatedArticles articleId={currentArticleId} limit={5} />
+      )}
+      
+      {/* Tag Cloud Widget */}
+      <TagCloud limit={20} title="Popular Tags" />
 
       {/* Recent Articles Card */}
       <Card className="mb-4 shadow-sm">

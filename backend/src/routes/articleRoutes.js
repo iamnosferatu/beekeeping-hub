@@ -421,6 +421,47 @@ router.delete(
  */
 router.post("/:id/like", protect, articleController.toggleLike);
 
+/**
+ * @swagger
+ * /articles/{id}/related:
+ *   get:
+ *     summary: Get related articles
+ *     tags: [Articles]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Article ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 10
+ *           default: 5
+ *         description: Number of related articles to return
+ *     responses:
+ *       200:
+ *         description: Related articles retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Article'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.get("/:id/related", articleController.getRelatedArticles);
+
 // Alternative endpoint for article comments
 router.get("/:articleId/comments", async (req, res) => {
   try {

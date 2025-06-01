@@ -27,6 +27,7 @@ import axios from "axios";
 import { API_URL } from "../../config";
 import AuthContext from "../../contexts/AuthContext";
 import { formatDate } from "../../utils/formatters";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 const ContactMessagesPage = () => {
   const { token } = useContext(AuthContext);
@@ -35,6 +36,7 @@ const ContactMessagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [stats, setStats] = useState(null);
   
   // Filters and pagination
@@ -140,14 +142,12 @@ const ContactMessagesPage = () => {
   };
 
   // Delete message
-  const deleteMessage = async (messageId) => {
-    if (!window.confirm("Are you sure you want to delete this message?")) {
-      return;
-    }
+  const deleteMessage = async () => {
+    if (!selectedMessage) return;
 
     try {
       await axios.delete(
-        `${API_URL}/contact/admin/contacts/${messageId}`,
+        `${API_URL}/contact/admin/contacts/${selectedMessage.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -156,6 +156,7 @@ const ContactMessagesPage = () => {
       fetchMessages();
       fetchStats();
       setShowModal(false);
+      setShowDeleteConfirm(false);
     } catch (error) {
       console.error("Error deleting message:", error);
     }
@@ -418,7 +419,7 @@ const ContactMessagesPage = () => {
               </Button>
               <Button
                 variant="danger"
-                onClick={() => deleteMessage(selectedMessage.id)}
+                onClick={() => setShowDeleteConfirm(true)}
               >
                 <BsTrash /> Delete
               </Button>
@@ -429,6 +430,17 @@ const ContactMessagesPage = () => {
           </>
         )}
       </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        show={showDeleteConfirm}
+        onHide={() => setShowDeleteConfirm(false)}
+        onConfirm={deleteMessage}
+        title="Delete Contact Message"
+        message={`Are you sure you want to delete the message from ${selectedMessage?.name}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </Container>
   );
 };

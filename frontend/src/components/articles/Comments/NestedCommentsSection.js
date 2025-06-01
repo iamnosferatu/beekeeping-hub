@@ -22,6 +22,9 @@ import { Link } from "react-router-dom";
 import AuthContext from "../../../contexts/AuthContext";
 import apiService from "../../../services/api";
 import NestedCommentItem from "./NestedCommentItem";
+import Avatar from "../../common/Avatar";
+import PromptDialog from "../../common/PromptDialog";
+import ErrorAlert from "../../common/ErrorAlert";
 
 /**
  * NestedCommentsSection Component
@@ -48,6 +51,9 @@ const NestedCommentsSection = ({
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState("newest"); // newest, oldest, popular
   const [filterStatus, setFilterStatus] = useState("all"); // all, approved, pending
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportingComment, setReportingComment] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   /**
    * Fetch comments from API
@@ -246,33 +252,34 @@ const NestedCommentsSection = ({
       }
     } catch (err) {
       console.error("Failed to delete comment:", err);
-      alert("Failed to delete comment. Please try again.");
+      setActionError("Failed to delete comment. Please try again.");
     }
   };
 
   /**
    * Handle comment report
    */
-  const handleReport = async (comment) => {
-    const reason = prompt(
-      "Please provide a reason for reporting this comment:"
-    );
+  const handleReport = (comment) => {
+    setReportingComment(comment);
+    setShowReportDialog(true);
+  };
 
-    if (!reason) return;
+  const submitReport = async (reason) => {
+    if (!reportingComment || !reason.trim()) return;
 
     try {
-      const response = await apiService.comments.report(comment.id, { reason });
+      const response = await apiService.comments.report(reportingComment.id, { reason });
 
       if (response.success) {
-        alert(
-          "Comment reported successfully. An administrator will review it."
-        );
+        setActionError(null);
+        // Show success message
+        setError("Comment reported successfully. An administrator will review it.");
       } else {
         throw new Error(response.error?.message || "Failed to report comment");
       }
     } catch (err) {
       console.error("Failed to report comment:", err);
-      alert("Failed to report comment. Please try again.");
+      setActionError("Failed to report comment. Please try again.");
     }
   };
 
@@ -312,7 +319,7 @@ const NestedCommentsSection = ({
       }
     } catch (err) {
       console.error("Failed to vote on comment:", err);
-      alert("Failed to vote. Please try again.");
+      setActionError("Failed to vote. Please try again.");
     }
   };
 
@@ -362,6 +369,7 @@ const NestedCommentsSection = ({
   const totalComments = getTotalCommentCount();
 
   return (
+    <>
     <Card className="shadow-sm comments-section">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <h4 className="mb-0">
@@ -442,16 +450,9 @@ const NestedCommentsSection = ({
             {user ? (
               <Form onSubmit={handleCommentSubmit}>
                 <div className="d-flex mb-3">
-                  <img
-                    src={
-                      user.avatar || "https://via.placeholder.com/40x40?text=👤"
-                    }
-                    alt={user.username}
-                    className="rounded-circle me-3"
-                    width="40"
-                    height="40"
-                    style={{ objectFit: "cover" }}
-                  />
+                  <div className="me-3">
+                    <Avatar user={user} size={40} />
+                  </div>
                   <div className="flex-grow-1">
                     <Form.Control
                       as="textarea"
@@ -561,6 +562,30 @@ const NestedCommentsSection = ({
         )}
       </Card.Body>
     </Card>
+
+    {/* Action Error Alert */}
+    <ErrorAlert 
+      error={actionError}
+      variant="danger"
+      onDismiss={() => setActionError(null)}
+      className="mt-2"
+    />
+
+    {/* Report Comment Dialog */}
+    <PromptDialog
+      show={showReportDialog}
+      onHide={() => {
+        setShowReportDialog(false);
+        setReportingComment(null);
+      }}
+      onSubmit={submitReport}
+      title="Report Comment"
+      message="Please provide a reason for reporting this comment:"
+      placeholder="Enter your reason for reporting..."
+      submitText="Report"
+      required={true}
+    />
+    </>
   );
 };
 

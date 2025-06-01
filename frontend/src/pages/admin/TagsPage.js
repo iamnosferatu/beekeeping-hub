@@ -25,6 +25,7 @@ import {
 import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
+import ErrorAlert from "../../components/common/ErrorAlert";
 
 /**
  * Admin Tags Management Page
@@ -47,6 +48,7 @@ const TagsPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -193,19 +195,20 @@ const TagsPage = () => {
       if (response.data.success) {
         setShowCreateModal(false);
         setFormData({ name: "", slug: "", description: "" });
+        setActionError(null);
         fetchTags();
       }
     } catch (error) {
       console.error("Error creating tag:", error);
 
       if (error.response?.status === 409) {
-        alert("A tag with this name or slug already exists.");
+        setActionError("A tag with this name or slug already exists.");
       } else if (error.response?.status === 404) {
-        alert(
+        setActionError(
           "Tag creation endpoint not implemented. This would create a new tag in a production system."
         );
       } else {
-        alert("Failed to create tag. Please try again.");
+        setActionError("Failed to create tag. Please try again.");
       }
     } finally {
       setActionLoading(false);
@@ -238,17 +241,18 @@ const TagsPage = () => {
         setShowEditModal(false);
         setSelectedTag(null);
         setFormData({ name: "", slug: "", description: "" });
+        setActionError(null);
         fetchTags();
       }
     } catch (error) {
       console.error("Error updating tag:", error);
 
       if (error.response?.status === 404) {
-        alert(
+        setActionError(
           "Tag update endpoint not implemented. This would update the tag in a production system."
         );
       } else {
-        alert("Failed to update tag. Please try again.");
+        setActionError("Failed to update tag. Please try again.");
       }
     } finally {
       setActionLoading(false);
@@ -272,17 +276,18 @@ const TagsPage = () => {
       if (response.data.success) {
         setShowDeleteModal(false);
         setSelectedTag(null);
+        setActionError(null);
         fetchTags();
       }
     } catch (error) {
       console.error("Error deleting tag:", error);
 
       if (error.response?.status === 404) {
-        alert(
+        setActionError(
           "Tag deletion endpoint not implemented. This would delete the tag in a production system."
         );
       } else {
-        alert("Failed to delete tag. Please try again.");
+        setActionError("Failed to delete tag. Please try again.");
       }
     } finally {
       setActionLoading(false);
@@ -309,17 +314,18 @@ const TagsPage = () => {
         setShowMergeModal(false);
         setSelectedTag(null);
         setMergeTarget("");
+        setActionError(null);
         fetchTags();
       }
     } catch (error) {
       console.error("Error merging tags:", error);
 
       if (error.response?.status === 404) {
-        alert(
+        setActionError(
           "Tag merge endpoint not implemented. This would merge tags in a production system."
         );
       } else {
-        alert("Failed to merge tags. Please try again.");
+        setActionError("Failed to merge tags. Please try again.");
       }
     } finally {
       setActionLoading(false);
@@ -574,6 +580,13 @@ const TagsPage = () => {
           <Modal.Title>Create New Tag</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>
@@ -653,6 +666,13 @@ const TagsPage = () => {
           <Modal.Title>Edit Tag</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>
@@ -730,6 +750,13 @@ const TagsPage = () => {
           <Modal.Title>Merge Tags</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           <p>
             Merge <strong>"{selectedTag?.name}"</strong> into another tag. All
             articles with this tag will be updated to use the target tag
@@ -782,6 +809,13 @@ const TagsPage = () => {
           <Modal.Title>Delete Tag</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           <div className="text-center">
             <BsExclamationTriangle size={50} className="text-danger mb-3" />
             <h5>Are you sure you want to delete this tag?</h5>

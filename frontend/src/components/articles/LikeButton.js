@@ -4,12 +4,14 @@ import { BsHeart, BsHeartFill } from 'react-icons/bs';
 import { Button } from 'react-bootstrap';
 import { useLikes } from '../../hooks/api/useLikes';
 import AuthContext from '../../contexts/AuthContext';
+import ErrorAlert from '../common/ErrorAlert';
 import './LikeButton.scss';
 
 const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, onLikeChange, size = 'md' }) => {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [loginError, setLoginError] = useState(null);
   const { toggleLike, loading } = useLikes();
   const { user } = useContext(AuthContext);
 
@@ -20,10 +22,11 @@ const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, o
 
   const handleLikeClick = async () => {
     if (!user) {
-      // Could show a modal or redirect to login
-      alert('Please log in to like articles');
+      setLoginError('Please log in to like articles');
       return;
     }
+
+    setLoginError(null);
 
     // Optimistic update
     setIsLiked(!isLiked);
@@ -64,21 +67,31 @@ const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, o
   };
 
   return (
-    <Button
-      variant={isLiked ? 'danger' : 'outline-danger'}
-      size={size}
-      className={`like-button d-flex align-items-center gap-1 ${sizeClasses[size]} ${isAnimating ? 'like-animating' : ''}`}
-      onClick={handleLikeClick}
-      disabled={loading}
-      aria-label={isLiked ? 'Unlike article' : 'Like article'}
-    >
-      {isLiked ? (
-        <BsHeartFill size={iconSize[size]} />
-      ) : (
-        <BsHeart size={iconSize[size]} />
-      )}
-      <span className="like-count">{likeCount}</span>
-    </Button>
+    <div>
+      <Button
+        variant={isLiked ? 'danger' : 'outline-danger'}
+        size={size}
+        className={`like-button d-flex align-items-center gap-1 ${sizeClasses[size]} ${isAnimating ? 'like-animating' : ''}`}
+        onClick={handleLikeClick}
+        disabled={loading}
+        aria-label={isLiked ? 'Unlike article' : 'Like article'}
+      >
+        {isLiked ? (
+          <BsHeartFill size={iconSize[size]} />
+        ) : (
+          <BsHeart size={iconSize[size]} />
+        )}
+        <span className="like-count">{likeCount}</span>
+      </Button>
+      
+      <ErrorAlert 
+        error={loginError}
+        variant="info"
+        onDismiss={() => setLoginError(null)}
+        className="mt-2"
+        showIcon={false}
+      />
+    </div>
   );
 };
 

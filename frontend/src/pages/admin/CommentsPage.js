@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
+import Avatar from "../../components/common/Avatar";
 
 /**
  * Admin Comments Management Page
@@ -46,6 +47,7 @@ const CommentsPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showContentModal, setShowContentModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   /**
    * Fetch comments from the backend
@@ -136,6 +138,7 @@ const CommentsPage = () => {
   const handleStatusUpdate = async (comment, newStatus) => {
     try {
       setActionLoading(true);
+      setActionError(null);
       const token = localStorage.getItem("beekeeper_auth_token");
 
       const response = await axios.put(
@@ -157,7 +160,7 @@ const CommentsPage = () => {
 
       // If endpoint doesn't exist, show message
       if (error.response?.status === 404) {
-        alert(
+        setActionError(
           "Comment moderation endpoint not implemented. This would update the comment status in a production system."
         );
 
@@ -168,7 +171,7 @@ const CommentsPage = () => {
           )
         );
       } else {
-        alert("Failed to update comment status. Please try again.");
+        setActionError("Failed to update comment status. Please try again.");
       }
     } finally {
       setActionLoading(false);
@@ -198,14 +201,7 @@ const CommentsPage = () => {
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
-
-      if (error.response?.status === 404) {
-        alert(
-          "Comment deletion endpoint not implemented. This would delete the comment in a production system."
-        );
-      } else {
-        alert("Failed to delete comment. Please try again.");
-      }
+      setActionError("Failed to delete comment. Please try again.");
     } finally {
       setActionLoading(false);
     }
@@ -255,6 +251,12 @@ const CommentsPage = () => {
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {actionError && (
+        <Alert variant="warning" dismissible onClose={() => setActionError(null)}>
+          {actionError}
         </Alert>
       )}
 
@@ -337,16 +339,10 @@ const CommentsPage = () => {
                     <tr key={comment.id}>
                       <td>
                         <div className="d-flex align-items-center">
-                          <img
-                            src={
-                              comment.author?.avatar ||
-                              "https://via.placeholder.com/40x40?text=👤"
-                            }
-                            alt={comment.author?.username || "Anonymous"}
-                            className="rounded-circle me-2"
-                            width="40"
-                            height="40"
-                            style={{ objectFit: "cover" }}
+                          <Avatar 
+                            user={comment.author} 
+                            size={40}
+                            className="me-2"
                           />
                           <div>
                             <strong>

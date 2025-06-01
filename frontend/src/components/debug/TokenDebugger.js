@@ -9,6 +9,8 @@ const TokenDebugger = () => {
   const { user, token, logout } = useContext(AuthContext);
   const [decodedToken, setDecodedToken] = useState(null);
   const [decodeError, setDecodeError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // Decode JWT token manually (just the payload, not verification)
   const decodeToken = React.useCallback(() => {
@@ -38,7 +40,8 @@ const TokenDebugger = () => {
   const copyToken = () => {
     if (token) {
       navigator.clipboard.writeText(token);
-      alert("Token copied to clipboard!");
+      setSuccessMessage("Token copied to clipboard!");
+      setTimeout(() => setSuccessMessage(null), 3000);
     }
   };
 
@@ -71,17 +74,20 @@ const TokenDebugger = () => {
       });
 
       if (response.ok) {
-        alert("✅ Token works! Auth issue might be elsewhere.");
+        setSuccessMessage("✅ Token works! Auth issue might be elsewhere.");
+        setTimeout(() => setSuccessMessage(null), 5000);
       } else {
-        alert(
+        setErrorMessage(
           `❌ Token failed: ${response.status} - ${
             result.message || "Unknown error"
           }`
         );
+        setTimeout(() => setErrorMessage(null), 5000);
       }
     } catch (error) {
       console.error("Direct token test error:", error);
-      alert(`❌ Request failed: ${error.message}`);
+      setErrorMessage(`❌ Request failed: ${error.message}`);
+      setTimeout(() => setErrorMessage(null), 5000);
     }
   };
 
@@ -128,6 +134,18 @@ const TokenDebugger = () => {
             <Badge bg="danger">Not logged in</Badge>
           )}
         </div>
+
+        {/* Success/Error Messages */}
+        {successMessage && (
+          <Alert variant="success" className="mb-3" dismissible onClose={() => setSuccessMessage(null)}>
+            {successMessage}
+          </Alert>
+        )}
+        {errorMessage && (
+          <Alert variant="danger" className="mb-3" dismissible onClose={() => setErrorMessage(null)}>
+            {errorMessage}
+          </Alert>
+        )}
 
         {/* Token Status */}
         <table className="table table-sm table-bordered">

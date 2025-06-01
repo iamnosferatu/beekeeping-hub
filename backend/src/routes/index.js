@@ -12,6 +12,7 @@ const siteSettingsRoutes = require("./siteSettingsRoutes");
 const newsletterRoutes = require("./newsletterRoutes");
 const contactRoutes = require("./contactRoutes");
 const likeRoutes = require("./likeRoutes");
+const sitemapRoutes = require("./sitemapRoutes");
 
 // API root
 router.get("/", (req, res) => {
@@ -32,6 +33,7 @@ router.get("/", (req, res) => {
       "/contact",
       "/likes",
       "/health",
+      "/sitemap",
     ],
   });
 });
@@ -46,6 +48,7 @@ router.use("/site-settings", siteSettingsRoutes);
 router.use("/newsletter", newsletterRoutes);
 router.use("/contact", contactRoutes);
 router.use("/likes", likeRoutes);
+router.use("/", sitemapRoutes); // Sitemap routes at root level for sitemap.xml
 
 // API health check
 router.get("/health", (req, res) => {

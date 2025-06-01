@@ -12,7 +12,14 @@ import ThemeContext from "../contexts/ThemeContext";
 import "./MainLayout.scss";
 
 const MainLayout = () => {
-  const { themeConfig } = useContext(ThemeContext);
+  const { themeConfig } = useContext(ThemeContext) || {};
+
+  // Provide default theme config if undefined
+  const theme = themeConfig || {
+    bgColor: "#ffffff",
+    textColor: "#212529",
+    fontFamily: "'Open Sans', sans-serif",
+  };
 
   // Force re-import of components to fix "invalid element type" error
   const headerComponent = <Header />;
@@ -26,9 +33,9 @@ const MainLayout = () => {
     <div
       className="main-layout"
       style={{
-        backgroundColor: themeConfig.bgColor,
-        color: themeConfig.textColor,
-        fontFamily: themeConfig.fontFamily,
+        backgroundColor: theme.bgColor,
+        color: theme.textColor,
+        fontFamily: theme.fontFamily,
       }}
     >
       {apiStatusBarComponent}

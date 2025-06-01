@@ -12,6 +12,9 @@ import {
 import { Link } from "react-router-dom";
 import moment from "moment";
 import AuthContext from "../../../contexts/AuthContext";
+import Avatar from "../../common/Avatar";
+import ConfirmDialog from "../../common/ConfirmDialog";
+import ErrorAlert from "../../common/ErrorAlert";
 
 /**
  * NestedCommentItem Component
@@ -49,6 +52,8 @@ const NestedCommentItem = ({
   const [editContent, setEditContent] = useState(comment.content);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [voteError, setVoteError] = useState(null);
 
   // Find direct replies to this comment
   const replies = allComments.filter((c) => c.parent_id === comment.id);
@@ -72,14 +77,6 @@ const NestedCommentItem = ({
     return fullName || username || "Anonymous";
   };
 
-  /**
-   * Get author avatar URL
-   */
-  const getAuthorAvatar = () => {
-    return (
-      comment.author?.avatar || "https://via.placeholder.com/40x40?text=👤"
-    );
-  };
 
   /**
    * Handle reply submission
@@ -146,9 +143,11 @@ const NestedCommentItem = ({
    * Handle delete with confirmation
    */
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this comment?")) {
-      onDelete(comment.id);
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    onDelete(comment.id);
   };
 
   /**
@@ -156,10 +155,11 @@ const NestedCommentItem = ({
    */
   const handleVote = (voteType) => {
     if (!user) {
-      alert("Please log in to vote on comments");
+      setVoteError("Please log in to vote on comments");
       return;
     }
 
+    setVoteError(null);
     onVote && onVote(comment.id, voteType);
   };
 
@@ -177,18 +177,14 @@ const NestedCommentItem = ({
   };
 
   return (
+    <>
     <div className="comment-item mb-3" style={getIndentationStyle()}>
       {/* Comment Header */}
       <div className="d-flex align-items-start">
         {/* Author Avatar */}
-        <img
-          src={getAuthorAvatar()}
-          alt={getAuthorDisplayName()}
-          className="rounded-circle me-3"
-          width="40"
-          height="40"
-          style={{ objectFit: "cover" }}
-        />
+        <div className="me-3">
+          <Avatar user={comment.author} size={40} />
+        </div>
 
         <div className="flex-grow-1">
           {/* Author Info and Timestamp */}
@@ -379,16 +375,9 @@ const NestedCommentItem = ({
               )}
 
               <div className="d-flex align-items-start">
-                <img
-                  src={
-                    user?.avatar || "https://via.placeholder.com/40x40?text=👤"
-                  }
-                  alt={user?.username}
-                  className="rounded-circle me-2"
-                  width="32"
-                  height="32"
-                  style={{ objectFit: "cover" }}
-                />
+                <div className="me-2">
+                  <Avatar user={user} size={32} />
+                </div>
 
                 <div className="flex-grow-1">
                   <Form.Control
@@ -458,6 +447,27 @@ const NestedCommentItem = ({
         </div>
       </div>
     </div>
+
+    {/* Vote Error Alert */}
+    <ErrorAlert 
+      error={voteError}
+      variant="info"
+      onDismiss={() => setVoteError(null)}
+      className="mt-2"
+      showIcon={false}
+    />
+
+    {/* Delete Confirmation Dialog */}
+    <ConfirmDialog
+      show={showDeleteConfirm}
+      onHide={() => setShowDeleteConfirm(false)}
+      onConfirm={confirmDelete}
+      title="Delete Comment"
+      message="Are you sure you want to delete this comment? This action cannot be undone."
+      confirmText="Delete"
+      variant="danger"
+    />
+    </>
   );
 };
 

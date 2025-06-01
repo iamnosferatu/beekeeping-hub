@@ -8,6 +8,7 @@ import { ASSETS_URL } from '../../config';
 const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-secondary" }) => {
   const fileInputRef = useRef(null);
   const { uploadImage, uploading, uploadProgress, uploadError } = useArticleImageUpload();
+  const [validationError, setValidationError] = React.useState(null);
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -17,17 +18,19 @@ const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-se
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setValidationError(null);
+
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      setValidationError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
       return;
     }
 
     // Validate file size (10MB max)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      alert('File size must be less than 10MB');
+      setValidationError('File size must be less than 10MB');
       return;
     }
 
@@ -46,8 +49,7 @@ const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-se
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      // Show more detailed error
-      alert(`Upload failed: ${error.message}`);
+      // Error already handled by the hook
     }
 
     // Reset file input
@@ -91,6 +93,12 @@ const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-se
           className="mt-2"
           style={{ height: '10px' }}
         />
+      )}
+
+      {validationError && (
+        <Alert variant="warning" className="mt-2 mb-0" dismissible onClose={() => setValidationError(null)}>
+          {validationError}
+        </Alert>
       )}
 
       {uploadError && (

@@ -1,0 +1,26 @@
+// frontend/src/App.scss
+
+// Smooth transitions for theme changes
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+// Prevent text selection during theme transition
+body.theme-transitioning {
+  user-select: none;
+}
+
+// Optimize images and prevent layout shift
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Loading state optimization
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

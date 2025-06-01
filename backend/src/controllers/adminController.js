@@ -427,7 +427,7 @@ exports.getCommentsForModeration = async (req, res, next) => {
         {
           model: User,
           as: "author",
-          attributes: ["id", "username", "email", "avatar"],
+          attributes: ["id", "username", "email", "first_name", "last_name", "avatar"],
         },
         {
           model: Article,
@@ -493,7 +493,7 @@ exports.updateCommentStatus = async (req, res, next) => {
         {
           model: User,
           as: "author",
-          attributes: ["id", "username", "email", "avatar"],
+          attributes: ["id", "username", "email", "first_name", "last_name", "avatar"],
         },
         {
           model: Article,

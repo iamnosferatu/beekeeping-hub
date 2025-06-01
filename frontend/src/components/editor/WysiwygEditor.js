@@ -7,12 +7,16 @@ import ImageUploadButton from "./ImageUploadButton";
 import useArticleImageUpload from "../../hooks/api/useArticleImageUpload";
 import { ASSETS_URL } from "../../config";
 import "./WysiwygEditor.scss";
+import PromptDialog from "../common/PromptDialog";
+import ErrorAlert from "../common/ErrorAlert";
 
 const WysiwygEditor = ({ value, onChange, height = "400px" }) => {
   const [editorValue, setEditorValue] = useState(value || "");
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [featureError, setFeatureError] = useState(null);
   const quillRef = useRef(null);
   const { uploadImage } = useArticleImageUpload();
 
@@ -79,17 +83,20 @@ const WysiwygEditor = ({ value, onChange, height = "400px" }) => {
 
   // Helper to insert an image from URL
   const insertImage = () => {
-    const url = prompt("Enter the image URL:");
-    if (url) {
+    setShowImageDialog(true);
+  };
+
+  const handleImageInsert = (url) => {
+    if (url && url.trim()) {
       const quill = quillRef.current.getEditor();
       const range = quill.getSelection(true);
-      quill.insertEmbed(range.index, "image", url);
+      quill.insertEmbed(range.index, "image", url.trim());
     }
   };
 
   // Helper to insert a table (not supported by Quill by default)
   const insertTable = () => {
-    alert(
+    setFeatureError(
       "Table insertion is not supported in the basic Quill editor. For complex tables, consider using HTML code blocks."
     );
   };
@@ -258,6 +265,28 @@ const WysiwygEditor = ({ value, onChange, height = "400px" }) => {
         <small>{getWordCount()} words</small>
         <small>HTML formatting supported</small>
       </div>
+
+      {/* Feature Error Alert */}
+      <ErrorAlert 
+        error={featureError}
+        variant="info"
+        onDismiss={() => setFeatureError(null)}
+        className="mt-2"
+        showIcon={false}
+      />
+
+      {/* Image URL Dialog */}
+      <PromptDialog
+        show={showImageDialog}
+        onHide={() => setShowImageDialog(false)}
+        onSubmit={handleImageInsert}
+        title="Insert Image"
+        message="Enter the image URL:"
+        placeholder="https://example.com/image.jpg"
+        submitText="Insert"
+        inputType="url"
+        required={true}
+      />
     </div>
   );
 };

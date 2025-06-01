@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
+import ErrorAlert from "../../components/common/ErrorAlert";
 
 /**
  * Admin Articles Management Page
@@ -47,6 +48,7 @@ const ArticlesPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   /**
    * Fetch articles from the backend
@@ -131,10 +133,11 @@ const ArticlesPage = () => {
         setShowBlockModal(false);
         setSelectedArticle(null);
         setBlockReason("");
+        setActionError(null);
       }
     } catch (error) {
       console.error("Error toggling block status:", error);
-      alert("Failed to update article status. Please try again.");
+      setActionError("Failed to update article status. Please try again.");
     } finally {
       setActionLoading(false);
     }
@@ -162,10 +165,11 @@ const ArticlesPage = () => {
         );
         setShowDeleteModal(false);
         setSelectedArticle(null);
+        setActionError(null);
       }
     } catch (error) {
       console.error("Error deleting article:", error);
-      alert("Failed to delete article. Please try again.");
+      setActionError("Failed to delete article. Please try again.");
     } finally {
       setActionLoading(false);
     }
@@ -416,6 +420,13 @@ const ArticlesPage = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           {selectedArticle?.blocked ? (
             <p>Are you sure you want to unblock this article?</p>
           ) : (
@@ -463,6 +474,13 @@ const ArticlesPage = () => {
           <Modal.Title>Delete Article</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {actionError && (
+            <ErrorAlert 
+              error={actionError} 
+              onDismiss={() => setActionError(null)}
+              className="mb-3"
+            />
+          )}
           <div className="text-center">
             <BsExclamationTriangle size={50} className="text-danger mb-3" />
             <h5>Are you sure you want to delete this article?</h5>

@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Card, Button, Spinner } from "react-bootstrap";
 import { BsSave, BsTrash, BsEye } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import ConfirmDialog from "../common/ConfirmDialog";
+import ErrorAlert from "../common/ErrorAlert";
 
 /**
  * ArticleActions Component
@@ -12,6 +14,8 @@ import { Link } from "react-router-dom";
 const ArticleActions = ({ isEditMode, formData, onSave, onDelete }) => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   /**
    * Handle save action
@@ -23,12 +27,13 @@ const ArticleActions = ({ isEditMode, formData, onSave, onDelete }) => {
       if (result.success) {
         // Show success message or handle success
         console.log("Article saved successfully");
+        setActionError(null);
       } else if (result.error) {
-        alert(result.error);
+        setActionError(result.error);
       }
     } catch (error) {
       console.error("Error saving article:", error);
-      alert("Failed to save article. Please try again.");
+      setActionError("Failed to save article. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -37,23 +42,25 @@ const ArticleActions = ({ isEditMode, formData, onSave, onDelete }) => {
   /**
    * Handle delete action
    */
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this article?")) {
-      return;
-    }
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
 
+  const confirmDelete = async () => {
     setDeleting(true);
     try {
       await onDelete();
+      setActionError(null);
     } catch (error) {
       console.error("Error deleting article:", error);
-      alert("Failed to delete article. Please try again.");
+      setActionError("Failed to delete article. Please try again.");
     } finally {
       setDeleting(false);
     }
   };
 
   return (
+    <>
     <Card>
       <Card.Header>
         <h5 className="mb-0">Actions</h5>
@@ -150,8 +157,28 @@ const ArticleActions = ({ isEditMode, formData, onSave, onDelete }) => {
             </p>
           )}
         </div>
+
+        {/* Action Error Alert */}
+        <ErrorAlert 
+          error={actionError}
+          variant="danger"
+          onDismiss={() => setActionError(null)}
+          className="mt-2"
+        />
       </Card.Body>
     </Card>
+
+    {/* Delete Confirmation Dialog */}
+    <ConfirmDialog
+      show={showDeleteConfirm}
+      onHide={() => setShowDeleteConfirm(false)}
+      onConfirm={confirmDelete}
+      title="Delete Article"
+      message="Are you sure you want to delete this article? This action cannot be undone."
+      confirmText="Delete"
+      variant="danger"
+    />
+    </>
   );
 };
 

@@ -305,12 +305,14 @@ const tagController = {
         ],
         order: [[sequelize.literal("article_count"), "DESC"]],
         limit,
-        having: sequelize.literal("article_count > 0"), // Only tags with articles
       });
+      
+      // Filter out tags with no articles
+      const filteredTags = tags.filter(tag => tag.get('article_count') > 0);
 
       res.status(200).json({
         success: true,
-        data: tags,
+        data: filteredTags,
       });
     } catch (error) {
       console.error("Error fetching popular tags:", error);
