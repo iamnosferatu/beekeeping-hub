@@ -24,7 +24,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
 
       try {
         const response = await apiCall(...args);
-        console.log("useApi execute response:", response);
+        // API response received
 
         if (response.success) {
           const data = transform ? transform(response.data) : response.data;
@@ -46,7 +46,7 @@ export const useApi = (apiCall, dependencies = [], options = {}) => {
           return { success: false, error };
         }
       } catch (error) {
-        console.error("useApi execute error:", error);
+        // API execution error
         setState(prev => ({ ...prev, loading: false, error }));
 
         if (onError) {
@@ -106,11 +106,11 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
       const mergedParams = { ...params, ...newParams };
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      console.log("usePaginatedApi execute with params:", mergedParams);
+      // Executing paginated API call
 
       try {
         const response = await apiCall(mergedParams);
-        console.log("usePaginatedApi response:", response);
+        // Paginated API response received
 
         if (response.success) {
           // Handle the backend response structure
@@ -119,7 +119,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
 
           // Ensure data is always an array
           if (!Array.isArray(data)) {
-            console.warn("API returned non-array data:", data);
+            // API returned non-array data, processing
             // Try to extract array from common response patterns
             if (data && typeof data === "object") {
               if (Array.isArray(data.data)) {
@@ -146,11 +146,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
             total: response.count || data.length,
           };
 
-          console.log("usePaginatedApi processed data:", {
-            data,
-            pagination,
-            originalResponse: response,
-          });
+          // Data processed successfully
 
           setState({
             data,
@@ -166,7 +162,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
           return { success: true, data, pagination };
         } else {
           const error = response.error;
-          console.error("usePaginatedApi error response:", error);
+          // Paginated API error response
           setState(prev => ({ ...prev, loading: false, error }));
 
           if (onError) {
@@ -176,7 +172,7 @@ export const usePaginatedApi = (apiCall, initialParams = {}, options = {}) => {
           return { success: false, error };
         }
       } catch (error) {
-        console.error("usePaginatedApi catch error:", error);
+        // Paginated API catch error
         setState(prev => ({ ...prev, loading: false, error }));
 
         if (onError) {

@@ -38,7 +38,6 @@ const Sidebar = () => {
       setArticlesLoading(true);
       setArticlesError(null);
 
-      console.log("Fetching recent articles");
 
       const response = await axios.get(`${API_URL}/articles`, {
         params: {
@@ -48,7 +47,6 @@ const Sidebar = () => {
         },
       });
 
-      console.log("Recent articles response:", response.data);
 
       if (response.data.success && response.data.data) {
         const articles = response.data.data || [];
@@ -62,13 +60,12 @@ const Sidebar = () => {
             slug: article.slug,
           }));
 
-        console.log("Valid recent articles found:", validArticles.length);
         setRecentArticles(validArticles);
       } else {
         setRecentArticles([]);
       }
     } catch (error) {
-      console.error("Error fetching recent articles:", error);
+      // Error fetching recent articles
       setArticlesError("Unable to load recent articles");
       setRecentArticles([]);
     } finally {
@@ -107,7 +104,7 @@ const Sidebar = () => {
         setNewsletterError(response.message || "Failed to subscribe");
       }
     } catch (error) {
-      console.error("Newsletter subscription error:", error);
+      // Newsletter subscription failed
       setNewsletterError(
         error.response?.data?.message || 
         "Unable to subscribe. Please try again later."
@@ -149,7 +146,7 @@ const Sidebar = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching article for sidebar:', error);
+      // Error fetching article data
       setCurrentArticleId(null);
       setCurrentArticleData(null);
     }

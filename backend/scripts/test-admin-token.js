@@ -1,6 +1,6 @@
 // Test if admin token is working correctly
 const axios = require('axios');
-const { User } = require('./src/models');
+const { User } = require('../src/models');
 const jwt = require('jsonwebtoken');
 
 const API_URL = 'http://localhost:5000/api';

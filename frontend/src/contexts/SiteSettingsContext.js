@@ -70,7 +70,7 @@ export const SiteSettingsProvider = ({ children }) => {
         }
       }
     } catch (err) {
-      console.error("Error fetching site settings:", err);
+      // Error fetching site settings
       setError("Failed to load site settings");
     } finally {
       setLoading(false);
@@ -101,7 +101,7 @@ export const SiteSettingsProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      console.error("Error updating site settings:", err);
+      // Error updating site settings
       return {
         success: false,
         error: err.response?.data?.message || "Failed to update settings",
@@ -132,7 +132,7 @@ export const SiteSettingsProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      console.error("Error toggling maintenance mode:", err);
+      // Error toggling maintenance mode
       return {
         success: false,
         error:
@@ -168,7 +168,7 @@ export const SiteSettingsProvider = ({ children }) => {
         return { success: true };
       }
     } catch (err) {
-      console.error("Error toggling alert:", err);
+      // Error toggling alert
       return {
         success: false,
         error: err.response?.data?.message || "Failed to toggle alert",

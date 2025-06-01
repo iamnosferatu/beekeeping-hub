@@ -125,7 +125,7 @@ const WysiwygEditor = ({ value, onChange, height = "400px" }) => {
       const result = await uploadImage(file);
       return `${ASSETS_URL}${result.url}`;
     } catch (error) {
-      console.error('Image upload failed:', error);
+      // Image upload failed, error handled
       setUploadError(error.message);
       return null;
     } finally {

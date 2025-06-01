@@ -1,6 +1,6 @@
 // Simple test to reproduce the auth error
 const express = require('express');
-const { protect, authorize } = require('./src/middleware/auth');
+const { protect, authorize } = require('../src/middleware/auth');
 
 const app = express();
 app.use(express.json());

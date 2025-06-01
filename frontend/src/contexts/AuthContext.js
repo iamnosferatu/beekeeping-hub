@@ -12,38 +12,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Debug token
-  useEffect(() => {
-    console.log(
-      "AuthContext - Current token:",
-      token ? token.substring(0, 20) + "..." : "None"
-    );
-  }, [token]);
+  // Removed token debugging for production security
 
   // Load user from token on mount
   useEffect(() => {
     const loadUser = async () => {
       if (token) {
         try {
-          console.log("AuthContext - Loading user data");
-
           const response = await apiService.auth.getProfile();
 
           if (response.success) {
-            console.log("AuthContext - User data loaded:", response.data.user);
             setUser(response.data.user);
           } else {
-            console.error("AuthContext - Error loading user:", response.error);
             logout();
             setError("Authentication error. Please log in again.");
           }
         } catch (err) {
-          console.error("AuthContext - Unexpected error loading user:", err);
           logout();
           setError("Authentication error. Please log in again.");
         }
-      } else {
-        console.log("AuthContext - No token found, user not authenticated");
       }
 
       setLoading(false);
@@ -58,13 +45,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log(`AuthContext - Attempting login for: ${email}`);
-
       const response = await apiService.auth.login({ email, password });
 
       if (response.success) {
-        console.log("AuthContext - Login successful, setting token and user");
-
         // Save token to localStorage and state
         localStorage.setItem(TOKEN_NAME, response.data.token);
         setToken(response.data.token);
@@ -78,7 +61,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
     } catch (err) {
-      console.error("AuthContext - Login error:", err);
       const errorMessage = err.message || "Login failed. Please try again.";
       setError(errorMessage);
       throw err;
@@ -93,15 +75,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log("AuthContext - Registering new user");
-
       const response = await apiService.auth.register(userData);
 
       if (response.success) {
-        console.log(
-          "AuthContext - Registration successful, setting token and user"
-        );
-
         // Save token to localStorage and state
         localStorage.setItem(TOKEN_NAME, response.data.token);
         setToken(response.data.token);
@@ -115,7 +91,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
     } catch (err) {
-      console.error("AuthContext - Registration error:", err);
       const errorMessage =
         err.message || "Registration failed. Please try again.";
       setError(errorMessage);
@@ -127,7 +102,6 @@ export const AuthProvider = ({ children }) => {
 
   // Logout user
   const logout = () => {
-    console.log("AuthContext - Logging out user");
     localStorage.removeItem(TOKEN_NAME);
     setToken(null);
     setUser(null);
@@ -143,7 +117,6 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.auth.updateProfile(userData);
 
       if (response.success) {
-        console.log("AuthContext - Profile updated successfully");
         setUser(response.data.user);
         return response.data.user;
       } else {
@@ -154,7 +127,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
     } catch (err) {
-      console.error("AuthContext - Profile update error:", err);
       const errorMessage =
         err.message || "Failed to update profile. Please try again.";
       setError(errorMessage);
@@ -173,7 +145,6 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.auth.changePassword(passwords);
 
       if (response.success) {
-        console.log("AuthContext - Password changed successfully");
         return true;
       } else {
         const errorMessage =
@@ -183,7 +154,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
     } catch (err) {
-      console.error("AuthContext - Password change error:", err);
       const errorMessage =
         err.message || "Failed to change password. Please try again.";
       setError(errorMessage);
@@ -195,27 +165,15 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user has specific role
   const hasRole = (roles) => {
-    console.log("AuthContext - Checking role:", {
-      userRole: user?.role,
-      requiredRoles: roles,
-    });
-
     if (!user) {
-      console.log("AuthContext - No user, role check failed");
       return false;
     }
 
     if (Array.isArray(roles)) {
-      const result = roles.includes(user.role);
-      console.log(
-        `AuthContext - User has one of roles [${roles.join(", ")}]: ${result}`
-      );
-      return result;
+      return roles.includes(user.role);
     }
 
-    const result = user.role === roles;
-    console.log(`AuthContext - User has role ${roles}: ${result}`);
-    return result;
+    return user.role === roles;
   };
 
   // Clear error
@@ -237,7 +195,6 @@ export const AuthProvider = ({ children }) => {
   // Check if user is author or admin
   const canCreateContent = user?.role === "author" || user?.role === "admin";
 
-  // Log the context value on each render for debugging
   const contextValue = {
     user,
     token,
@@ -255,16 +212,6 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     canCreateContent,
   };
-
-  console.log("AuthContext - Current state:", {
-    user: user ? `${user.username} (${user.role})` : "None",
-    token: token ? "Present" : "None",
-    loading,
-    error,
-    isAuthenticated,
-    isAdmin,
-    canCreateContent,
-  });
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

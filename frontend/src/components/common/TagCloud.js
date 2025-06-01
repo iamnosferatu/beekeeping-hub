@@ -19,18 +19,14 @@ const TagCloud = ({ limit = 20, title = "Popular Tags" }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('TagCloud component rendered with props:', { limit, title });
 
   useEffect(() => {
-    console.log('TagCloud useEffect running with limit:', limit);
     const fetchPopularTags = async () => {
-      console.log('Starting to fetch popular tags...');
       try {
         setLoading(true);
         setError(null);
 
         const response = await apiService.tags.getPopular(limit);
-        console.log('Tag cloud API response:', response);
 
         if (response.success) {
           // Handle nested response structure
@@ -44,7 +40,6 @@ const TagCloud = ({ limit = 20, title = "Popular Tags" }) => {
             }
           }
           
-          console.log('Extracted tags data:', tagsData);
 
           // Calculate size classes based on article count
           if (tagsData.length > 0) {
@@ -75,7 +70,7 @@ const TagCloud = ({ limit = 20, title = "Popular Tags" }) => {
           throw new Error(response.error?.message || 'Failed to load tags');
         }
       } catch (err) {
-        console.error('Error fetching popular tags:', err);
+        // Error fetching popular tags
         setError('Failed to load tags');
       } finally {
         setLoading(false);

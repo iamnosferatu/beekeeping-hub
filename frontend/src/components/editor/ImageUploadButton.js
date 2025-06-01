@@ -35,9 +35,8 @@ const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-se
     }
 
     try {
-      console.log('Starting upload for file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      // Starting file upload
       const result = await uploadImage(file);
-      console.log('Upload result:', result);
       const fullUrl = `${ASSETS_URL}${result.url}`;
       
       if (onImageUploaded) {
@@ -48,7 +47,7 @@ const ImageUploadButton = ({ onImageUploaded, size = "sm", variant = "outline-se
         });
       }
     } catch (error) {
-      console.error('Upload failed:', error);
+      // Upload failed, error handled by hook
       // Error already handled by the hook
     }
 

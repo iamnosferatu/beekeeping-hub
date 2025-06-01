@@ -51,7 +51,7 @@ const RelatedArticles = ({ articleId, limit = 5 }) => {
           throw new Error(response.error?.message || 'Failed to load related articles');
         }
       } catch (err) {
-        console.error('Error fetching related articles:', err);
+        // Error fetching related articles
         setError('Failed to load related articles');
       } finally {
         setLoading(false);

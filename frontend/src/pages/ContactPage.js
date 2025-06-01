@@ -154,7 +154,7 @@ const ContactPage = () => {
         throw new Error(response.data.message || "Failed to send message");
       }
     } catch (error) {
-      console.error("Contact form error:", error);
+      // Contact form error occurred
       setSubmitStatus("error");
 
       if (error.response?.status === 404) {

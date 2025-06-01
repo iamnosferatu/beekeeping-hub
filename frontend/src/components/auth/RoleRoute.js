@@ -7,10 +7,7 @@ const RoleRoute = ({ children, roles }) => {
   const { user, loading } = useContext(AuthContext);
   const location = useLocation();
 
-  // Add console logs to debug
-  console.log("RoleRoute - Current user:", user);
-  console.log("RoleRoute - Required roles:", roles);
-  console.log("RoleRoute - Loading state:", loading);
+  // Role-based route protection
 
   // Show loading indicator while checking authentication
   if (loading) {
@@ -26,7 +23,6 @@ const RoleRoute = ({ children, roles }) => {
 
   // If not logged in, redirect to login with return path
   if (!user) {
-    console.log("RoleRoute - No user found, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -35,11 +31,8 @@ const RoleRoute = ({ children, roles }) => {
     ? roles.includes(user.role)
     : user.role === roles;
 
-  console.log("RoleRoute - User has required role:", hasRequiredRole);
-
   // If user doesn't have the required role, redirect to home page
   if (!hasRequiredRole) {
-    console.log("RoleRoute - User missing required role, redirecting to home");
     return <Navigate to="/" replace />;
   }
 

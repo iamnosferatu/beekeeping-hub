@@ -53,7 +53,7 @@ export const useLikes = () => {
         likeCount: data.likeCount,
       };
     } catch (err) {
-      console.error('Error getting like status:', err);
+      // Error getting like status
       return { liked: false, likeCount: 0 };
     } finally {
       setLoading(false);

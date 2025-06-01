@@ -20,27 +20,16 @@ export const useUserManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  console.log("🔄 useUserManagement hook called", {
-    currentPage,
-    searchTerm,
-    roleFilter,
-    usersCount: users.length,
-    loading,
-    error: error?.slice(0, 50),
-  });
+  // useUserManagement hook initialized
 
   /**
    * Simplified fetch users function - removed complex caching that was causing loops
    */
   const fetchUsers = useCallback(async () => {
-    console.log("🚀 fetchUsers called", {
-      currentPage,
-      searchTerm,
-      roleFilter,
-    });
+    // fetchUsers called
 
     if (!currentUser) {
-      console.log("❌ No current user, skipping fetch");
+      // No current user, skipping fetch
       setLoading(false);
       setError("Please log in to view users");
       return;
@@ -62,23 +51,22 @@ export const useUserManagement = () => {
         ...(roleFilter !== "all" && { role: roleFilter }),
       };
 
-      console.log("📡 Making API request with params:", params);
+      // Making API request
 
       let response;
       let usedFallback = false;
 
       try {
         // Try admin endpoint first
-        console.log("🔄 Trying admin endpoint...");
+        // Trying admin endpoint
         response = await axios.get(`${API_URL}/admin/users`, {
           params,
           headers: { Authorization: `Bearer ${token}` },
           timeout: 10000,
         });
-        console.log("✅ Admin endpoint successful:", response.data);
+        // Admin endpoint successful
       } catch (adminError) {
-        console.log("❌ Admin endpoint failed:", adminError.message);
-        console.log("🔄 Trying fallback approach...");
+        // Admin endpoint failed, trying fallback
         usedFallback = true;
 
         // Fallback: Get users from articles authors
@@ -88,10 +76,7 @@ export const useUserManagement = () => {
           timeout: 10000,
         });
 
-        console.log("📊 Articles response:", {
-          success: articlesResponse.data.success,
-          articlesCount: articlesResponse.data.data?.length || 0,
-        });
+        // Articles response received
 
         // Extract unique authors
         const authorsMap = new Map();
@@ -117,7 +102,7 @@ export const useUserManagement = () => {
         }
 
         let uniqueUsers = Array.from(authorsMap.values());
-        console.log("👥 Extracted unique users:", uniqueUsers.length);
+        // Extracted unique users
 
         // Apply client-side filtering
         if (searchTerm.trim()) {
@@ -130,12 +115,12 @@ export const useUserManagement = () => {
                 .toLowerCase()
                 .includes(searchLower)
           );
-          console.log("🔍 After search filter:", uniqueUsers.length);
+          // After search filter applied
         }
 
         if (roleFilter !== "all") {
           uniqueUsers = uniqueUsers.filter((user) => user.role === roleFilter);
-          console.log("🎭 After role filter:", uniqueUsers.length);
+          // After role filter applied
         }
 
         // Simple pagination
@@ -144,12 +129,7 @@ export const useUserManagement = () => {
         const paginatedUsers = uniqueUsers.slice(startIndex, endIndex);
         const totalPagesCalc = Math.ceil(uniqueUsers.length / 10);
 
-        console.log("📄 Pagination:", {
-          totalUsers: uniqueUsers.length,
-          currentPage,
-          totalPages: totalPagesCalc,
-          showingUsers: paginatedUsers.length,
-        });
+        // Pagination calculated
 
         response = {
           data: {
@@ -168,11 +148,7 @@ export const useUserManagement = () => {
         const userData = response.data.data || [];
         const paginationData = response.data.pagination || {};
 
-        console.log("✅ Setting users data:", {
-          userCount: userData.length,
-          totalPages: paginationData.totalPages || 1,
-          usedFallback,
-        });
+        // Setting users data
 
         setUsers(userData);
         setTotalPages(paginationData.totalPages || 1);
@@ -180,11 +156,7 @@ export const useUserManagement = () => {
         throw new Error("API returned unsuccessful response");
       }
     } catch (err) {
-      console.error("❌ Error in fetchUsers:", {
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data,
-      });
+      // Error in fetchUsers
 
       let errorMessage = "Failed to load users. Please try again.";
 
@@ -207,7 +179,7 @@ export const useUserManagement = () => {
       setError(errorMessage);
       setUsers([]);
     } finally {
-      console.log("🏁 fetchUsers completed");
+      // fetchUsers completed
       setLoading(false);
     }
   }, [currentUser?.id, currentPage, searchTerm, roleFilter]); // Use only stable primitive values
@@ -216,7 +188,7 @@ export const useUserManagement = () => {
    * Simple search handler - no complex state updates
    */
   const handleSearch = useCallback((searchValue) => {
-    console.log("🔍 Search changed:", searchValue);
+    // Search term changed
     setSearchTerm(searchValue);
     setCurrentPage(1); // Reset to first page
   }, []);
@@ -225,7 +197,7 @@ export const useUserManagement = () => {
    * Simple role filter handler
    */
   const handleRoleFilterChange = useCallback((role) => {
-    console.log("🎭 Role filter changed:", role);
+    // Role filter changed
     setRoleFilter(role);
     setCurrentPage(1); // Reset to first page
   }, []);
@@ -234,7 +206,7 @@ export const useUserManagement = () => {
    * Simple page change handler
    */
   const handlePageChange = useCallback((page) => {
-    console.log("📄 Page changed:", page);
+    // Page changed
     setCurrentPage(page);
   }, []);
 
@@ -243,7 +215,7 @@ export const useUserManagement = () => {
    */
   const changeUserRole = useCallback(
     async (userId, newRole) => {
-      console.log("🔄 Changing user role:", { userId, newRole });
+      // Changing user role
 
       // Basic validation
       if (userId === currentUser?.id) {
@@ -273,7 +245,7 @@ export const useUserManagement = () => {
           throw new Error(response.data?.message || "Failed to update role");
         }
       } catch (err) {
-        console.error("❌ Role change error:", err.message);
+        // Role change error
 
         let errorMessage = "Failed to update user role.";
         if (err.response?.status === 404) {
@@ -291,7 +263,7 @@ export const useUserManagement = () => {
    */
   const deleteUser = useCallback(
     async (userId) => {
-      console.log("🗑️ Deleting user:", userId);
+      // Deleting user
 
       if (userId === currentUser?.id) {
         return { success: false, error: "You cannot delete your own account" };
@@ -317,7 +289,7 @@ export const useUserManagement = () => {
           throw new Error(response.data?.message || "Failed to delete user");
         }
       } catch (err) {
-        console.error("❌ Delete user error:", err.message);
+        // Delete user error
 
         let errorMessage = "Failed to delete user.";
         if (err.response?.status === 404) {
@@ -334,7 +306,7 @@ export const useUserManagement = () => {
    * Reset filters
    */
   const resetFilters = useCallback(() => {
-    console.log("🔄 Resetting filters");
+    // Resetting filters
     setSearchTerm("");
     setRoleFilter("all");
     setCurrentPage(1);
@@ -344,23 +316,17 @@ export const useUserManagement = () => {
    * Manual refetch
    */
   const refetch = useCallback(() => {
-    console.log("🔄 Manual refetch triggered");
+    // Manual refetch triggered
     fetchUsers();
   }, [fetchUsers]);
 
   // FIXED: Simplified useEffect with proper dependencies
   useEffect(() => {
-    console.log("🔄 useEffect triggered - calling fetchUsers");
+    // useEffect triggered - calling fetchUsers
     fetchUsers();
   }, [fetchUsers]); // Only depend on fetchUsers which has all the necessary dependencies
 
-  console.log("📊 useUserManagement returning:", {
-    usersCount: users.length,
-    loading,
-    hasError: !!error,
-    currentPage,
-    totalPages,
-  });
+  // useUserManagement returning state
 
   return {
     // Data

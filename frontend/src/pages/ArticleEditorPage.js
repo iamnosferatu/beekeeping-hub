@@ -87,7 +87,7 @@ const ArticleEditorPage = () => {
           return { success: true, message: "Article saved successfully" };
         }
       } catch (err) {
-        console.error("Error saving article:", err);
+        // Error saving article
         return {
           success: false,
           error: err.response?.data?.message || "Failed to save article",
@@ -110,7 +110,7 @@ const ArticleEditorPage = () => {
         });
       }
     } catch (err) {
-      console.error("Error deleting article:", err);
+      // Error deleting article
       return {
         success: false,
         error: err.response?.data?.message || "Failed to delete article",

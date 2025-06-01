@@ -67,7 +67,7 @@ const RegisterPage = () => {
       setRegistrationSuccess(true);
     } catch (err) {
       // Error is handled by AuthContext
-      console.error("Registration error:", err);
+      // Registration error handled by AuthContext
     }
   };
 

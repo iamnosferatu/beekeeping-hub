@@ -49,7 +49,7 @@ const LoginPage = () => {
       if (err.response?.status === 403 && err.response?.data?.needsVerification) {
         setNeedsVerification(true);
       }
-      console.error("Login error:", err);
+      // Login error handled
     }
   };
 

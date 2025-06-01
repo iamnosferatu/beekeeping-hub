@@ -23,9 +23,7 @@ export const API_URL = getApiUrl();
 export const ASSETS_URL = API_URL.replace(/\/api$/, "");
 export const BASE_URL = API_URL.replace(/\/api$/, ""); // Base URL without /api
 
-// Log the API URL for debugging
-console.log("API URL:", API_URL);
-console.log("Base URL:", BASE_URL);
+// API configuration loaded
 
 // App Configuration
 export const APP_NAME = process.env.REACT_APP_NAME || "BeeKeeper's Blog";

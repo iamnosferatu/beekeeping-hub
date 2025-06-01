@@ -20,7 +20,7 @@ const useArticleFetch = (user, isEditMode, id) => {
         setError(null);
         setDebugInfo(null);
 
-        console.log(`Attempting to fetch article with ID/Slug: ${articleId}`);
+        // Attempting to fetch article
 
         // Multiple fetch strategies with authentication
         const token = localStorage.getItem("beekeeper_auth_token");
@@ -41,12 +41,12 @@ const useArticleFetch = (user, isEditMode, id) => {
             response = await strategy();
 
             // Log full response for debugging
-            console.log("Fetch response:", response.data);
+            // Fetch response received
 
             // Break if successful
             if (response.data.success) break;
           } catch (strategyError) {
-            console.warn("Fetch strategy failed:", strategyError);
+            // Fetch strategy failed
             fetchError = strategyError;
           }
         }
@@ -81,7 +81,7 @@ const useArticleFetch = (user, isEditMode, id) => {
 
         return article;
       } catch (err) {
-        console.error("Comprehensive error in fetching article:", err);
+        // Comprehensive error in fetching article
 
         setError(
           err.response?.data?.message ||

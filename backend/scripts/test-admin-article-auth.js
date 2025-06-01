@@ -1,7 +1,7 @@
 // Test script to debug admin article authorization issue
 const jwt = require('jsonwebtoken');
-const { User, Article } = require('./src/models');
-const { sequelize } = require('./src/models');
+const { User, Article } = require('../src/models');
+const { sequelize } = require('../src/models');
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key_here";
 

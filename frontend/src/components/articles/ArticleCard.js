@@ -79,7 +79,7 @@ const ArticleCard = ({
 
   // Validate article data
   if (!isValidArticle(article)) {
-    console.warn("ArticleCard: Invalid article data provided", article);
+    // Invalid article data provided
     return null;
   }
 

@@ -48,7 +48,7 @@ const DashboardPage = () => {
       const token = localStorage.getItem("beekeeper_auth_token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      console.log("Fetching dashboard data...");
+      // Fetching dashboard data
 
       // Try to fetch from admin dashboard endpoint first
       try {
@@ -61,10 +61,7 @@ const DashboardPage = () => {
         );
 
         if (dashboardResponse.data?.success && dashboardResponse.data?.data) {
-          console.log(
-            "Dashboard data from admin endpoint:",
-            dashboardResponse.data
-          );
+          // Dashboard data from admin endpoint received
           setStats(dashboardResponse.data.data);
 
           // Also try to get recent activity

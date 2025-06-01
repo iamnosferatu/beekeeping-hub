@@ -90,7 +90,7 @@ export const useMyArticles = () => {
         throw new Error(response.data?.message || "Failed to fetch articles");
       }
     } catch (err) {
-      console.error("Error fetching articles:", err);
+      // Error fetching articles
 
       // Enhanced error handling
       let errorMessage = "Failed to load your articles. Please try again.";
@@ -148,7 +148,7 @@ export const useMyArticles = () => {
         throw new Error(response.data?.message || "Failed to delete article");
       }
     } catch (err) {
-      console.error("Error deleting article:", err);
+      // Error deleting article
 
       let errorMessage = "Failed to delete article. Please try again.";
       if (err.response?.status === 401) {

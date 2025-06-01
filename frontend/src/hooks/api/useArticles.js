@@ -18,13 +18,13 @@ export const useArticles = (filters = {}, options = {}) => {
     },
   });
 
-  console.log("🔄 useArticles called with filters:", filters);
+  // useArticles called with filters
 
   const fetchArticles = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      console.log("🔄 useArticles: Starting fetch...");
+      // Starting article fetch
 
       // Build params for API call
       const params = {
@@ -34,12 +34,12 @@ export const useArticles = (filters = {}, options = {}) => {
         ...(filters.search && { search: filters.search }),
       };
 
-      console.log("🔄 useArticles: Calling API with params:", params);
+      // Calling API with prepared params
 
       // Call the API service directly
       const response = await apiService.articles.getAll(params);
 
-      console.log("🔄 useArticles: API response:", response);
+      // API response received
 
       if (response.success) {
         // Extract the articles array from the response
@@ -60,7 +60,7 @@ export const useArticles = (filters = {}, options = {}) => {
           articles = response.data.articles;
         }
 
-        console.log("🔄 useArticles: Extracted articles:", articles);
+        // Articles extracted from response
 
         // Create pagination info
         const pagination = {
@@ -73,7 +73,7 @@ export const useArticles = (filters = {}, options = {}) => {
           ),
         };
 
-        console.log("🔄 useArticles: Pagination:", pagination);
+        // Pagination calculated
 
         setState({
           data: articles,
@@ -87,11 +87,11 @@ export const useArticles = (filters = {}, options = {}) => {
           options.onSuccess(articles);
         }
       } else {
-        console.error("🔄 useArticles: API returned success: false", response);
+        // API returned success: false
         throw new Error(response.error?.message || "Failed to fetch articles");
       }
     } catch (error) {
-      console.error("🔄 useArticles: Error occurred:", error);
+      // Error occurred during fetch
 
       setState((prev) => ({
         ...prev,
@@ -118,14 +118,14 @@ export const useArticles = (filters = {}, options = {}) => {
 
   // Function to change page (simplified for now)
   const changePage = (newPage) => {
-    console.log("🔄 useArticles: changePage called with:", newPage);
+    // changePage called
     // For now, just refetch (you can enhance this later for real pagination)
     fetchArticles();
   };
 
   // Function to refetch data
   const refetch = () => {
-    console.log("🔄 useArticles: refetch called");
+    // refetch called
     fetchArticles();
   };
 
@@ -138,7 +138,7 @@ export const useArticles = (filters = {}, options = {}) => {
     refetch,
   };
 
-  console.log("🔄 useArticles: Returning state:", result);
+  // Returning final state
 
   return result;
 };

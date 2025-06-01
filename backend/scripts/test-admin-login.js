@@ -1,6 +1,6 @@
 // Test admin login and token generation
 const axios = require('axios');
-const { User } = require('./src/models');
+const { User } = require('../src/models');
 const bcrypt = require('bcryptjs');
 
 const API_URL = 'http://localhost:8080/api';

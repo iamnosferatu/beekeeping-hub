@@ -32,23 +32,11 @@ class ApiService {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Log requests in development
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
-            {
-              baseURL: config.baseURL,
-              fullURL: `${config.baseURL}${config.url}`,
-              data: config.data,
-              params: config.params,
-            }
-          );
-        }
+        // Removed debug logging for production security
 
         return config;
       },
       (error) => {
-        console.error("Request interceptor error:", error);
         return Promise.reject(error);
       }
     );
@@ -56,41 +44,11 @@ class ApiService {
     // Response interceptor - Handle common response patterns
     this.client.interceptors.response.use(
       (response) => {
-        // Log responses in development
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `✅ API Response: ${response.config.method?.toUpperCase()} ${
-              response.config.url
-            }`,
-            {
-              status: response.status,
-              data: response.data,
-              headers: response.headers,
-            }
-          );
-        }
-
         return response;
       },
       (error) => {
         // Handle common error scenarios
         const customError = this.handleError(error);
-
-        // Log errors in development
-        if (process.env.NODE_ENV === "development") {
-          console.error(
-            `❌ API Error: ${error.config?.method?.toUpperCase()} ${
-              error.config?.url
-            }`,
-            {
-              error: customError,
-              originalError: error,
-              response: error.response?.data,
-              status: error.response?.status,
-            }
-          );
-        }
-
         return Promise.reject(customError);
       }
     );
@@ -182,15 +140,7 @@ class ApiService {
    */
   async request(config) {
     try {
-      console.log("🔄 ApiService.request called with config:", config);
-
       const response = await this.client(config);
-
-      console.log("✅ ApiService.request successful:", {
-        status: response.status,
-        data: response.data,
-        config: config,
-      });
 
       return {
         success: true,
@@ -198,13 +148,6 @@ class ApiService {
         status: response.status,
       };
     } catch (error) {
-      console.error("❌ ApiService.request failed:", {
-        error,
-        config,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-
       return {
         success: false,
         error,
@@ -220,20 +163,13 @@ class ApiService {
      * Get all articles with optional filters
      */
     getAll: async (params = {}) => {
-      console.log("📚 articles.getAll called with params:", params);
-
       const queryString = new URLSearchParams(params).toString();
       const url = `/articles${queryString ? `?${queryString}` : ""}`;
 
-      console.log("📚 articles.getAll making request to:", url);
-
-      const result = await this.request({
+      return await this.request({
         method: "GET",
         url: url,
       });
-
-      console.log("📚 articles.getAll result:", result);
-      return result;
     },
 
     /**
@@ -241,16 +177,10 @@ class ApiService {
      * Used for editing and admin functions
      */
     getById: async (id) => {
-      console.log("📄 articles.getById called with id:", id);
-
-      // Ensure we're using the correct endpoint for ID-based fetching
-      const result = await this.request({
+      return await this.request({
         method: "GET",
-        url: `/articles/byId/${id}`, // Explicit ID endpoint
+        url: `/articles/byId/${id}`,
       });
-
-      console.log("📄 articles.getById result:", result);
-      return result;
     },
 
     /**
@@ -258,24 +188,16 @@ class ApiService {
      * Used for public article viewing
      */
     getBySlug: async (slug) => {
-      console.log("📄 articles.getBySlug called with slug:", slug);
-
-      // The backend route is /articles/:slug not /articles/bySlug/:slug
-      const result = await this.request({
+      return await this.request({
         method: "GET",
         url: `/articles/${slug}`,
       });
-
-      console.log("📄 articles.getBySlug result:", result);
-      return result;
     },
 
     /**
      * Create new article
      */
     create: async (articleData) => {
-      console.log("✏️ articles.create called with data:", articleData);
-
       return this.request({
         method: "POST",
         url: "/articles",
@@ -287,13 +209,6 @@ class ApiService {
      * Update existing article
      */
     update: async (id, articleData) => {
-      console.log(
-        "📝 articles.update called with id:",
-        id,
-        "data:",
-        articleData
-      );
-
       return this.request({
         method: "PUT",
         url: `/articles/${id}`,
@@ -305,8 +220,6 @@ class ApiService {
      * Delete article
      */
     delete: async (id) => {
-      console.log("🗑️ articles.delete called with id:", id);
-
       return this.request({
         method: "DELETE",
         url: `/articles/${id}`,
@@ -317,8 +230,6 @@ class ApiService {
      * Toggle article like
      */
     toggleLike: async (id) => {
-      console.log("❤️ articles.toggleLike called with id:", id);
-
       return this.request({
         method: "POST",
         url: `/articles/${id}/like`,
@@ -329,8 +240,6 @@ class ApiService {
      * Get articles by current user
      */
     getMyArticles: async (params = {}) => {
-      console.log("👤 articles.getMyArticles called with params:", params);
-
       const queryString = new URLSearchParams(params).toString();
       return this.request({
         method: "GET",
@@ -342,8 +251,6 @@ class ApiService {
      * Get related articles
      */
     getRelated: async (id, limit = 5) => {
-      console.log("🔗 articles.getRelated called with id:", id, "limit:", limit);
-
       return this.request({
         method: "GET",
         url: `/articles/${id}/related?limit=${limit}`,
@@ -531,8 +438,6 @@ class ApiService {
      * Create a new comment
      */
     create: async (commentData) => {
-      console.log("💬 comments.create called with data:", commentData);
-
       return this.request({
         method: "POST",
         url: "/comments",

@@ -15,11 +15,7 @@ export const useArticleImageUpload = () => {
     const formData = new FormData();
     formData.append('image', file);
 
-    // Debug logging
-    console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
+    // FormData prepared for upload
 
     try {
       const response = await api.client.post('/articles/upload-image', formData, {
@@ -43,12 +39,7 @@ export const useArticleImageUpload = () => {
     } catch (error) {
       setUploading(false);
       setUploadProgress(0);
-      console.error('Upload error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-      });
+      // Upload failed, error details processed
       const errorMessage = error.response?.data?.message || error.message || 'Failed to upload image';
       setUploadError(errorMessage);
       throw new Error(errorMessage);
