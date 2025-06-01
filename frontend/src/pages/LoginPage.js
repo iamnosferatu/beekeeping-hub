@@ -2,19 +2,23 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
+import { useLogin, useResendVerification } from "../hooks/queries/useAuth";
 import AuthContext from "../contexts/AuthContext";
-import api from "../services/api";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [validated, setValidated] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
-  const [resendingVerification, setResendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  const { login, error, clearError } = useContext(AuthContext);
+  const { clearError } = useContext(AuthContext);
+  
+  // React Query mutations
+  const loginMutation = useLogin();
+  const resendVerificationMutation = useResendVerification();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,33 +45,36 @@ const LoginPage = () => {
       return;
     }
 
-    try {
-      await login(email, password);
-      navigate(from, { replace: true });
-    } catch (err) {
-      // Check if it's an email verification error
-      if (err.response?.status === 403 && err.response?.data?.needsVerification) {
-        setNeedsVerification(true);
+    loginMutation.mutate(
+      { email, password, rememberMe },
+      {
+        onSuccess: () => {
+          navigate(from, { replace: true });
+        },
+        onError: (err) => {
+          // Check if it's an email verification error
+          if (err.message?.includes('verify') || err.message?.includes('verification')) {
+            setNeedsVerification(true);
+          } else {
+            setLocalError(err.message || 'Login failed. Please try again.');
+          }
+        },
       }
-      // Login error handled
-    }
+    );
   };
 
   const handleResendVerification = async () => {
-    setResendingVerification(true);
     setLocalError(null);
     
-    try {
-      const response = await api.client.post('/auth/resend-verification', { email });
-      if (response.data.success) {
+    resendVerificationMutation.mutate(email, {
+      onSuccess: () => {
         setVerificationSent(true);
         setTimeout(() => setVerificationSent(false), 5000);
-      }
-    } catch (error) {
-      setLocalError(error.response?.data?.message || 'Failed to resend verification email');
-    } finally {
-      setResendingVerification(false);
-    }
+      },
+      onError: (error) => {
+        setLocalError(error.message || 'Failed to resend verification email');
+      },
+    });
   };
 
   return (
@@ -86,9 +93,9 @@ const LoginPage = () => {
           )}
 
           {/* Error messages */}
-          {error && !needsVerification && (
-            <Alert variant="danger" onClose={clearError} dismissible>
-              {error}
+          {loginMutation.error && !needsVerification && (
+            <Alert variant="danger" onClose={() => loginMutation.reset()} dismissible>
+              {loginMutation.error.message}
             </Alert>
           )}
 
@@ -110,9 +117,9 @@ const LoginPage = () => {
                   variant="warning" 
                   size="sm" 
                   onClick={handleResendVerification}
-                  disabled={resendingVerification}
+                  disabled={resendVerificationMutation.isPending}
                 >
-                  {resendingVerification ? (
+                  {resendVerificationMutation.isPending ? (
                     <>
                       <Spinner size="sm" animation="border" className="me-2" />
                       Sending...
@@ -147,7 +154,7 @@ const LoginPage = () => {
               </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group className="mb-4" controlId="password">
+            <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -162,9 +169,31 @@ const LoginPage = () => {
               </Form.Control.Feedback>
             </Form.Group>
 
+            <Form.Group className="mb-4" controlId="rememberMe">
+              <Form.Check
+                type="checkbox"
+                id="rememberMe"
+                label="Remember me for 30 days"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+            </Form.Group>
+
             <div className="d-grid">
-              <Button variant="primary" type="submit" size="lg">
-                Login
+              <Button 
+                variant="primary" 
+                type="submit" 
+                size="lg"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? (
+                  <>
+                    <Spinner size="sm" animation="border" className="me-2" />
+                    Logging in...
+                  </>
+                ) : (
+                  'Login'
+                )}
               </Button>
             </div>
 

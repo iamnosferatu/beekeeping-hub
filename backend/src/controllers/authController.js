@@ -21,14 +21,15 @@ if (!JWT_SECRET) {
 }
 
 // Helper to generate JWT token
-const generateToken = (id) => {
+const generateToken = (id, rememberMe = false) => {
   try {
+    const expiresIn = rememberMe ? "30d" : "7d"; // 30 days if remember me, 7 days otherwise
     const token = jwt.sign({ id }, JWT_SECRET, {
-      expiresIn: "30d",
+      expiresIn,
     });
 
     console.log(
-      `Token generated for user ID: ${id} (first 20 chars): ${token.substring(
+      `Token generated for user ID: ${id}, rememberMe: ${rememberMe}, expires: ${expiresIn} (first 20 chars): ${token.substring(
         0,
         20
       )}...`
@@ -141,7 +142,7 @@ exports.register = asyncHandler(async (req, res, next) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
 
   // Validate required fields
   if (!email || !password) {
@@ -178,18 +179,19 @@ exports.login = asyncHandler(async (req, res, next) => {
     user.last_login = new Date();
     await user.save();
 
-    // Generate token
-    const token = generateToken(user.id);
+    // Generate token with remember me option
+    const token = generateToken(user.id, rememberMe);
 
     // Remove password from response
     const userData = user.toJSON();
     delete userData.password;
 
-  console.log(`Login successful for user ${email}`);
+  console.log(`Login successful for user ${email}, rememberMe: ${rememberMe}`);
   res.status(200).json({
     success: true,
     token,
     user: userData,
+    rememberMe: !!rememberMe,
   });
 });
 

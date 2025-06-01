@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { BsHeart, BsHeartFill } from 'react-icons/bs';
 import { Button } from 'react-bootstrap';
-import { useLikes } from '../../hooks/api/useLikes';
+import { useToggleArticleLike } from '../../hooks/queries/useArticles';
 import AuthContext from '../../contexts/AuthContext';
 import ErrorAlert from '../common/ErrorAlert';
 import './LikeButton.scss';
@@ -12,7 +12,7 @@ const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, o
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isAnimating, setIsAnimating] = useState(false);
   const [loginError, setLoginError] = useState(null);
-  const { toggleLike, loading } = useLikes();
+  const toggleLikeMutation = useToggleArticleLike();
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -27,31 +27,31 @@ const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, o
     }
 
     setLoginError(null);
-
-    // Optimistic update
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
     setIsAnimating(true);
 
-    const result = await toggleLike(articleId);
-    
-    if (result.success) {
-      // Update with server response
-      setIsLiked(result.liked);
-      setLikeCount(result.likeCount);
-      
-      // Call parent callback if provided
-      if (onLikeChange) {
-        onLikeChange({ liked: result.liked, likeCount: result.likeCount });
+    // React Query handles optimistic updates automatically
+    toggleLikeMutation.mutate(
+      { articleId, isLiked },
+      {
+        onSuccess: (data) => {
+          // Update local state with server response
+          setIsLiked(data.isLiked);
+          setLikeCount(data.likesCount);
+          
+          // Call parent callback if provided
+          if (onLikeChange) {
+            onLikeChange({ liked: data.isLiked, likeCount: data.likesCount });
+          }
+        },
+        onError: (error) => {
+          setLoginError(error.message || 'Failed to update like');
+        },
+        onSettled: () => {
+          // Remove animation class
+          setTimeout(() => setIsAnimating(false), 300);
+        },
       }
-    } else {
-      // Revert on error
-      setIsLiked(!isLiked);
-      setLikeCount(isLiked ? likeCount + 1 : likeCount - 1);
-    }
-
-    // Remove animation class
-    setTimeout(() => setIsAnimating(false), 300);
+    );
   };
 
   const sizeClasses = {
@@ -73,7 +73,7 @@ const LikeButton = ({ articleId, initialLikeCount = 0, initialIsLiked = false, o
         size={size}
         className={`like-button d-flex align-items-center gap-1 ${sizeClasses[size]} ${isAnimating ? 'like-animating' : ''}`}
         onClick={handleLikeClick}
-        disabled={loading}
+        disabled={toggleLikeMutation.isPending}
         aria-label={isLiked ? 'Unlike article' : 'Like article'}
       >
         {isLiked ? (

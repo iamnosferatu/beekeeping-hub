@@ -8,9 +8,10 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem(TOKEN_NAME) || null);
+  const [token, setToken] = useState(localStorage.getItem(TOKEN_NAME) || sessionStorage.getItem(TOKEN_NAME) || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [rememberMe, setRememberMe] = useState(localStorage.getItem(`${TOKEN_NAME}_remember`) === 'true');
 
   // Removed token debugging for production security
 
@@ -40,18 +41,29 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   // Login user
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMeOption = false) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.auth.login({ email, password });
+      const response = await apiService.auth.login({ email, password, rememberMe: rememberMeOption });
 
       if (response.success) {
-        // Save token to localStorage and state
-        localStorage.setItem(TOKEN_NAME, response.data.token);
+        // Save token based on remember me preference
+        if (rememberMeOption) {
+          localStorage.setItem(TOKEN_NAME, response.data.token);
+          localStorage.setItem(`${TOKEN_NAME}_remember`, 'true');
+          // Clear from sessionStorage if it exists
+          sessionStorage.removeItem(TOKEN_NAME);
+        } else {
+          sessionStorage.setItem(TOKEN_NAME, response.data.token);
+          localStorage.removeItem(`${TOKEN_NAME}_remember`);
+          // Clear from localStorage if it exists
+          localStorage.removeItem(TOKEN_NAME);
+        }
         setToken(response.data.token);
         setUser(response.data.user);
+        setRememberMe(rememberMeOption);
 
         return response.data.user;
       } else {
@@ -103,9 +115,12 @@ export const AuthProvider = ({ children }) => {
   // Logout user
   const logout = () => {
     localStorage.removeItem(TOKEN_NAME);
+    localStorage.removeItem(`${TOKEN_NAME}_remember`);
+    sessionStorage.removeItem(TOKEN_NAME);
     setToken(null);
     setUser(null);
     setError(null);
+    setRememberMe(false);
   };
 
   // Update user profile
@@ -200,6 +215,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     error,
+    rememberMe,
     login,
     register,
     logout,

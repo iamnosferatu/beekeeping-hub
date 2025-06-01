@@ -1,6 +1,6 @@
 // frontend/src/components/articles/ArticleList/ArticleList.js
-import React from "react";
-import { useArticles } from "../../../hooks/api/useArticles";
+import React, { useState } from "react";
+import { useArticles } from "../../../hooks/queries/useArticles";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import { PAGINATION_CONFIG, LOADING_CONFIG } from "../../../constants/ui";
 import ArticleCard from "../ArticleCard";
@@ -43,39 +43,39 @@ const ArticleList = ({
   className = "",
 }) => {
   const { scrollToTop } = useScrollToTop();
+  const [page, setPage] = useState(1);
 
-  // Fetch articles with the API hook
+  // Build params for React Query
+  const params = {
+    page,
+    limit,
+    ...(tag && { tag }),
+    ...(search && { search }),
+  };
+
+  // Fetch articles with React Query hook
   const {
-    data: articles,
-    loading,
+    data: response,
+    isLoading,
     error,
-    pagination,
-    changePage,
     refetch,
-  } = useArticles(
-    {
-      tag,
-      search,
-      limit,
-    },
-    {
-      // Show real errors, no fallback
-      useFallback: false,
-      onError: (error) => {
-        console.error("ArticleList: Error fetching articles:", error);
-      },
-      onSuccess: (data) => {
-        console.log("ArticleList: Successfully loaded articles:", data);
-      },
-    }
-  );
+  } = useArticles(params);
+
+  // Extract articles and pagination from response
+  const articles = response?.articles || response?.data || [];
+  const pagination = {
+    page,
+    limit,
+    total: response?.count || response?.total || 0,
+    totalPages: Math.ceil((response?.count || response?.total || 0) / limit),
+  };
 
   /**
    * Handle page change with scroll to top
    * @param {number} newPage - The page to navigate to
    */
   const handlePageChange = (newPage) => {
-    changePage(newPage);
+    setPage(newPage);
     scrollToTop();
   };
 
@@ -87,7 +87,7 @@ const ArticleList = ({
   };
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <LoadingState
         count={LOADING_CONFIG.SKELETON_ITEMS}

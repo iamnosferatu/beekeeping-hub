@@ -2,11 +2,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./index.scss";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { SiteSettingsProvider } from "./contexts/SiteSettingsContext";
+import queryClient from "./lib/queryClient";
 import reportWebVitals from "./reportWebVitals";
 
 // Global error handlers for unhandled errors
@@ -87,15 +90,18 @@ window.addEventListener('unhandledrejection', handleUnhandledRejection);
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <SiteSettingsProvider>
-            <App />
-          </SiteSettingsProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider>
+          <AuthProvider>
+            <SiteSettingsProvider>
+              <App />
+            </SiteSettingsProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 

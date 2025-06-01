@@ -2,7 +2,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { Container, Spinner, Alert, Button } from "react-bootstrap";
-import { useArticleBySlug } from "../hooks/api/useArticles";
+import { useArticleBySlug } from "../hooks/queries/useArticles";
 import ArticleHeader from "../components/articles/ArticleHeader";
 import ArticleContent from "../components/articles/ArticleContent";
 import NestedCommentsSection from "../components/articles/Comments/NestedCommentsSection";
@@ -17,11 +17,11 @@ import "./ArticlePage.scss";
 const ArticlePage = () => {
   const { slug } = useParams();
 
-  // Fetch article data using the custom hook
-  const { data: article, loading, error } = useArticleBySlug(slug);
+  // Fetch article data using React Query hook
+  const { data: article, isLoading, error } = useArticleBySlug(slug);
 
   // Loading state - show spinner while fetching article
-  if (loading) {
+  if (isLoading) {
     return (
       <Container className="text-center py-5">
         <Spinner animation="border" variant="primary" role="status">

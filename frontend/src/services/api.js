@@ -27,7 +27,8 @@ class ApiService {
     // Request interceptor - Add auth token automatically
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem(TOKEN_NAME);
+        // Check both localStorage and sessionStorage for token
+        const token = localStorage.getItem(TOKEN_NAME) || sessionStorage.getItem(TOKEN_NAME);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -72,8 +73,10 @@ class ApiService {
     // Handle specific HTTP status codes
     switch (status) {
       case 401:
-        // Unauthorized - clear token and redirect to login
+        // Unauthorized - clear tokens from both storage locations and redirect to login
         localStorage.removeItem(TOKEN_NAME);
+        localStorage.removeItem(`${TOKEN_NAME}_remember`);
+        sessionStorage.removeItem(TOKEN_NAME);
         if (window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
