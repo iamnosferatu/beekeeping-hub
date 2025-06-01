@@ -1,6 +1,7 @@
-// frontend/src/services/api.js - DEBUG VERSION
+// frontend/src/services/api.js - Enhanced with Request Deduplication
 import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
+import { smartRequest } from "../lib/requestDeduplication";
 
 /**
  * Centralized API service for all HTTP requests - WITH DEBUGGING
@@ -139,23 +140,52 @@ class ApiService {
   }
 
   /**
-   * Generic request method with enhanced error handling and debugging
+   * Generic request method with enhanced error handling, debugging, and deduplication
    */
-  async request(config) {
-    try {
-      const response = await this.client(config);
+  async request(config, options = {}) {
+    const {
+      enableCache = true,
+      enableDeduplication = true,
+      enableBatching = false,
+      cacheTTL = 60000,
+      batchKey = null,
+    } = options;
 
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error,
-      };
-    }
+    // Create the actual request function
+    const requestFn = async () => {
+      try {
+        const response = await this.client(config);
+        return {
+          success: true,
+          data: response.data,
+          status: response.status,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error,
+        };
+      }
+    };
+
+    // Use smart request wrapper for optimization
+    const method = config.method || 'GET';
+    const url = config.url || '';
+    const params = { ...config.params, ...config.data };
+
+    return smartRequest.execute(
+      method,
+      url,
+      params,
+      requestFn,
+      {
+        enableCache,
+        enableDeduplication,
+        enableBatching,
+        cacheTTL,
+        batchKey,
+      }
+    );
   }
 
   // =============================================================================
@@ -172,6 +202,10 @@ class ApiService {
       return await this.request({
         method: "GET",
         url: url,
+      }, {
+        enableCache: true,
+        enableDeduplication: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes for article lists
       });
     },
 
@@ -194,6 +228,10 @@ class ApiService {
       return await this.request({
         method: "GET",
         url: `/articles/${slug}`,
+      }, {
+        enableCache: true,
+        enableDeduplication: true,
+        cacheTTL: 10 * 60 * 1000, // 10 minutes for individual articles
       });
     },
 

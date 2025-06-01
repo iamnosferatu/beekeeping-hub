@@ -5,6 +5,7 @@ import axios from "axios";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
 import ThemeContext from "../contexts/ThemeContext";
+import CacheMonitor from "../components/debug/CacheMonitor";
 
 const DebugPage = () => {
   const { user, token } = useContext(AuthContext);
@@ -54,6 +55,9 @@ const DebugPage = () => {
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link eventKey="theme">Theme</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="cache">Cache Monitor</Nav.Link>
               </Nav.Item>
             </Nav>
           </Card.Header>
@@ -439,6 +443,11 @@ const DebugPage = () => {
 }`}
                   </pre>
                 </div>
+              </Tab.Pane>
+
+              {/* Cache Monitor Tab */}
+              <Tab.Pane eventKey="cache">
+                <CacheMonitor />
               </Tab.Pane>
             </Tab.Content>
           </Card.Body>

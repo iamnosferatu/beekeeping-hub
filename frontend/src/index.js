@@ -9,7 +9,8 @@ import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { SiteSettingsProvider } from "./contexts/SiteSettingsContext";
-import queryClient from "./lib/queryClient";
+import queryClient, { persistenceUtils } from "./lib/queryClient";
+import { cacheWarmingManager, warmCache } from "./lib/cacheWarming";
 import reportWebVitals from "./reportWebVitals";
 
 // Global error handlers for unhandled errors
@@ -86,6 +87,19 @@ const handleUnhandledRejection = (event) => {
 window.addEventListener('error', handleGlobalError);
 window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
+// Initialize cache persistence and warming
+const initializeCache = async () => {
+  // Restore cache from localStorage
+  persistenceUtils.restoreFromStorage();
+  
+  // Warm critical cache on app start
+  await warmCache.onAppInit();
+};
+
+// Initialize cache asynchronously
+initializeCache().catch(error => {
+  console.warn('Cache initialization failed:', error);
+});
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

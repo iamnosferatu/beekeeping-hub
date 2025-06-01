@@ -1,6 +1,7 @@
 // frontend/src/hooks/queries/useArticles.js
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiService from '../../services/api';
+import { invalidateCache } from '../../lib/cacheInvalidation';
 
 // Query keys for articles
 export const ARTICLES_QUERY_KEYS = {
@@ -119,8 +120,8 @@ export const useCreateArticle = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      // Invalidate articles list to refetch with new article
-      queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() });
+      // Use intelligent cache invalidation
+      invalidateCache.articleCreated(data);
       
       // Add the new article to the cache
       queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.id), data);
@@ -149,6 +150,9 @@ export const useUpdateArticle = () => {
       return response.data;
     },
     onSuccess: (data) => {
+      // Use intelligent cache invalidation
+      invalidateCache.articleUpdated(data);
+      
       // Update the cached article
       queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.id), data);
       
@@ -156,9 +160,6 @@ export const useUpdateArticle = () => {
       if (data.slug) {
         queryClient.setQueryData(ARTICLES_QUERY_KEYS.bySlug(data.slug), data);
       }
-      
-      // Invalidate lists to reflect changes
-      queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() });
     },
     onError: (error) => {
       console.error('Update article error:', error);
@@ -179,14 +180,11 @@ export const useDeleteArticle = () => {
       return response.data;
     },
     onSuccess: (_, deletedId) => {
+      // Use intelligent cache invalidation
+      invalidateCache.articleDeleted({ id: deletedId });
+      
       // Remove from cache
       queryClient.removeQueries({ queryKey: ARTICLES_QUERY_KEYS.detail(deletedId) });
-      
-      // Invalidate lists to remove the deleted article
-      queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() });
-      
-      // Also invalidate related queries
-      queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.all });
     },
     onError: (error) => {
       console.error('Delete article error:', error);
@@ -236,6 +234,14 @@ export const useToggleArticleLike = () => {
           context.previousArticle
         );
       }
+    },
+    onSuccess: (data) => {
+      // Use intelligent cache invalidation for likes
+      invalidateCache.likeToggled({
+        article_id: data.articleId,
+        isLiked: data.wasLiked,
+        likeCount: data.likesCount,
+      });
     },
     onSettled: (data, error, variables) => {
       // Always refetch after error or success
