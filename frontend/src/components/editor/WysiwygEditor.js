@@ -1,7 +1,9 @@
 // frontend/src/components/editor/WysiwygEditor.js
-import React, { useState, useEffect, useRef } from "react";
-import ReactQuill from "react-quill";
+import React, { useState, useEffect, useRef, Suspense, lazy } from "react";
 import "react-quill/dist/quill.snow.css";
+
+// Lazy load ReactQuill to reduce initial bundle size
+const ReactQuill = lazy(() => import("react-quill"));
 import { Button, Spinner, Alert } from "react-bootstrap";
 import ImageUploadButton from "./ImageUploadButton";
 import useArticleImageUpload from "../../hooks/api/useArticleImageUpload";
@@ -250,15 +252,22 @@ const WysiwygEditor = ({ value, onChange, height = "400px" }) => {
       </div>
 
       {/* The Quill Editor */}
-      <ReactQuill
-        ref={quillRef}
-        theme="snow"
-        value={editorValue}
-        onChange={handleChange}
-        modules={modules}
-        formats={formats}
-        style={{ height }}
-      />
+      <Suspense fallback={
+        <div className="text-center py-5" style={{ height }}>
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3">Loading editor...</p>
+        </div>
+      }>
+        <ReactQuill
+          ref={quillRef}
+          theme="snow"
+          value={editorValue}
+          onChange={handleChange}
+          modules={modules}
+          formats={formats}
+          style={{ height }}
+        />
+      </Suspense>
 
       {/* Word counter */}
       <div className="d-flex justify-content-between mt-2 text-muted">
