@@ -37,6 +37,7 @@ router.get("/", (req, res) => {
       "/contact",
       "/likes",
       "/health",
+      "/debug",
       "/sitemap",
     ],
   });
@@ -61,6 +62,44 @@ router.get("/health", (req, res) => {
     message: "API is running",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
+  });
+});
+
+// Debug endpoint (only available in development)
+router.get("/debug", (req, res) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({
+      success: false,
+      message: "Debug endpoint only available in development mode"
+    });
+  }
+
+  const { sequelize } = require('../models');
+  
+  res.status(200).json({
+    success: true,
+    environment: process.env.NODE_ENV,
+    server: {
+      time: new Date().toISOString(),
+      uptime: process.uptime(),
+      memoryUsage: process.memoryUsage(),
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch,
+    },
+    database: {
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      connected: sequelize.connectionManager.pool ? true : false,
+      dialect: sequelize.getDialect(),
+    },
+    headers: req.headers,
+    requestInfo: {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+    }
   });
 });
 

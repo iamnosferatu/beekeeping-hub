@@ -101,6 +101,54 @@ initializeCache().catch(error => {
   console.warn('Cache initialization failed:', error);
 });
 
+// Add global debugging helpers for cache inspection
+if (typeof window !== 'undefined') {
+  window.debugCache = {
+    getStats: () => {
+      try {
+        const cache = queryClient.getQueryCache();
+        const queries = cache.getAll();
+        return {
+          totalQueries: queries.length,
+          freshQueries: queries.filter(q => !q.isStale()).length,
+          staleQueries: queries.filter(q => q.isStale()).length,
+          errorQueries: queries.filter(q => q.isError()).length,
+          fetchingQueries: queries.filter(q => q.isFetching()).length,
+        };
+      } catch (error) {
+        return { error: error.message };
+      }
+    },
+    getAllQueries: () => {
+      try {
+        return queryClient.getQueryCache().getAll().map(q => ({
+          queryKey: q.queryKey,
+          state: q.state.status,
+          dataUpdatedAt: q.state.dataUpdatedAt,
+          isStale: q.isStale(),
+        }));
+      } catch (error) {
+        return { error: error.message };
+      }
+    },
+    clearCache: () => {
+      try {
+        queryClient.clear();
+        return 'Cache cleared successfully';
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+  };
+  
+  window.queryClient = queryClient;
+  console.log('🔧 Debug helpers available:');
+  console.log('  window.debugCache.getStats() - Get cache statistics');
+  console.log('  window.debugCache.getAllQueries() - List all cached queries');
+  console.log('  window.debugCache.clearCache() - Clear all cache');
+  console.log('  window.queryClient - Direct access to QueryClient');
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

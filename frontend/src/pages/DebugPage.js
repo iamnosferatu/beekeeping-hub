@@ -5,7 +5,8 @@ import axios from "axios";
 import { API_URL } from "../config";
 import AuthContext from "../contexts/AuthContext";
 import ThemeContext from "../contexts/ThemeContext";
-import CacheMonitor from "../components/debug/CacheMonitor";
+import CacheMonitorSimple from "../components/debug/CacheMonitorSimple";
+import DebugErrorBoundary from "../components/debug/DebugErrorBoundary";
 
 const DebugPage = () => {
   const { user, token } = useContext(AuthContext);
@@ -23,7 +24,11 @@ const DebugPage = () => {
         setBackendInfo(res.data);
       } catch (err) {
         console.error("Error fetching backend debug info:", err);
-        setBackendError("Failed to load backend debug information.");
+        if (err.response?.status === 404) {
+          setBackendError("Backend debug endpoint not available. This is normal - the cache monitor will still work.");
+        } else {
+          setBackendError(`Failed to load backend debug information: ${err.message}`);
+        }
       } finally {
         setBackendLoading(false);
       }
@@ -231,9 +236,9 @@ const DebugPage = () => {
 
                 <Button
                   variant="primary"
-                  onClick={() => window.open(`${API_URL}/debug-ui`, "_blank")}
+                  onClick={() => window.open(`${API_URL}/debug`, "_blank")}
                 >
-                  Open Backend Debug UI
+                  View Raw Debug JSON
                 </Button>
               </Tab.Pane>
 
@@ -447,7 +452,9 @@ const DebugPage = () => {
 
               {/* Cache Monitor Tab */}
               <Tab.Pane eventKey="cache">
-                <CacheMonitor />
+                <DebugErrorBoundary>
+                  <CacheMonitorSimple />
+                </DebugErrorBoundary>
               </Tab.Pane>
             </Tab.Content>
           </Card.Body>

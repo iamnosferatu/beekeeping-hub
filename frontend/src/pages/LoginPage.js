@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
-import { useLogin, useResendVerification } from "../hooks/queries/useAuth";
+import { useResendVerification } from "../hooks/queries/useAuth";
 import AuthContext from "../contexts/AuthContext";
 
 const LoginPage = () => {
@@ -14,10 +14,9 @@ const LoginPage = () => {
   const [verificationSent, setVerificationSent] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  const { clearError } = useContext(AuthContext);
+  const { login, clearError, loading } = useContext(AuthContext);
   
   // React Query mutations
-  const loginMutation = useLogin();
   const resendVerificationMutation = useResendVerification();
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,22 +44,17 @@ const LoginPage = () => {
       return;
     }
 
-    loginMutation.mutate(
-      { email, password, rememberMe },
-      {
-        onSuccess: () => {
-          navigate(from, { replace: true });
-        },
-        onError: (err) => {
-          // Check if it's an email verification error
-          if (err.message?.includes('verify') || err.message?.includes('verification')) {
-            setNeedsVerification(true);
-          } else {
-            setLocalError(err.message || 'Login failed. Please try again.');
-          }
-        },
+    try {
+      await login(email, password, rememberMe);
+      navigate(from, { replace: true });
+    } catch (err) {
+      // Check if it's an email verification error
+      if (err.message?.includes('verify') || err.message?.includes('verification')) {
+        setNeedsVerification(true);
+      } else {
+        setLocalError(err.message || 'Login failed. Please try again.');
       }
-    );
+    }
   };
 
   const handleResendVerification = async () => {
@@ -93,11 +87,6 @@ const LoginPage = () => {
           )}
 
           {/* Error messages */}
-          {loginMutation.error && !needsVerification && (
-            <Alert variant="danger" onClose={() => loginMutation.reset()} dismissible>
-              {loginMutation.error.message}
-            </Alert>
-          )}
 
           {localError && (
             <Alert variant="danger" onClose={() => setLocalError(null)} dismissible>
@@ -184,9 +173,9 @@ const LoginPage = () => {
                 variant="primary" 
                 type="submit" 
                 size="lg"
-                disabled={loginMutation.isPending}
+                disabled={loading}
               >
-                {loginMutation.isPending ? (
+                {loading ? (
                   <>
                     <Spinner size="sm" animation="border" className="me-2" />
                     Logging in...

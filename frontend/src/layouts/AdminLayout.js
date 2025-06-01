@@ -80,6 +80,11 @@ const AdminLayout = () => {
       icon: <BsTools size={20} />,
       label: "Diagnostics",
     },
+    {
+      path: "/debug",
+      icon: <BsTools size={20} />,
+      label: "Debug",
+    },
   ];
 
   /**
