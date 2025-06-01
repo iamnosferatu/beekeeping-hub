@@ -9,6 +9,7 @@ import MaintenanceMode from "./components/MaintenanceMode";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import RoutePreloader from "./components/common/RoutePreloader";
 import PerformanceMonitor from "./components/common/PerformanceMonitor";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Eagerly loaded components (small, always needed)
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -74,7 +75,7 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary level="app" userId={user?.id}>
       <RoutePreloader />
       <PerformanceMonitor />
       <Suspense 
@@ -86,91 +87,221 @@ function App() {
       >
         <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="articles" element={<ArticleListPage />} />
-          <Route path="articles/:slug" element={<ArticlePage />} />
-          <Route path="search" element={<SearchResultsPage />} />
-          <Route path="tags/:slug" element={<TagPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="verify-email" element={<VerifyEmailPage />} />
-          <Route path="forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="reset-password" element={<ResetPasswordPage />} />
+        <Route path="/" element={
+          <ErrorBoundary level="layout">
+            <MainLayout />
+          </ErrorBoundary>
+        }>
+          <Route index element={
+            <ErrorBoundary level="page">
+              <HomePage />
+            </ErrorBoundary>
+          } />
+          <Route path="articles" element={
+            <ErrorBoundary level="page">
+              <ArticleListPage />
+            </ErrorBoundary>
+          } />
+          <Route path="articles/:slug" element={
+            <ErrorBoundary level="page">
+              <ArticlePage />
+            </ErrorBoundary>
+          } />
+          <Route path="search" element={
+            <ErrorBoundary level="page">
+              <SearchResultsPage />
+            </ErrorBoundary>
+          } />
+          <Route path="tags/:slug" element={
+            <ErrorBoundary level="page">
+              <TagPage />
+            </ErrorBoundary>
+          } />
+          <Route path="login" element={
+            <ErrorBoundary level="page">
+              <LoginPage />
+            </ErrorBoundary>
+          } />
+          <Route path="register" element={
+            <ErrorBoundary level="page">
+              <RegisterPage />
+            </ErrorBoundary>
+          } />
+          <Route path="verify-email" element={
+            <ErrorBoundary level="page">
+              <VerifyEmailPage />
+            </ErrorBoundary>
+          } />
+          <Route path="forgot-password" element={
+            <ErrorBoundary level="page">
+              <ForgotPasswordPage />
+            </ErrorBoundary>
+          } />
+          <Route path="reset-password" element={
+            <ErrorBoundary level="page">
+              <ResetPasswordPage />
+            </ErrorBoundary>
+          } />
 
           {/* Protected Routes */}
           <Route
             path="profile"
             element={
-              <PrivateRoute>
-                <ProfilePage />
-              </PrivateRoute>
+              <ErrorBoundary level="page">
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              </ErrorBoundary>
             }
           />
           <Route
             path="my-articles"
             element={
-              <PrivateRoute>
-                <MyArticlesPage />
-              </PrivateRoute>
+              <ErrorBoundary level="page">
+                <PrivateRoute>
+                  <MyArticlesPage />
+                </PrivateRoute>
+              </ErrorBoundary>
             }
           />
           <Route
             path="editor"
             element={
-              <RoleRoute roles={["author", "admin"]}>
-                <ArticleEditorPage />
-              </RoleRoute>
+              <ErrorBoundary level="page">
+                <RoleRoute roles={["author", "admin"]}>
+                  <ArticleEditorPage />
+                </RoleRoute>
+              </ErrorBoundary>
             }
           />
           <Route
             path="editor/:id"
             element={
-              <RoleRoute roles={["author", "admin"]}>
-                <ArticleEditorPage />
-              </RoleRoute>
+              <ErrorBoundary level="page">
+                <RoleRoute roles={["author", "admin"]}>
+                  <ArticleEditorPage />
+                </RoleRoute>
+              </ErrorBoundary>
             }
           />
 
           {/* Debug Routes */}
-          <Route path="/auth-debug" element={<AuthDebugPage />} />
-          <Route path="/debug" element={<DebugPage />} />
-          <Route path="/debug/related-articles" element={<RelatedArticlesDebugger />} />
-          <Route path="/debug/article/:slug" element={<ArticlePageDebug />} />
+          <Route path="/auth-debug" element={
+            <ErrorBoundary level="page">
+              <AuthDebugPage />
+            </ErrorBoundary>
+          } />
+          <Route path="/debug" element={
+            <ErrorBoundary level="page">
+              <DebugPage />
+            </ErrorBoundary>
+          } />
+          <Route path="/debug/related-articles" element={
+            <ErrorBoundary level="page">
+              <RelatedArticlesDebugger />
+            </ErrorBoundary>
+          } />
+          <Route path="/debug/article/:slug" element={
+            <ErrorBoundary level="page">
+              <ArticlePageDebug />
+            </ErrorBoundary>
+          } />
           
           {/* Static page routes */}
-          <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="privacy" element={<PrivacyPage />} />
-          <Route path="terms" element={<TermsPage />} />
-          <Route path="sitemap" element={<SitemapPage />} />
+          <Route path="about" element={
+            <ErrorBoundary level="page">
+              <AboutPage />
+            </ErrorBoundary>
+          } />
+          <Route path="contact" element={
+            <ErrorBoundary level="page">
+              <ContactPage />
+            </ErrorBoundary>
+          } />
+          <Route path="privacy" element={
+            <ErrorBoundary level="page">
+              <PrivacyPage />
+            </ErrorBoundary>
+          } />
+          <Route path="terms" element={
+            <ErrorBoundary level="page">
+              <TermsPage />
+            </ErrorBoundary>
+          } />
+          <Route path="sitemap" element={
+            <ErrorBoundary level="page">
+              <SitemapPage />
+            </ErrorBoundary>
+          } />
 
           {/* 404 Page */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={
+            <ErrorBoundary level="page">
+              <NotFoundPage />
+            </ErrorBoundary>
+          } />
         </Route>
 
         {/* Admin Routes */}
         <Route
           path="/admin"
           element={
-            <RoleRoute roles={["admin"]}>
-              <AdminLayout />
-            </RoleRoute>
+            <ErrorBoundary level="layout">
+              <RoleRoute roles={["admin"]}>
+                <AdminLayout />
+              </RoleRoute>
+            </ErrorBoundary>
           }
         >
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="articles" element={<AdminArticlesPage />} />
-          <Route path="comments" element={<AdminCommentsPage />} />
-          <Route path="tags" element={<AdminTagsPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="newsletter" element={<AdminNewsletterPage />} />
-          <Route path="contact" element={<AdminContactMessagesPage />} />
-          <Route path="settings" element={<AdminSiteSettingsPage />} />
-          <Route path="diagnostics" element={<AdminDiagnosticsPage />} />
+          <Route index element={
+            <ErrorBoundary level="page">
+              <AdminDashboardPage />
+            </ErrorBoundary>
+          } />
+          <Route path="articles" element={
+            <ErrorBoundary level="page">
+              <AdminArticlesPage />
+            </ErrorBoundary>
+          } />
+          <Route path="comments" element={
+            <ErrorBoundary level="page">
+              <AdminCommentsPage />
+            </ErrorBoundary>
+          } />
+          <Route path="tags" element={
+            <ErrorBoundary level="page">
+              <AdminTagsPage />
+            </ErrorBoundary>
+          } />
+          <Route path="users" element={
+            <ErrorBoundary level="page">
+              <AdminUsersPage />
+            </ErrorBoundary>
+          } />
+          <Route path="newsletter" element={
+            <ErrorBoundary level="page">
+              <AdminNewsletterPage />
+            </ErrorBoundary>
+          } />
+          <Route path="contact" element={
+            <ErrorBoundary level="page">
+              <AdminContactMessagesPage />
+            </ErrorBoundary>
+          } />
+          <Route path="settings" element={
+            <ErrorBoundary level="page">
+              <AdminSiteSettingsPage />
+            </ErrorBoundary>
+          } />
+          <Route path="diagnostics" element={
+            <ErrorBoundary level="page">
+              <AdminDiagnosticsPage />
+            </ErrorBoundary>
+          } />
         </Route>
         </Routes>
       </Suspense>
-    </>
+    </ErrorBoundary>
   );
 }
 
