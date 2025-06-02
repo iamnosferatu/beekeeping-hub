@@ -38,6 +38,11 @@ export const useComment = (commentId) => {
       return response.data;
     },
     enabled: !!commentId,
+    // Aggressive settings to ensure comments always load on first try
+    refetchOnMount: true, // Always fetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes once loaded
   });
 };
 

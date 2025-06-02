@@ -7,7 +7,36 @@ import { invalidateCache } from '../../lib/cacheInvalidation';
 export const ARTICLES_QUERY_KEYS = {
   all: ['articles'],
   lists: () => [...ARTICLES_QUERY_KEYS.all, 'list'],
-  list: (params) => [...ARTICLES_QUERY_KEYS.lists(), params],
+  list: (params) => {
+    // Normalize params to ensure consistent cache keys
+    const normalizedParams = { ...params };
+    
+    // Remove undefined/null values
+    Object.keys(normalizedParams).forEach(key => {
+      if (normalizedParams[key] === undefined || normalizedParams[key] === null) {
+        delete normalizedParams[key];
+      }
+    });
+    
+    // Remove default values to ensure cache consistency
+    // This prevents cache misses when components pass explicit defaults
+    if (normalizedParams.page === 1) {
+      delete normalizedParams.page;
+    }
+    // Don't remove limit since different components use different limits (8, 10, etc)
+    // The cache warming will warm both common limits
+    
+    // Sort params for consistent ordering
+    const sortedParams = Object.keys(normalizedParams).sort().reduce(
+      (obj, key) => {
+        obj[key] = normalizedParams[key];
+        return obj;
+      },
+      {}
+    );
+    
+    return [...ARTICLES_QUERY_KEYS.lists(), sortedParams];
+  },
   details: () => [...ARTICLES_QUERY_KEYS.all, 'detail'],
   detail: (id) => [...ARTICLES_QUERY_KEYS.details(), id],
   bySlug: (slug) => [...ARTICLES_QUERY_KEYS.all, 'slug', slug],
@@ -18,16 +47,68 @@ export const ARTICLES_QUERY_KEYS = {
 
 // Hook for fetching articles list
 export const useArticles = (params = {}) => {
+  // Check if this is a filtered query (tag, search, etc) vs homepage list
+  const isFilteredQuery = Object.keys(params).length > 0;
+  const hasTag = params.tag;
+  
   return useQuery({
     queryKey: ARTICLES_QUERY_KEYS.list(params),
     queryFn: async () => {
-      const response = await apiService.articles.getAll(params);
-      if (!response.success) {
-        throw new Error(response.error?.message || 'Failed to fetch articles');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Fetching articles with params:', params);
+        console.log('🔑 Query key:', ARTICLES_QUERY_KEYS.list(params));
       }
-      return response.data;
+      
+      try {
+        const response = await apiService.articles.getAll(params);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📦 Articles API response:', {
+            success: response.success,
+            dataType: typeof response.data,
+            isArray: Array.isArray(response.data),
+            hasArticles: response.data?.articles ? 'yes' : 'no',
+            dataKeys: response.data ? Object.keys(response.data) : 'no data',
+            articlesCount: Array.isArray(response.data) ? response.data.length : 
+                         response.data?.articles?.length || 'unknown',
+            fullResponse: response
+          });
+        }
+        
+        if (!response.success) {
+          throw new Error(response.error?.message || 'Failed to fetch articles');
+        }
+        
+        // Ensure we return the correct data structure
+        if (response.data) {
+          return response.data;
+        } else {
+          throw new Error('No data in response');
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Articles fetch error:', error);
+        }
+        throw error;
+      }
     },
     enabled: true,
+    // Use aggressive settings for filtered queries (tags, search)
+    // Use optimized settings for homepage list
+    staleTime: isFilteredQuery ? 0 : 5 * 60 * 1000, // Always stale for filtered, 5min for homepage
+    refetchOnMount: isFilteredQuery, // Always refetch filtered queries
+    refetchOnWindowFocus: false,
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes once loaded
+    retry: (failureCount, error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Retrying articles fetch, attempt:', failureCount + 1, error);
+      }
+      // Don't retry 4xx errors
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 
@@ -43,6 +124,18 @@ export const useArticleBySlug = (slug) => {
       return response.data;
     },
     enabled: !!slug,
+    // Aggressive settings to ensure individual articles always load
+    refetchOnMount: true, // Always fetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
+    retry: (failureCount, error) => {
+      // Retry network errors but not 4xx errors
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 
@@ -58,6 +151,18 @@ export const useArticleById = (id) => {
       return response.data;
     },
     enabled: !!id,
+    // Aggressive settings to ensure individual articles always load
+    refetchOnMount: true, // Always fetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
+    retry: (failureCount, error) => {
+      // Retry network errors but not 4xx errors
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 

@@ -97,9 +97,11 @@ const initializeCache = async () => {
 };
 
 // Initialize cache asynchronously
+// Re-enabled with simplified cache warming
 initializeCache().catch(error => {
   console.warn('Cache initialization failed:', error);
 });
+console.log('🔧 Simplified cache warming enabled - testing if it works without corruption');
 
 // Add global debugging helpers for cache inspection
 if (typeof window !== 'undefined') {
@@ -108,12 +110,20 @@ if (typeof window !== 'undefined') {
       try {
         const cache = queryClient.getQueryCache();
         const queries = cache.getAll();
+        const articleQueries = queries.filter(q => q.queryKey[0] === 'articles');
         return {
           totalQueries: queries.length,
+          articleQueries: articleQueries.length,
           freshQueries: queries.filter(q => !q.isStale()).length,
           staleQueries: queries.filter(q => q.isStale()).length,
           errorQueries: queries.filter(q => q.isError()).length,
           fetchingQueries: queries.filter(q => q.isFetching()).length,
+          articleQueryDetails: articleQueries.map(q => ({
+            key: q.queryKey,
+            status: q.state.status,
+            hasData: !!q.state.data,
+            isStale: q.isStale()
+          }))
         };
       } catch (error) {
         return { error: error.message };

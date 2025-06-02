@@ -1,5 +1,5 @@
 // frontend/src/components/articles/ArticleList/ArticleList.js
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useArticles } from "../../../hooks/queries/useArticles";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import { PAGINATION_CONFIG, LOADING_CONFIG } from "../../../constants/ui";
@@ -9,6 +9,7 @@ import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
 import EmptyState from "./EmptyState";
 import ArticleGrid from "./ArticleGrid";
+import { debugArticleListQuery, getArticlesDiagnostics } from "../../../utils/articlesDebug";
 import "./ArticleList.scss";
 
 /**
@@ -59,16 +60,68 @@ const ArticleList = ({
     isLoading,
     error,
     refetch,
+    isFetching,
+    isError,
   } = useArticles(params);
 
   // Extract articles and pagination from response (memoized)
-  const articles = useMemo(() => response?.articles || response?.data || [], [response]);
-  const pagination = useMemo(() => ({
-    page,
-    limit,
-    total: response?.count || response?.total || 0,
-    totalPages: Math.ceil((response?.count || response?.total || 0) / limit),
-  }), [page, limit, response]);
+  // Handle different response structures from the API
+  const articles = useMemo(() => {
+    if (!response) return [];
+    
+    // If response.data is an array, use it directly
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    
+    // If response.data has articles property
+    if (response.data?.articles) {
+      return response.data.articles;
+    }
+    
+    // If response has articles property directly
+    if (response.articles) {
+      return response.articles;
+    }
+    
+    // Fallback to empty array
+    return [];
+  }, [response]);
+  
+  const pagination = useMemo(() => {
+    const total = response?.data?.total || response?.data?.count || response?.count || response?.total || 0;
+    return {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }, [page, limit, response]);
+
+  // Debug logging in development (only on error states)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // Only log when there are actual issues
+      if (isError || (articles.length === 0 && !isLoading && !isFetching)) {
+        console.log('📋 ArticleList issue:', {
+          isLoading,
+          isFetching,
+          isError,
+          hasResponse: !!response,
+          responseKeys: response ? Object.keys(response) : 'no response',
+          articlesLength: articles.length,
+          error: error?.message
+        });
+        
+        // Get diagnostics only when there are issues
+        const diagnostics = getArticlesDiagnostics();
+        console.log('🔍 Articles diagnostics:', diagnostics);
+        
+        // Debug cache state only when there's an issue
+        debugArticleListQuery(params);
+      }
+    }
+  }, [isLoading, isFetching, isError, response, articles.length, error, params]);
 
   /**
    * Handle page change with scroll to top (memoized)

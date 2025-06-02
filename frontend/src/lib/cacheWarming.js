@@ -7,11 +7,10 @@
  * by preloading critical data and predicting user navigation patterns.
  */
 
-import { queryClient, cacheUtils, requestUtils } from './queryClient';
+import { cacheUtils, requestUtils } from './queryClient';
 import { ARTICLES_QUERY_KEYS } from '../hooks/queries/useArticles';
 import { COMMENTS_QUERY_KEYS } from '../hooks/queries/useComments';
 import { TAGS_QUERY_KEYS } from '../hooks/queries/useTags';
-import { AUTH_QUERY_KEYS } from '../hooks/queries/useAuth';
 
 class CacheWarmingManager {
   constructor() {
@@ -43,20 +42,26 @@ class CacheWarmingManager {
       priority: 'critical',
       triggers: ['app.mount'],
       prefetch: async () => {
+        // SIMPLIFIED CACHE WARMING - Only warm the most critical query
+        // Use the exact same query function as components to avoid conflicts
+        const apiService = await this.getApiService();
+        
         const strategies = [
-          // Popular content
+          // Only warm the HomePage article list (limit: 8) - the most important one
           {
-            queryKey: ARTICLES_QUERY_KEYS.list({ popular: true, limit: 5 }),
-            queryFn: () => this.getApiService().then(api => api.articles.getAll({ popular: true, limit: 5 })),
-            staleTime: 10 * 60 * 1000,
-          },
-          // Popular tags
-          {
-            queryKey: TAGS_QUERY_KEYS.popular(),
-            queryFn: () => this.getApiService().then(api => api.tags.getPopular(10)),
-            staleTime: 15 * 60 * 1000,
+            queryKey: ARTICLES_QUERY_KEYS.list({ limit: 8 }),
+            queryFn: async () => {
+              // Use identical logic to component hook
+              const response = await apiService.articles.getAll({ limit: 8 });
+              if (!response.success) {
+                throw new Error(response.error?.message || 'Failed to fetch articles');
+              }
+              return response.data;
+            },
+            staleTime: 5 * 60 * 1000,
           },
         ];
+
 
         await cacheUtils.warmCache(strategies);
       },
@@ -67,7 +72,7 @@ class CacheWarmingManager {
       priority: 'high',
       triggers: ['route.article'],
       prefetch: async (context) => {
-        const { articleId, slug } = context;
+        const { articleId } = context;
         const strategies = [];
 
         // Prefetch related articles
@@ -173,17 +178,22 @@ class CacheWarmingManager {
     const startTime = Date.now();
 
     try {
-      console.debug('Executing cache warming strategy:', strategyName, context);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔥 Executing cache warming strategy:', strategyName, context);
+      }
       await strategy.prefetch(context);
       
       this.stats.successfulWarmups++;
       const warmupTime = Date.now() - startTime;
       this.updateAverageWarmupTime(warmupTime);
       
-      console.debug(`Cache warming completed: ${strategyName} (${warmupTime}ms)`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`✅ Cache warming completed: ${strategyName} (${warmupTime}ms)`);
+      }
     } catch (error) {
       this.stats.failedWarmups++;
-      console.warn('Cache warming failed:', strategyName, error);
+      console.warn('❌ Cache warming failed:', strategyName, error);
+      // Don't throw error to prevent breaking app initialization
     }
   }
 

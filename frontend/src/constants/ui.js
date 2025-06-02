@@ -73,11 +73,13 @@ export const LOADING_CONFIG = {
     search: 300,
     api: 500,
   },
+  SKELETON_ITEMS: 3, // Number of skeleton items to show while loading
 };
 
 // Pagination configurations
 export const PAGINATION_CONFIG = {
-  defaultPageSize: 10,
+  DEFAULT_PAGE_SIZE: 10, // Fixed to match usage in components
+  defaultPageSize: 10, // Keep both for backward compatibility
   maxVisiblePages: 5,
   pageSizes: [5, 10, 20, 50],
   showFirstLast: true,

@@ -14,8 +14,8 @@ const CACHE_CONFIG = {
   },
   // Garbage collection times
   GC_TIME: {
-    SHORT: 5 * 60 * 1000,       // 5 minutes - for frequently changing data
-    MEDIUM: 15 * 60 * 1000,     // 15 minutes - for moderately stable data
+    SHORT: 10 * 60 * 1000,      // 10 minutes - for frequently changing data
+    MEDIUM: 30 * 60 * 1000,     // 30 minutes - for moderately stable data
     LONG: 60 * 60 * 1000,       // 1 hour - for stable data
   },
   // Retry configuration
@@ -76,7 +76,7 @@ export const queryClient = new QueryClient({
       // Background refetching settings
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
-      refetchOnMount: true,
+      refetchOnMount: false, // Don't refetch on mount if cache exists
       // Network mode for offline support
       networkMode: 'online',
       // Error handling
@@ -144,15 +144,31 @@ export const cacheUtils = {
 
   // Cache warming for critical data
   warmCache: async (warmingStrategies) => {
-    const warmingPromises = warmingStrategies.map(async (strategy) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔥 Starting cache warming with', warmingStrategies.length, 'strategies');
+    }
+    
+    const warmingPromises = warmingStrategies.map(async (strategy, index) => {
       try {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔥 [${index + 1}/${warmingStrategies.length}] Warming cache for:`, strategy.queryKey);
+        }
+        
         await queryClient.prefetchQuery(strategy);
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ [${index + 1}/${warmingStrategies.length}] Cache warmed successfully:`, strategy.queryKey);
+        }
       } catch (error) {
-        console.warn('Cache warming failed for:', strategy.queryKey, error);
+        console.warn(`❌ [${index + 1}/${warmingStrategies.length}] Cache warming failed for:`, strategy.queryKey, error);
       }
     });
 
     await Promise.allSettled(warmingPromises);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🏁 Cache warming completed for all strategies');
+    }
   },
 
   // Selective cache clearing
@@ -169,8 +185,8 @@ export const cacheUtils = {
       totalQueries: queries.length,
       staleQueries: queries.filter(q => q.isStale()).length,
       freshQueries: queries.filter(q => !q.isStale()).length,
-      fetchingQueries: queries.filter(q => q.isFetching()).length,
-      errorQueries: queries.filter(q => q.isError()).length,
+      fetchingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
+      errorQueries: queries.filter(q => q.state.status === 'error').length,
       cacheSize: queries.reduce((size, query) => {
         return size + JSON.stringify(query.state.data || {}).length;
       }, 0),

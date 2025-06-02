@@ -54,6 +54,18 @@ export const useTagBySlug = (slug) => {
       return response.data;
     },
     enabled: !!slug,
+    // Aggressive settings to ensure tags always load on first try
+    refetchOnMount: true, // Always fetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
+    retry: (failureCount, error) => {
+      // Retry network errors but not 4xx errors
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 
@@ -69,6 +81,18 @@ export const useTag = (id) => {
       return response.data;
     },
     enabled: !!id,
+    // Aggressive settings to ensure tags always load on first try
+    refetchOnMount: true, // Always fetch on mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
+    retry: (failureCount, error) => {
+      // Retry network errors but not 4xx errors
+      if (error?.status >= 400 && error?.status < 500) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 };
 
