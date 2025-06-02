@@ -1,5 +1,5 @@
 // frontend/src/components/layout/Header.js
-import React, { useContext } from "react";
+import React, { useContext, memo, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
@@ -12,19 +12,27 @@ import {
 import { BsSearch } from "react-icons/bs";
 import AuthContext from "../../contexts/AuthContext";
 import ThemeContext from "../../contexts/ThemeContext";
+import { trackNavRender } from "../../utils/navigationPerformance";
 
-const Header = () => {
+const Header = memo(() => {
   const { user, logout } = useContext(AuthContext);
   const { themeConfig } = useContext(ThemeContext);
   const navigate = useNavigate();
 
-  const handleSearch = (e) => {
+  // Track renders in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      trackNavRender('Header');
+    }
+  });
+
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
     const searchTerm = e.target.elements.search.value;
     if (searchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
-  };
+  }, [navigate]);
 
   return (
     <Navbar
@@ -105,6 +113,9 @@ const Header = () => {
       </Container>
     </Navbar>
   );
-};
+});
 
-export default Header;
+Header.displayName = 'Header';
+
+// Memoize Header to prevent unnecessary re-renders
+export default React.memo(Header);

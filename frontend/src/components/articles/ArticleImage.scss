@@ -38,10 +38,10 @@
   }
 }
 
-// Loading state
+// Loading state - show with reduced opacity instead of hiding
 .article-image[src=""],
 .article-image:not([src]) {
-  visibility: hidden;
+  opacity: 0.3;
 }
 
 // Error state

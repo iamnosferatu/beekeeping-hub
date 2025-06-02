@@ -57,18 +57,6 @@ const AuthorApplicationStatus = () => {
     return null;
   }
 
-  // Debug logging
-  console.log('AuthorApplicationStatus Debug:', {
-    user: user ? { id: user.id, role: user.role, username: user.username } : null,
-    isAuthenticated,
-    isCheckingEligibility,
-    isLoadingApplication,
-    canApplyData,
-    application,
-    canApplyError: canApplyError ? { type: canApplyError.type, message: canApplyError.message } : null,
-    applicationError: applicationError ? { type: applicationError.type, message: applicationError.message } : null,
-    token: localStorage.getItem('beekeeper_auth_token') ? 'Present' : 'Missing'
-  });
 
   const handleApplicationSuccess = () => {
     // Refetch application status after successful submission
@@ -282,7 +270,10 @@ const AuthorApplicationStatus = () => {
 
   // If user has an application, show its status
   if (application) {
-    const statusConfig = getStatusConfig(application.status);
+    // Extract the actual application data if it's wrapped in a response
+    const applicationData = application.data || application;
+    
+    const statusConfig = getStatusConfig(applicationData.status);
 
     return (
       <>
@@ -302,18 +293,18 @@ const AuthorApplicationStatus = () => {
 
             <Row className="text-sm">
               <Col md={6}>
-                <strong>Applied:</strong> {moment(application.createdAt).format('MMMM D, YYYY')}
+                <strong>Applied:</strong> {moment(applicationData.createdAt).format('MMMM D, YYYY')}
               </Col>
-              {application.reviewed_at && (
+              {applicationData.reviewed_at && (
                 <Col md={6}>
-                  <strong>Reviewed:</strong> {moment(application.reviewed_at).format('MMMM D, YYYY')}
+                  <strong>Reviewed:</strong> {moment(applicationData.reviewed_at).format('MMMM D, YYYY')}
                 </Col>
               )}
             </Row>
 
-            {application.admin_notes && (
+            {applicationData.admin_notes && (
               <Alert variant="info" className="mt-3 mb-0">
-                <strong>Admin Notes:</strong> {application.admin_notes}
+                <strong>Admin Notes:</strong> {applicationData.admin_notes}
               </Alert>
             )}
 
@@ -340,67 +331,96 @@ const AuthorApplicationStatus = () => {
             <Modal.Title>Your Author Application</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+
             <div className="mb-4">
               <div className="d-flex align-items-center justify-content-between mb-2">
                 <strong>Status:</strong>
-                <Badge bg={statusConfig.variant} className="px-3 py-2">
-                  {statusConfig.icon}
-                  {statusConfig.text}
-                </Badge>
+                {(() => {
+                  // Get fresh status config using the application data
+                  const currentStatus = applicationData.status || 'pending';
+                  
+                  const modalStatusConfig = getStatusConfig(currentStatus);
+                  return (
+                    <Badge bg={modalStatusConfig.variant} className="px-3 py-2">
+                      {modalStatusConfig.icon}
+                      {modalStatusConfig.text}
+                    </Badge>
+                  );
+                })()}
               </div>
-              <p className="text-muted mb-0">{statusConfig.description}</p>
+              <p className="text-muted mb-0">
+                {(() => {
+                  const currentStatus = applicationData.status || applicationData['status'] || 'pending';
+                  const modalStatusConfig = getStatusConfig(currentStatus);
+                  return modalStatusConfig.description;
+                })()}
+              </p>
             </div>
 
             <div className="mb-4">
               <strong>Application Text:</strong>
-              <div className="mt-2 p-3 bg-light rounded">
-                {application.application_text}
+              <div className="mt-2 p-3 bg-light rounded" style={{ color: '#212529' }}>
+                {(() => {
+                  // Check different possible locations for the application text
+                  const text = applicationData.application_text || 
+                               applicationData['application_text'] ||
+                               applicationData.applicationText;
+                  
+                  if (text) {
+                    return text;
+                  }
+                  
+                  // If still not found, show a simple message
+                  return (
+                    <span className="text-muted font-italic">No application text available</span>
+                  );
+                })()}
               </div>
             </div>
 
-            {application.writing_experience && (
+            {applicationData.writing_experience && (
               <div className="mb-4">
                 <strong>Writing Experience:</strong>
-                <div className="mt-2 p-3 bg-light rounded">
-                  {application.writing_experience}
+                <div className="mt-2 p-3 bg-light rounded" style={{ color: '#212529' }}>
+                  {applicationData.writing_experience}
                 </div>
               </div>
             )}
 
-            {application.beekeeping_experience && (
+            {applicationData.beekeeping_experience && (
               <div className="mb-4">
                 <strong>Beekeeping Experience:</strong>
-                <div className="mt-2 p-3 bg-light rounded">
-                  {application.beekeeping_experience}
+                <div className="mt-2 p-3 bg-light rounded" style={{ color: '#212529' }}>
+                  {applicationData.beekeeping_experience}
                 </div>
               </div>
             )}
 
-            {application.topics_of_interest && (
+            {applicationData.topics_of_interest && (
               <div className="mb-4">
                 <strong>Topics of Interest:</strong>
-                <div className="mt-2 p-3 bg-light rounded">
-                  {application.topics_of_interest}
+                <div className="mt-2 p-3 bg-light rounded" style={{ color: '#212529' }}>
+                  {applicationData.topics_of_interest}
                 </div>
               </div>
             )}
 
-            {application.admin_notes && (
+            {applicationData.admin_notes && (
               <div className="mb-4">
                 <strong>Admin Notes:</strong>
                 <Alert variant="info" className="mt-2">
-                  {application.admin_notes}
+                  {applicationData.admin_notes}
                 </Alert>
               </div>
             )}
 
             <Row className="text-sm text-muted">
               <Col md={6}>
-                <strong>Submitted:</strong> {moment(application.createdAt).format('MMMM D, YYYY [at] h:mm A')}
+                <strong>Submitted:</strong> {moment(applicationData.createdAt).format('MMMM D, YYYY [at] h:mm A')}
               </Col>
-              {application.reviewed_at && (
+              {applicationData.reviewed_at && (
                 <Col md={6}>
-                  <strong>Reviewed:</strong> {moment(application.reviewed_at).format('MMMM D, YYYY [at] h:mm A')}
+                  <strong>Reviewed:</strong> {moment(applicationData.reviewed_at).format('MMMM D, YYYY [at] h:mm A')}
                 </Col>
               )}
             </Row>

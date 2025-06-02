@@ -42,11 +42,18 @@
         }
     }
 
+    .article-header-image-container {
+        overflow: hidden;
+        max-height: 400px;
+        background-color: #f8f9fa;
+    }
+
     .article-featured-image {
         width: 100%;
         height: 400px;
         object-fit: cover;
         object-position: center;
+        display: block;
     }
 
     // Styling for WYSIWYG content

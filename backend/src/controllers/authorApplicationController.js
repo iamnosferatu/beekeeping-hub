@@ -104,6 +104,7 @@ const submitApplication = async (req, res) => {
 const getMyApplication = async (req, res) => {
   try {
     const userId = req.user.id;
+    
 
     const application = await AuthorApplication.findOne({
       where: { user_id: userId },
@@ -127,9 +128,12 @@ const getMyApplication = async (req, res) => {
       });
     }
 
+    // Ensure we're sending the correct data - extract from dataValues
+    const applicationData = application.get({ plain: true });
+
     res.json({
       success: true,
-      data: application
+      data: applicationData
     });
 
   } catch (error) {

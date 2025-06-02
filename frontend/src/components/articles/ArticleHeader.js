@@ -13,6 +13,7 @@ import moment from "moment";
 import AuthContext from "../../contexts/AuthContext";
 import LikeButton from "./LikeButton";
 import { getImageUrl } from "../../utils/imageHelpers";
+import { ASSETS_URL } from "../../config";
 
 /**
  * ArticleHeader Component
@@ -25,6 +26,11 @@ import { getImageUrl } from "../../utils/imageHelpers";
 const ArticleHeader = ({ article }) => {
   const { user } = useContext(AuthContext);
   
+  // Memoize the image URL to ensure it's stable
+  const featuredImageUrl = React.useMemo(() => {
+    if (!article?.featured_image) return null;
+    return getImageUrl(article.featured_image);
+  }, [article?.featured_image]);
 
   /**
    * Format author display name
@@ -66,18 +72,16 @@ const ArticleHeader = ({ article }) => {
 
       <Card className="mb-4 border-0 shadow-sm">
         {/* Featured Image */}
-        {article.featured_image && (
-          <div className="article-image-container">
+        {featuredImageUrl && (
+          <div className="article-header-image-container">
             <img
-              key={`article-image-${article.id}`}
-              src={getImageUrl(article.featured_image)}
+              key={`article-image-${article.id}-${featuredImageUrl}`}
+              src={featuredImageUrl}
               className="card-img-top article-featured-image"
               alt={article.title}
               loading="eager"
-              style={{
-                maxHeight: "400px",
-                width: "100%",
-                objectFit: "cover",
+              onError={(e) => {
+                console.error('ArticleHeader image failed to load:', e.target.src);
               }}
             />
           </div>

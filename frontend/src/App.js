@@ -65,6 +65,7 @@ const AuthDebugPage = lazy(() => import("./pages/AuthDebugPage"));
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 const RelatedArticlesDebugger = lazy(() => import('./components/debug/RelatedArticlesDebugger'));
 const ArticlePageDebug = lazy(() => import('./pages/ArticlePageDebug'));
+const TestAuthorApplicationPage = lazy(() => import('./pages/TestAuthorApplicationPage'));
 
 function App() {
   const { settings, loading } = useSiteSettings();
@@ -91,6 +92,7 @@ function App() {
 
   return (
     <ErrorBoundary level="app" userId={user?.id}>
+      {/* Re-enabled with image loading safeguards */}
       <RoutePreloader />
       <PerformanceMonitor />
       <CookieConsentBanner />
@@ -220,6 +222,11 @@ function App() {
           <Route path="/debug/article/:slug" element={
             <ErrorBoundary level="page">
               <ArticlePageDebug />
+            </ErrorBoundary>
+          } />
+          <Route path="/debug/author-application" element={
+            <ErrorBoundary level="page">
+              <TestAuthorApplicationPage />
             </ErrorBoundary>
           } />
           

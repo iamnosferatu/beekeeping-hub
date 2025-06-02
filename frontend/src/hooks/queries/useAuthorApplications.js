@@ -57,16 +57,16 @@ export const useMyAuthorApplication = (enabled = true) => {
   return useQuery({
     queryKey: AUTHOR_APPLICATIONS_QUERY_KEYS.myApplication(),
     queryFn: async () => {
-      console.log('useMyAuthorApplication: Making API call to getMyApplication');
       try {
         const response = await apiService.authorApplications.getMyApplication();
-        console.log('useMyAuthorApplication: API response:', response);
         if (!response.success) {
           throw new Error(response.error?.message || 'Failed to fetch application');
         }
-        return response.data;
+        // Ensure we return plain data object
+        // Sequelize might return a special object that needs to be converted
+        const plainData = response.data ? JSON.parse(JSON.stringify(response.data)) : response.data;
+        return plainData;
       } catch (error) {
-        console.error('useMyAuthorApplication: API error:', error);
         // Rethrow with more specific error message
         if (error.type === 'AUTH_ERROR') {
           throw new Error('Authentication required. Please log in.');

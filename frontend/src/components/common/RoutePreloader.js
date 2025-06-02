@@ -51,21 +51,50 @@ const RoutePreloader = () => {
       ...adminPreloadRoutes,
     };
 
+    // Debounced preload function to avoid excessive calls
+    let preloadTimeout = null;
     const preloadOnHover = (event) => {
       const link = event.target.closest('a');
       if (!link) return;
 
       const href = link.getAttribute('href');
-      if (href && preloadRoutes[href]) {
-        // Preload the route component
-        preloadRoutes[href]().catch(() => {
-          // Silently fail - component will load normally when navigated to
-        });
+      
+      // Clear any pending preload
+      if (preloadTimeout) {
+        clearTimeout(preloadTimeout);
       }
+      
+      // Don't preload external links or same page anchors
+      if (!href || href.startsWith('http') || href.startsWith('#')) return;
+      
+      // Don't preload the current page
+      if (href === window.location.pathname) return;
+      
+      // Debounce the preload to avoid triggering on quick hovers
+      preloadTimeout = setTimeout(() => {
+        // Don't preload if images are currently loading
+        const loadingImages = document.querySelectorAll('img[loading="lazy"], img:not([complete])');
+        const hasLoadingImages = Array.from(loadingImages).some(img => !img.complete);
+        
+        if (hasLoadingImages) {
+          console.log('🚫 Skipping route preload - images still loading');
+          return;
+        }
+        
+        if (href && preloadRoutes[href]) {
+          // Preload the route component
+          preloadRoutes[href]().catch(() => {
+            // Silently fail - component will load normally when navigated to
+          });
+        }
+      }, 300); // 300ms delay before preloading
     };
 
-    // Add event listeners for hover preloading
-    document.addEventListener('mouseover', preloadOnHover);
+    // Add event listeners for hover preloading with delegation
+    const navContainer = document.querySelector('.navbar');
+    if (navContainer) {
+      navContainer.addEventListener('mouseover', preloadOnHover, { passive: true });
+    }
     
     // Preload critical routes after a longer delay to avoid interfering with page rendering
     // Use requestIdleCallback if available, otherwise fallback to longer timeout
@@ -118,7 +147,17 @@ const RoutePreloader = () => {
     }
 
     return () => {
-      document.removeEventListener('mouseover', preloadOnHover);
+      // Clean up event listener
+      if (navContainer) {
+        navContainer.removeEventListener('mouseover', preloadOnHover);
+      }
+      
+      // Clear preload timeout
+      if (preloadTimeout) {
+        clearTimeout(preloadTimeout);
+      }
+      
+      // Clear scheduled preload
       if (preloadTimer) {
         if ('requestIdleCallback' in window && typeof preloadTimer !== 'number') {
           cancelIdleCallback(preloadTimer);

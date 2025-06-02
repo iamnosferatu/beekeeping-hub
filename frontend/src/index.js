@@ -92,16 +92,17 @@ const initializeCache = async () => {
   // Restore cache from localStorage
   persistenceUtils.restoreFromStorage();
   
-  // Warm critical cache on app start
-  await warmCache.onAppInit();
+  // DISABLED: Cache warming causing image loading issues
+  // await warmCache.onAppInit();
+  console.log('⚠️ Cache warming DISABLED - fixing image loading issues');
 };
 
 // Initialize cache asynchronously
-// Re-enabled with simplified cache warming
+// TEMPORARILY DISABLED cache warming due to image conflicts
 initializeCache().catch(error => {
   console.warn('Cache initialization failed:', error);
 });
-console.log('🔧 Simplified cache warming enabled - testing if it works without corruption');
+console.log('🔧 Cache warming DISABLED to fix image loading issues');
 
 // Add global debugging helpers for cache inspection
 if (typeof window !== 'undefined') {

@@ -12,7 +12,7 @@ import ArticleStats from "./ArticleStats";
 import ArticleAuthor from "./ArticleAuthor";
 
 // Import utilities (simplified if constants don't exist)
-const ARTICLE_CONFIG = { IMAGE_LOADING: "eager" };
+const ARTICLE_CONFIG = { IMAGE_LOADING: "lazy" };
 const ARIA_LABELS = {
   ARTICLE: {
     CARD: "article",
@@ -251,4 +251,16 @@ const ArticleCardFooter = ({ article, articleUrl, showAuthor }) => (
   </div>
 );
 
-export default ArticleCard;
+// Memoize ArticleCard to prevent unnecessary re-renders
+export default React.memo(ArticleCard, (prevProps, nextProps) => {
+  // Only re-render if article data actually changes
+  return (
+    prevProps.article?.id === nextProps.article?.id &&
+    prevProps.article?.title === nextProps.article?.title &&
+    prevProps.article?.featured_image === nextProps.article?.featured_image &&
+    prevProps.showImage === nextProps.showImage &&
+    prevProps.showAuthor === nextProps.showAuthor &&
+    prevProps.showStats === nextProps.showStats &&
+    prevProps.className === nextProps.className
+  );
+});

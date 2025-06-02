@@ -30,7 +30,9 @@ class CacheWarmingManager {
     };
     
     this.setupDefaultStrategies();
-    this.startBehaviorTracking();
+    // DISABLED: Behavior tracking causing image conflicts
+    // this.startBehaviorTracking();
+    console.log('⚠️ Cache warming behavior tracking DISABLED');
   }
 
   /**
@@ -42,6 +44,11 @@ class CacheWarmingManager {
       priority: 'critical',
       triggers: ['app.mount'],
       prefetch: async () => {
+        // DISABLED: Temporarily disabled to prevent image loading conflicts
+        console.log('🚫 App init cache warming temporarily disabled');
+        return;
+        
+        /* Original implementation - commented out
         // SIMPLIFIED CACHE WARMING - Only warm the most critical query
         // Use the exact same query function as components to avoid conflicts
         const apiService = await this.getApiService();
@@ -64,6 +71,7 @@ class CacheWarmingManager {
 
 
         await cacheUtils.warmCache(strategies);
+        */
       },
     });
 
@@ -272,11 +280,28 @@ class CacheWarmingManager {
    * Prefetch article list
    */
   async prefetchArticleList(params = {}) {
-    // Don't prefetch article list if user is currently on an individual article page
-    // This prevents cache interference with the current article's images and data
+    // ENHANCED: More aggressive prevention of interference
     const currentPath = window.location.pathname;
-    if (currentPath.startsWith('/articles/') && currentPath !== '/articles') {
-      console.log('🚫 Skipping article list prefetch - user is on individual article page');
+    
+    // Check for any images currently loading
+    const loadingImages = document.querySelectorAll('img[loading="lazy"], img:not([complete])');
+    const hasLoadingImages = Array.from(loadingImages).some(img => !img.complete);
+    
+    // Don't prefetch if:
+    // 1. On any article-related page
+    // 2. On home page (has article images)
+    // 3. Any images are currently loading
+    // 4. Within 2 seconds of page load (let images load first)
+    const timeSinceLoad = performance.now();
+    if (currentPath.startsWith('/articles') || 
+        currentPath === '/' || 
+        hasLoadingImages ||
+        timeSinceLoad < 2000) {
+      console.log('🚫 Skipping article list prefetch - preventing image conflicts', {
+        path: currentPath,
+        hasLoadingImages,
+        timeSinceLoad
+      });
       return;
     }
 
@@ -422,8 +447,8 @@ class CacheWarmingManager {
     // Track page views
     this.trackPageViews();
     
-    // Track link hovers for prefetching
-    this.trackLinkHovers();
+    // DISABLED: Link hover tracking to prevent performance issues
+    // this.trackLinkHovers();
     
     // Track scroll behavior
     this.trackScrollBehavior();
@@ -463,8 +488,17 @@ class CacheWarmingManager {
 
   /**
    * Track link hovers for intelligent prefetching
+   * DISABLED: This was causing image loading conflicts
    */
   trackLinkHovers() {
+    // Temporarily disabled due to image loading conflicts
+    // The hover-based prefetching was interfering with current page images
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚫 Link hover tracking disabled to prevent image conflicts');
+    }
+    return;
+    
+    /* Original implementation commented out
     let hoverTimeout;
     
     document.addEventListener('mouseover', (event) => {
@@ -480,6 +514,7 @@ class CacheWarmingManager {
     document.addEventListener('mouseout', () => {
       clearTimeout(hoverTimeout);
     });
+    */
   }
 
   /**
@@ -501,6 +536,12 @@ class CacheWarmingManager {
    * Parse URL for prefetching
    */
   parseUrlForPrefetch(url) {
+    // CRITICAL: Don't prefetch /articles list page to prevent image conflicts
+    if (url === '/articles') {
+      console.log('🚫 Blocking /articles prefetch to prevent image loading conflicts');
+      return null;
+    }
+    
     // Article URLs
     const articleMatch = url.match(/^\/articles\/(.+)$/);
     if (articleMatch) {
