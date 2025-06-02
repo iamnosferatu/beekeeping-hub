@@ -1,5 +1,5 @@
 // frontend/src/App.js
-import React, { useContext, Suspense, lazy } from "react";
+import React, { useContext, useEffect, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useSiteSettings } from "./contexts/SiteSettingsContext";
 import AuthContext from "./contexts/AuthContext";
@@ -10,6 +10,8 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 import RoutePreloader from "./components/common/RoutePreloader";
 import PerformanceMonitor from "./components/common/PerformanceMonitor";
 import ErrorBoundary from "./components/common/ErrorBoundary";
+import CookieConsentBanner from "./components/common/CookieConsentBanner";
+import { shouldLoadAdminComponents, logAdminOptimizationStatus } from "./utils/adminOptimization";
 
 // Eagerly loaded components (small, always needed)
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -52,6 +54,7 @@ const AdminContactMessagesPage = lazy(() => import("./pages/admin/ContactMessage
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const SitemapPage = lazy(() => import('./pages/SitemapPage'));
 
@@ -63,11 +66,21 @@ const ArticlePageDebug = lazy(() => import('./pages/ArticlePageDebug'));
 
 function App() {
   const { settings, loading } = useSiteSettings();
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
+  
+  // Log admin optimization status in development
+  useEffect(() => {
+    if (!authLoading) {
+      logAdminOptimizationStatus(user);
+    }
+  }, [user, authLoading]);
   
   // Check if site is in maintenance mode
   const isInMaintenance = settings?.maintenance_mode;
   const isAdmin = user?.role === 'admin';
+  
+  // Determine if admin components should be loaded
+  const shouldLoadAdmin = shouldLoadAdminComponents(user, authLoading);
   
   // Show maintenance page for non-admin users when maintenance is active
   if (!loading && isInMaintenance && !isAdmin) {
@@ -78,6 +91,7 @@ function App() {
     <ErrorBoundary level="app" userId={user?.id}>
       <RoutePreloader />
       <PerformanceMonitor />
+      <CookieConsentBanner />
       <Suspense 
         fallback={
           <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
@@ -223,6 +237,16 @@ function App() {
               <PrivacyPage />
             </ErrorBoundary>
           } />
+          <Route path="privacy-policy" element={
+            <ErrorBoundary level="page">
+              <PrivacyPage />
+            </ErrorBoundary>
+          } />
+          <Route path="cookie-policy" element={
+            <ErrorBoundary level="page">
+              <CookiePolicyPage />
+            </ErrorBoundary>
+          } />
           <Route path="terms" element={
             <ErrorBoundary level="page">
               <TermsPage />
@@ -242,63 +266,65 @@ function App() {
           } />
         </Route>
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ErrorBoundary level="layout">
-              <RoleRoute roles={["admin"]}>
-                <AdminLayout />
-              </RoleRoute>
-            </ErrorBoundary>
-          }
-        >
-          <Route index element={
-            <ErrorBoundary level="page">
-              <AdminDashboardPage />
-            </ErrorBoundary>
-          } />
-          <Route path="articles" element={
-            <ErrorBoundary level="page">
-              <AdminArticlesPage />
-            </ErrorBoundary>
-          } />
-          <Route path="comments" element={
-            <ErrorBoundary level="page">
-              <AdminCommentsPage />
-            </ErrorBoundary>
-          } />
-          <Route path="tags" element={
-            <ErrorBoundary level="page">
-              <AdminTagsPage />
-            </ErrorBoundary>
-          } />
-          <Route path="users" element={
-            <ErrorBoundary level="page">
-              <AdminUsersPage />
-            </ErrorBoundary>
-          } />
-          <Route path="newsletter" element={
-            <ErrorBoundary level="page">
-              <AdminNewsletterPage />
-            </ErrorBoundary>
-          } />
-          <Route path="contact" element={
-            <ErrorBoundary level="page">
-              <AdminContactMessagesPage />
-            </ErrorBoundary>
-          } />
-          <Route path="settings" element={
-            <ErrorBoundary level="page">
-              <AdminSiteSettingsPage />
-            </ErrorBoundary>
-          } />
-          <Route path="diagnostics" element={
-            <ErrorBoundary level="page">
-              <AdminDiagnosticsPage />
-            </ErrorBoundary>
-          } />
-        </Route>
+        {/* Admin Routes - Only render for admin users or when auth is loading */}
+        {shouldLoadAdmin && (
+          <Route
+            path="/admin"
+            element={
+              <ErrorBoundary level="layout">
+                <RoleRoute roles={["admin"]}>
+                  <AdminLayout />
+                </RoleRoute>
+              </ErrorBoundary>
+            }
+          >
+            <Route index element={
+              <ErrorBoundary level="page">
+                <AdminDashboardPage />
+              </ErrorBoundary>
+            } />
+            <Route path="articles" element={
+              <ErrorBoundary level="page">
+                <AdminArticlesPage />
+              </ErrorBoundary>
+            } />
+            <Route path="comments" element={
+              <ErrorBoundary level="page">
+                <AdminCommentsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="tags" element={
+              <ErrorBoundary level="page">
+                <AdminTagsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="users" element={
+              <ErrorBoundary level="page">
+                <AdminUsersPage />
+              </ErrorBoundary>
+            } />
+            <Route path="newsletter" element={
+              <ErrorBoundary level="page">
+                <AdminNewsletterPage />
+              </ErrorBoundary>
+            } />
+            <Route path="contact" element={
+              <ErrorBoundary level="page">
+                <AdminContactMessagesPage />
+              </ErrorBoundary>
+            } />
+            <Route path="settings" element={
+              <ErrorBoundary level="page">
+                <AdminSiteSettingsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="diagnostics" element={
+              <ErrorBoundary level="page">
+                <AdminDiagnosticsPage />
+              </ErrorBoundary>
+            } />
+          </Route>
+        )}
         </Routes>
       </Suspense>
     </ErrorBoundary>

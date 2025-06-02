@@ -63,6 +63,22 @@ const PrivacyPage = () => {
                   <li>Communications with us</li>
                   <li>Any other information you choose to provide</li>
                 </ul>
+                
+                <h3>Cookies and Tracking Technologies</h3>
+                <p>
+                  We use cookies and similar tracking technologies to collect information
+                  about your use of our website. With your consent, we may collect:
+                </p>
+                <ul>
+                  <li><strong>Necessary Cookies:</strong> Essential for website functionality, authentication, and security</li>
+                  <li><strong>Functional Cookies:</strong> Remember your preferences and enhance functionality</li>
+                  <li><strong>Analytics Cookies:</strong> Help us understand how visitors use our website</li>
+                  <li><strong>Performance Cookies:</strong> Monitor and improve website performance</li>
+                </ul>
+                <p>
+                  You can manage your cookie preferences through our cookie consent banner
+                  or in your browser settings. For more details, see our Cookie Policy.
+                </p>
               </section>
 
               <section className="mb-5">

@@ -1,11 +1,15 @@
 // frontend/src/utils/errorReporting.js
 
+import { isCategoryAllowed, COOKIE_CATEGORIES } from './cookieConsent';
+
 /**
  * Enhanced Error Reporting Utilities
  * 
  * Comprehensive error reporting and logging functionality
  * with retry mechanisms, classification, and monitoring.
  * Similar to backend error handling patterns.
+ * 
+ * Respects user cookie consent for analytics and performance tracking.
  */
 
 /**
@@ -92,6 +96,10 @@ export const reportError = (error, context = {}) => {
   const errorType = classifyError(error);
   const severity = getErrorSeverity(error);
   
+  // Check cookie consent for analytics data collection
+  const canCollectAnalytics = isCategoryAllowed(COOKIE_CATEGORIES.ANALYTICS);
+  const canCollectPerformance = isCategoryAllowed(COOKIE_CATEGORIES.PERFORMANCE);
+  
   const errorData = {
     id: generateErrorId(),
     message: error.message || 'Unknown error',
@@ -103,18 +111,19 @@ export const reportError = (error, context = {}) => {
       ...context,
       component: context.component || 'Unknown',
       action: context.action || 'Unknown',
-      userId: context.userId,
+      userId: canCollectAnalytics ? context.userId : null, // Only include userId if analytics allowed
     },
     metadata: {
       timestamp: new Date().toISOString(),
       url: window.location.href,
-      userAgent: navigator.userAgent,
+      // Only collect detailed metadata if performance cookies are allowed
+      userAgent: canCollectPerformance ? navigator.userAgent : null,
       buildVersion: process.env.REACT_APP_VERSION || 'unknown',
-      sessionId: getSessionId(),
-      viewport: {
+      sessionId: canCollectPerformance ? getSessionId() : null,
+      viewport: canCollectPerformance ? {
         width: window.innerWidth,
         height: window.innerHeight,
-      },
+      } : null,
     },
     apiData: error.response?.data || null,
   };
@@ -128,14 +137,20 @@ export const reportError = (error, context = {}) => {
     console.error('Severity:', severity);
     console.error('Context:', context);
     console.error('Full Data:', errorData);
+    console.error('Cookie Consent - Analytics:', canCollectAnalytics, 'Performance:', canCollectPerformance);
     console.groupEnd();
   }
 
-  // Store locally for debugging
-  storeErrorLocally(errorData);
+  // Always store critical errors locally for debugging, regardless of consent
+  if (severity === ERROR_SEVERITY.CRITICAL || severity === ERROR_SEVERITY.HIGH) {
+    storeErrorLocally(errorData);
+  } else if (canCollectAnalytics) {
+    // Only store non-critical errors if analytics consent is given
+    storeErrorLocally(errorData);
+  }
 
-  // Send to monitoring service in production
-  if (process.env.NODE_ENV === 'production') {
+  // Send to monitoring service in production only with consent
+  if (process.env.NODE_ENV === 'production' && canCollectAnalytics) {
     sendToMonitoringService(errorData);
   }
 

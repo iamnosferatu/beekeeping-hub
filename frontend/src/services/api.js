@@ -3,6 +3,7 @@ import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
 import { smartRequest } from "../lib/requestDeduplication";
 import { reportError, shouldRetryError, getRetryDelay, ERROR_TYPES, ERROR_SEVERITY } from "../utils/errorReporting";
+import PerformanceMonitor, { METRIC_TYPES } from "../utils/performanceMonitoring";
 
 /**
  * Enhanced API service with comprehensive error handling, retry mechanisms,
@@ -19,6 +20,10 @@ class ApiService {
       },
     });
 
+    // Performance tracking
+    this.requestTimers = new Map();
+    this.requestCounts = new Map();
+
     // Setup request and response interceptors
     this.setupInterceptors();
   }
@@ -27,7 +32,7 @@ class ApiService {
    * Setup axios interceptors for requests and responses
    */
   setupInterceptors() {
-    // Request interceptor - Add auth token automatically
+    // Request interceptor - Add auth token and start performance tracking
     this.client.interceptors.request.use(
       (config) => {
         // Check both localStorage and sessionStorage for token
@@ -36,7 +41,20 @@ class ApiService {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Removed debug logging for production security
+        // Start performance tracking
+        const requestId = this.generateRequestId();
+        config.metadata = {
+          requestId,
+          startTime: performance.now(),
+          url: config.url,
+          method: config.method?.toUpperCase() || 'GET',
+        };
+        
+        this.requestTimers.set(requestId, config.metadata);
+        
+        // Track request count
+        const endpoint = `${config.method?.toUpperCase() || 'GET'} ${config.url}`;
+        this.requestCounts.set(endpoint, (this.requestCounts.get(endpoint) || 0) + 1);
 
         return config;
       },
@@ -45,12 +63,19 @@ class ApiService {
       }
     );
 
-    // Response interceptor - Handle common response patterns
+    // Response interceptor - Handle common response patterns and track performance
     this.client.interceptors.response.use(
       (response) => {
+        // Track successful response performance
+        this.trackResponsePerformance(response.config, response.status, response.headers['content-length']);
         return response;
       },
       (error) => {
+        // Track error response performance
+        if (error.config) {
+          this.trackResponsePerformance(error.config, error.response?.status || 0, null, error);
+        }
+        
         // Handle common error scenarios
         const customError = this.handleError(error);
         return Promise.reject(customError);
@@ -139,6 +164,63 @@ class ApiService {
           data,
         };
     }
+  }
+
+  /**
+   * Generate unique request ID
+   */
+  generateRequestId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+  }
+
+  /**
+   * Track response performance
+   */
+  trackResponsePerformance(config, status, contentLength = null, error = null) {
+    if (!config.metadata) return;
+
+    const { requestId, startTime, method, url } = config.metadata;
+    const duration = performance.now() - startTime;
+    const endpoint = `${method} ${url}`;
+
+    // Record API performance metric
+    PerformanceMonitor.recordApi(method, url, duration, status, {
+      requestId,
+      contentLength: contentLength ? parseInt(contentLength) : null,
+      success: !error && status >= 200 && status < 400,
+      error: error?.message,
+      retryCount: config.metadata.retryCount || 0,
+      fromCache: config.metadata.fromCache || false,
+      requestCount: this.requestCounts.get(endpoint) || 1,
+    });
+
+    // Clean up timer
+    this.requestTimers.delete(requestId);
+
+    // Log slow requests in development
+    if (process.env.NODE_ENV === 'development' && duration > 1000) {
+      console.warn(`🐌 Slow API request: ${endpoint} took ${duration.toFixed(0)}ms`);
+    }
+  }
+
+  /**
+   * Get API performance statistics
+   */
+  getApiPerformanceStats() {
+    const analytics = PerformanceMonitor.getAnalytics();
+    return {
+      api: analytics.api || {},
+      requestCounts: Object.fromEntries(this.requestCounts),
+      activeRequests: this.requestTimers.size,
+    };
+  }
+
+  /**
+   * Clear API performance data
+   */
+  clearApiPerformanceData() {
+    this.requestCounts.clear();
+    this.requestTimers.clear();
   }
 
   /**

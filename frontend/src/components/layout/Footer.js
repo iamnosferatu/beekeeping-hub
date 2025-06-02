@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ThemeContext from "../../contexts/ThemeContext";
+import { CookieStatusIndicator } from "../common/CookieConsentBanner";
 
 const Footer = () => {
   const { themeConfig } = useContext(ThemeContext);
@@ -65,6 +66,8 @@ const Footer = () => {
           <Link to="/terms">Terms of Service</Link>
           <span className="mx-2">|</span>
           <Link to="/sitemap">Sitemap</Link>
+          <span className="mx-2">|</span>
+          <CookieStatusIndicator />
         </div>
 
         <div className="text-center">
