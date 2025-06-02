@@ -1,5 +1,5 @@
 // frontend/src/contexts/AuthContext.js
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useMemo, useCallback } from "react";
 import { TOKEN_NAME } from "../config";
 import apiService from "../services/api";
 
@@ -178,8 +178,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Check if user has specific role
-  const hasRole = (roles) => {
+  // Check if user has specific role (memoized)
+  const hasRole = useCallback((roles) => {
     if (!user) {
       return false;
     }
@@ -189,28 +189,24 @@ export const AuthProvider = ({ children }) => {
     }
 
     return user.role === roles;
-  };
+  }, [user]);
 
-  // Clear error
-  const clearError = () => setError(null);
+  // Clear error (memoized)
+  const clearError = useCallback(() => setError(null), []);
   
-  // Update user data (for avatar updates, etc.)
-  const updateUserData = (updates) => {
+  // Update user data (for avatar updates, etc.) (memoized)
+  const updateUserData = useCallback((updates) => {
     if (user) {
       setUser({ ...user, ...updates });
     }
-  };
+  }, [user]);
 
-  // Check if user is authenticated
-  const isAuthenticated = !!user && !!token;
+  // Memoized derived state
+  const isAuthenticated = useMemo(() => !!user && !!token, [user, token]);
+  const isAdmin = useMemo(() => user?.role === "admin", [user?.role]);
+  const canCreateContent = useMemo(() => user?.role === "author" || user?.role === "admin", [user?.role]);
 
-  // Check if user is admin
-  const isAdmin = user?.role === "admin";
-
-  // Check if user is author or admin
-  const canCreateContent = user?.role === "author" || user?.role === "admin";
-
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     user,
     token,
     loading,
@@ -227,7 +223,24 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     canCreateContent,
-  };
+  }), [
+    user,
+    token,
+    loading,
+    error,
+    rememberMe,
+    login,
+    register,
+    logout,
+    updateProfile,
+    changePassword,
+    hasRole,
+    clearError,
+    updateUserData,
+    isAuthenticated,
+    isAdmin,
+    canCreateContent,
+  ]);
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

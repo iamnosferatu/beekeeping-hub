@@ -1,5 +1,5 @@
 // frontend/src/contexts/SiteSettingsContext.js
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from "react";
 import axios from "axios";
 import { API_URL } from "../config";
 
@@ -55,9 +55,9 @@ export const SiteSettingsProvider = ({ children }) => {
   const [alertDismissed, setAlertDismissed] = useState(false);
 
   /**
-   * Fetch site settings from the API
+   * Fetch site settings from the API (memoized)
    */
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/site-settings`);
 
@@ -75,12 +75,12 @@ export const SiteSettingsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [settings.alert_message]);
 
   /**
-   * Update site settings (admin only)
+   * Update site settings (admin only) (memoized)
    */
-  const updateSettings = async (newSettings) => {
+  const updateSettings = useCallback(async (newSettings) => {
     try {
       const token = localStorage.getItem("beekeeper_auth_token");
 
@@ -107,12 +107,12 @@ export const SiteSettingsProvider = ({ children }) => {
         error: err.response?.data?.message || "Failed to update settings",
       };
     }
-  };
+  }, []);
 
   /**
-   * Toggle maintenance mode (admin only)
+   * Toggle maintenance mode (admin only) (memoized)
    */
-  const toggleMaintenanceMode = async () => {
+  const toggleMaintenanceMode = useCallback(async () => {
     try {
       const token = localStorage.getItem("beekeeper_auth_token");
 
@@ -139,12 +139,12 @@ export const SiteSettingsProvider = ({ children }) => {
           err.response?.data?.message || "Failed to toggle maintenance mode",
       };
     }
-  };
+  }, []);
 
   /**
-   * Toggle alert banner (admin only)
+   * Toggle alert banner (admin only) (memoized)
    */
-  const toggleAlert = async () => {
+  const toggleAlert = useCallback(async () => {
     try {
       const token = localStorage.getItem("beekeeper_auth_token");
 
@@ -174,16 +174,16 @@ export const SiteSettingsProvider = ({ children }) => {
         error: err.response?.data?.message || "Failed to toggle alert",
       };
     }
-  };
+  }, []);
 
   /**
-   * Dismiss the alert banner (user action)
+   * Dismiss the alert banner (user action) (memoized)
    */
-  const dismissAlert = () => {
+  const dismissAlert = useCallback(() => {
     setAlertDismissed(true);
     // Optionally store in localStorage to persist across page refreshes
     localStorage.setItem("beekeeper_alert_dismissed", settings.alert_message);
-  };
+  }, [settings.alert_message]);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -201,11 +201,13 @@ export const SiteSettingsProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Check if alert should be shown
-  const shouldShowAlert =
-    settings.alert_enabled && settings.alert_message && !alertDismissed;
+  // Check if alert should be shown (memoized)
+  const shouldShowAlert = useMemo(() =>
+    settings.alert_enabled && settings.alert_message && !alertDismissed,
+    [settings.alert_enabled, settings.alert_message, alertDismissed]
+  );
 
-  const value = {
+  const value = useMemo(() => ({
     settings,
     loading,
     error,
@@ -215,7 +217,17 @@ export const SiteSettingsProvider = ({ children }) => {
     toggleAlert,
     dismissAlert,
     refreshSettings: fetchSettings,
-  };
+  }), [
+    settings,
+    loading,
+    error,
+    shouldShowAlert,
+    updateSettings,
+    toggleMaintenanceMode,
+    toggleAlert,
+    dismissAlert,
+    fetchSettings,
+  ]);
 
   return (
     <SiteSettingsContext.Provider value={value}>

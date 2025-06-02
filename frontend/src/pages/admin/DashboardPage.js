@@ -1,5 +1,5 @@
 // frontend/src/pages/admin/DashboardPage.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, Row, Col, Alert, Spinner, Table, Button } from "react-bootstrap";
 import {
   BsFileEarmarkText,
@@ -36,10 +36,21 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
+  // Memoized calculations for stats display to prevent unnecessary re-renders
+  const displayStats = useMemo(() => {
+    // Return the stats as-is since they're already calculated in state
+    return stats;
+  }, [stats]);
+
+  const displayActivity = useMemo(() => {
+    // Return the activity as-is since it's already calculated in state
+    return recentActivity;
+  }, [recentActivity]);
+
   /**
-   * Fetch dashboard statistics from the backend
+   * Fetch dashboard statistics from the backend (memoized)
    */
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -218,6 +229,8 @@ const DashboardPage = () => {
         },
       };
 
+      setStats(calculatedStats);
+
       // If no users found from API, try to extract from articles
       if (calculatedStats.users.total === 0 && articles.length > 0) {
         const uniqueAuthors = new Map();
@@ -292,7 +305,7 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Fetch data on mount
   useEffect(() => {
@@ -300,16 +313,16 @@ const DashboardPage = () => {
   }, []);
 
   /**
-   * Manual refresh handler
+   * Manual refresh handler (memoized)
    */
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     fetchDashboardData();
-  };
+  }, [fetchDashboardData]);
 
   /**
-   * Get activity badge variant based on type and action
+   * Get activity badge variant based on type and action (memoized)
    */
-  const getActivityBadge = (type, action) => {
+  const getActivityBadge = useCallback((type, action) => {
     const variants = {
       article: {
         published: "success",
@@ -330,7 +343,7 @@ const DashboardPage = () => {
     };
 
     return variants[type]?.[action] || "secondary";
-  };
+  }, []);
 
   // Loading state
   if (loading) {
@@ -396,7 +409,7 @@ const DashboardPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="text-muted mb-1">Articles</h6>
-                  <h3 className="mb-0 display-5">{stats.articles.total}</h3>
+                  <h3 className="mb-0 display-5">{displayStats.articles.total}</h3>
                 </div>
                 <BsFileEarmarkText
                   size={40}
@@ -406,14 +419,14 @@ const DashboardPage = () => {
               <hr />
               <div className="d-flex justify-content-between small">
                 <span className="text-success">
-                  Published: <strong>{stats.articles.published}</strong>
+                  Published: <strong>{displayStats.articles.published}</strong>
                 </span>
                 <span className="text-secondary">
-                  Draft: <strong>{stats.articles.draft}</strong>
+                  Draft: <strong>{displayStats.articles.draft}</strong>
                 </span>
-                {stats.articles.blocked > 0 && (
+                {displayStats.articles.blocked > 0 && (
                   <span className="text-danger">
-                    Blocked: <strong>{stats.articles.blocked}</strong>
+                    Blocked: <strong>{displayStats.articles.blocked}</strong>
                   </span>
                 )}
               </div>
@@ -428,7 +441,7 @@ const DashboardPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="text-muted mb-1">Comments</h6>
-                  <h3 className="mb-0 display-5">{stats.comments.total}</h3>
+                  <h3 className="mb-0 display-5">{displayStats.comments.total}</h3>
                 </div>
                 <BsChatSquareText
                   size={40}
@@ -438,14 +451,14 @@ const DashboardPage = () => {
               <hr />
               <div className="d-flex justify-content-between small">
                 <span className="text-success">
-                  Approved: <strong>{stats.comments.approved}</strong>
+                  Approved: <strong>{displayStats.comments.approved}</strong>
                 </span>
                 <span className="text-warning">
-                  Pending: <strong>{stats.comments.pending}</strong>
+                  Pending: <strong>{displayStats.comments.pending}</strong>
                 </span>
-                {stats.comments.rejected > 0 && (
+                {displayStats.comments.rejected > 0 && (
                   <span className="text-danger">
-                    Rejected: <strong>{stats.comments.rejected}</strong>
+                    Rejected: <strong>{displayStats.comments.rejected}</strong>
                   </span>
                 )}
               </div>
@@ -460,20 +473,20 @@ const DashboardPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="text-muted mb-1">Users</h6>
-                  <h3 className="mb-0 display-5">{stats.users.total}</h3>
+                  <h3 className="mb-0 display-5">{displayStats.users.total}</h3>
                 </div>
                 <BsPeople size={40} className="text-success opacity-75" />
               </div>
               <hr />
               <div className="d-flex justify-content-between small">
                 <span className="text-danger">
-                  Admin: <strong>{stats.users.admin}</strong>
+                  Admin: <strong>{displayStats.users.admin}</strong>
                 </span>
                 <span className="text-warning">
-                  Author: <strong>{stats.users.author}</strong>
+                  Author: <strong>{displayStats.users.author}</strong>
                 </span>
                 <span className="text-info">
-                  User: <strong>{stats.users.user}</strong>
+                  User: <strong>{displayStats.users.user}</strong>
                 </span>
               </div>
             </Card.Body>
@@ -487,7 +500,7 @@ const DashboardPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="text-muted mb-1">Tags</h6>
-                  <h3 className="mb-0 display-5">{stats.tags.total}</h3>
+                  <h3 className="mb-0 display-5">{displayStats.tags.total}</h3>
                 </div>
                 <BsTag size={40} className="text-info opacity-75" />
               </div>
@@ -508,7 +521,7 @@ const DashboardPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="text-muted mb-1">Total Views</h6>
-                  <h3 className="mb-0 display-5">{stats.views.total}</h3>
+                  <h3 className="mb-0 display-5">{displayStats.views.total}</h3>
                 </div>
                 <BsEye size={40} className="text-danger opacity-75" />
               </div>
@@ -553,7 +566,7 @@ const DashboardPage = () => {
           <small className="text-muted">Last 10 activities</small>
         </Card.Header>
         <Card.Body className="p-0">
-          {recentActivity.length > 0 ? (
+          {displayActivity.length > 0 ? (
             <div className="table-responsive">
               <Table hover className="mb-0">
                 <thead>
@@ -566,7 +579,7 @@ const DashboardPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentActivity.map((activity, index) => (
+                  {displayActivity.map((activity, index) => (
                     <tr key={`${activity.type}-${activity.id}-${index}`}>
                       <td>
                         <span className="badge bg-secondary text-capitalize">

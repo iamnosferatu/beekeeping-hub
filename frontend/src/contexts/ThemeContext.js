@@ -1,5 +1,5 @@
 // frontend/src/contexts/ThemeContext.js
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useMemo, useCallback } from "react";
 
 // Available themes
 const themes = {
@@ -126,22 +126,22 @@ export const ThemeProvider = ({ children }) => {
     }
   }, [currentTheme]);
 
-  // Change theme
-  const changeTheme = (theme) => {
+  // Change theme (memoized)
+  const changeTheme = useCallback((theme) => {
     if (themes[theme]) {
       setCurrentTheme(theme);
     }
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    currentTheme,
+    themes,
+    changeTheme,
+    themeConfig: themes[currentTheme] || themes.default,
+  }), [currentTheme, changeTheme]);
 
   return (
-    <ThemeContext.Provider
-      value={{
-        currentTheme,
-        themes,
-        changeTheme,
-        themeConfig: themes[currentTheme] || themes.default,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

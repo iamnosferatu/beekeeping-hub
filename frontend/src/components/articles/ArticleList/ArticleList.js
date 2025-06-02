@@ -1,5 +1,5 @@
 // frontend/src/components/articles/ArticleList/ArticleList.js
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useArticles } from "../../../hooks/queries/useArticles";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import { PAGINATION_CONFIG, LOADING_CONFIG } from "../../../constants/ui";
@@ -45,13 +45,13 @@ const ArticleList = ({
   const { scrollToTop } = useScrollToTop();
   const [page, setPage] = useState(1);
 
-  // Build params for React Query
-  const params = {
+  // Build params for React Query (memoized)
+  const params = useMemo(() => ({
     page,
     limit,
     ...(tag && { tag }),
     ...(search && { search }),
-  };
+  }), [page, limit, tag, search]);
 
   // Fetch articles with React Query hook
   const {
@@ -61,30 +61,30 @@ const ArticleList = ({
     refetch,
   } = useArticles(params);
 
-  // Extract articles and pagination from response
-  const articles = response?.articles || response?.data || [];
-  const pagination = {
+  // Extract articles and pagination from response (memoized)
+  const articles = useMemo(() => response?.articles || response?.data || [], [response]);
+  const pagination = useMemo(() => ({
     page,
     limit,
     total: response?.count || response?.total || 0,
     totalPages: Math.ceil((response?.count || response?.total || 0) / limit),
-  };
+  }), [page, limit, response]);
 
   /**
-   * Handle page change with scroll to top
+   * Handle page change with scroll to top (memoized)
    * @param {number} newPage - The page to navigate to
    */
-  const handlePageChange = (newPage) => {
+  const handlePageChange = useCallback((newPage) => {
     setPage(newPage);
     scrollToTop();
-  };
+  }, [scrollToTop]);
 
   /**
-   * Handle retry action
+   * Handle retry action (memoized)
    */
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   // Loading state
   if (isLoading) {
