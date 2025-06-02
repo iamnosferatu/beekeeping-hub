@@ -12,7 +12,7 @@ import ArticleStats from "./ArticleStats";
 import ArticleAuthor from "./ArticleAuthor";
 
 // Import utilities (simplified if constants don't exist)
-const ARTICLE_CONFIG = { IMAGE_LOADING: "lazy" };
+const ARTICLE_CONFIG = { IMAGE_LOADING: "eager" };
 const ARIA_LABELS = {
   ARTICLE: {
     CARD: "article",

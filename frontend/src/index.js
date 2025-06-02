@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import AdminDevtools from "./components/debug/AdminDevtools";
 import "./index.scss";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -168,11 +168,11 @@ root.render(
           <AuthProvider>
             <SiteSettingsProvider>
               <App />
+              <AdminDevtools />
             </SiteSettingsProvider>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>
 );

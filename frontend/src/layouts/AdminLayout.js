@@ -15,6 +15,8 @@ import {
   BsTag,
   BsEnvelope,
   BsInboxFill,
+  BsBullseye,
+  BsBug,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
@@ -71,6 +73,11 @@ const AdminLayout = () => {
       label: "Contact Messages",
     },
     {
+      path: "/admin/ads",
+      icon: <BsBullseye size={20} />,
+      label: "Advertisements",
+    },
+    {
       path: "/admin/settings",
       icon: <BsGear size={20} />,
       label: "Settings",
@@ -82,7 +89,7 @@ const AdminLayout = () => {
     },
     {
       path: "/debug",
-      icon: <BsTools size={20} />,
+      icon: <BsBug size={20} />,
       label: "Debug",
     },
   ];

@@ -71,6 +71,7 @@ const ArticleHeader = ({ article }) => {
               src={getImageUrl(article.featured_image)}
               className="card-img-top article-featured-image"
               alt={article.title}
+              loading="eager"
               style={{
                 maxHeight: "400px",
                 width: "100%",

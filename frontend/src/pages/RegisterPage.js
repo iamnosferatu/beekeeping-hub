@@ -107,25 +107,6 @@ const RegisterPage = () => {
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
             <Row>
               <Col md={6}>
-                <Form.Group className="mb-3" controlId="username">
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Choose a username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                    minLength={3}
-                    maxLength={50}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Username must be between 3 and 50 characters.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
                 <Form.Group className="mb-3" controlId="email">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
@@ -134,10 +115,31 @@ const RegisterPage = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    autoComplete="email"
                     required
                   />
                   <Form.Control.Feedback type="invalid">
                     Please provide a valid email.
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="username">
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Choose a username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    autoComplete="username"
+                    required
+                    minLength={3}
+                    maxLength={50}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    Username must be between 3 and 50 characters.
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
@@ -153,6 +155,7 @@ const RegisterPage = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
+                    autoComplete="given-name"
                     required
                   />
                   <Form.Control.Feedback type="invalid">
@@ -170,6 +173,7 @@ const RegisterPage = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
+                    autoComplete="family-name"
                     required
                   />
                   <Form.Control.Feedback type="invalid">
@@ -189,6 +193,7 @@ const RegisterPage = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                     minLength={8}
                     isInvalid={validated && !passwordMatch}
@@ -208,6 +213,7 @@ const RegisterPage = () => {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                     isInvalid={validated && !passwordMatch}
                   />

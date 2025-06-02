@@ -49,6 +49,7 @@ const AdminDiagnosticsPage = lazy(() => import("./pages/admin/DiagnosticsPage"))
 const AdminSiteSettingsPage = lazy(() => import("./pages/admin/SiteSettingsPage"));
 const AdminNewsletterPage = lazy(() => import("./pages/admin/NewsletterPage"));
 const AdminContactMessagesPage = lazy(() => import("./pages/admin/ContactMessagesPage"));
+const AdminAdsPage = lazy(() => import("./pages/admin/AdsPage"));
 
 // Lazy loaded static pages
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -321,6 +322,11 @@ function App() {
             <Route path="diagnostics" element={
               <ErrorBoundary level="page">
                 <AdminDiagnosticsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="ads" element={
+              <ErrorBoundary level="page">
+                <AdminAdsPage />
               </ErrorBoundary>
             } />
           </Route>

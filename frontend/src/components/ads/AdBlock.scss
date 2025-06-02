@@ -1,0 +1,187 @@
+// frontend/src/components/ads/AdBlock.scss
+
+.ad-block {
+  margin: 1rem 0;
+  text-align: center;
+  
+  .ad-label {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .ad-content {
+    position: relative;
+  }
+  
+  .ad-debug-info {
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 0.25rem;
+    font-family: monospace;
+  }
+  
+  // Specific placement styles
+  &.ad-banner_top {
+    margin: 0 0 2rem 0;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+  }
+  
+  &.ad-banner_bottom {
+    margin: 2rem 0 0 0;
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+  }
+  
+  &.ad-sidebar_top,
+  &.ad-sidebar_bottom {
+    margin: 1rem 0;
+    
+    @media (max-width: 768px) {
+      display: none; // Hide sidebar ads on mobile
+    }
+  }
+  
+  &.ad-article_top {
+    margin: 0 0 2rem 0;
+  }
+  
+  &.ad-article_middle {
+    margin: 2rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  &.ad-article_bottom {
+    margin: 2rem 0 0 0;
+  }
+  
+  &.ad-between_articles {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  &.ad-mobile_sticky {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: white;
+    border-top: 1px solid #e9ecef;
+    padding: 0.5rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    
+    @media (min-width: 769px) {
+      display: none; // Hide on desktop
+    }
+    
+    .ad-label {
+      display: none; // No label needed for sticky mobile ads
+    }
+  }
+  
+  &.ad-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+  }
+  
+  &.ad-native {
+    margin: 1rem 0;
+    
+    .ad-content {
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+// Component-specific styles
+.adsense-placeholder {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #e9ecef !important;
+  }
+}
+
+.direct-sponsor-block {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .sponsored-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+.affiliate-block {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  .card-title {
+    line-height: 1.2;
+  }
+}
+
+.custom-html-block {
+  // Let custom HTML define its own styles
+  // But ensure it doesn't break the layout
+  overflow: hidden;
+  
+  // Ensure links are styled appropriately
+  a {
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .ad-block {
+    margin: 0.5rem 0;
+    
+    &.ad-article_middle {
+      margin: 1rem 0;
+      padding: 0.5rem 0;
+    }
+    
+    &.ad-between_articles {
+      margin: 1.5rem 0;
+      padding: 1rem 0;
+    }
+  }
+}
+
+// Print media - hide all ads
+@media print {
+  .ad-block {
+    display: none !important;
+  }
+}

@@ -124,10 +124,10 @@ export const useArticleBySlug = (slug) => {
       return response.data;
     },
     enabled: !!slug,
-    // Aggressive settings to ensure individual articles always load
-    refetchOnMount: true, // Always fetch on mount
+    // Optimized settings to prevent component unmounting/remounting
+    refetchOnMount: false, // Don't refetch if data exists
     refetchOnWindowFocus: false, // Don't refetch on focus
-    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
     retry: (failureCount, error) => {
       // Retry network errors but not 4xx errors
@@ -151,10 +151,10 @@ export const useArticleById = (id) => {
       return response.data;
     },
     enabled: !!id,
-    // Aggressive settings to ensure individual articles always load
-    refetchOnMount: true, // Always fetch on mount
+    // Optimized settings to prevent component unmounting/remounting
+    refetchOnMount: false, // Don't refetch if data exists
     refetchOnWindowFocus: false, // Don't refetch on focus
-    staleTime: 0, // Always consider stale initially, then cache for subsequent requests
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
     retry: (failureCount, error) => {
       // Retry network errors but not 4xx errors

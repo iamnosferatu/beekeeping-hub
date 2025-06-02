@@ -6,6 +6,8 @@ import { useArticleBySlug } from "../hooks/queries/useArticles";
 import ArticleHeader from "../components/articles/ArticleHeader";
 import ArticleContent from "../components/articles/ArticleContent";
 import NestedCommentsSection from "../components/articles/Comments/NestedCommentsSection";
+import AdBlock from "../components/ads/AdBlock";
+import { AD_PLACEMENTS } from "../utils/adManager";
 import "./ArticlePage.scss";
 
 /**
@@ -75,17 +77,35 @@ const ArticlePage = () => {
   // Render the article
   return (
     <div className="article-page">
+      {/* Top article advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.ARTICLE_TOP}
+        pageType="article"
+      />
+      
       {/* Article Header with title, author, date, and stats */}
       <ArticleHeader article={articleData} />
 
       {/* Article Content - the main body of the article */}
       <ArticleContent article={articleData} />
+      
+      {/* Middle article advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.ARTICLE_MIDDLE}
+        pageType="article"
+      />
 
       {/* Nested Comments Section - New enhanced comments with threading */}
       <NestedCommentsSection
         articleId={articleData.id}
         initialComments={articleData.comments || []}
         showCommentForm={true}
+      />
+      
+      {/* Bottom article advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.ARTICLE_BOTTOM}
+        pageType="article"
       />
     </div>
   );

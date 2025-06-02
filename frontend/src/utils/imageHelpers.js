@@ -31,27 +31,62 @@ export const getAvatarUrl = (avatarPath) => {
  * @returns {string} The full URL to the image
  */
 export const getImageUrl = (imagePath) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🖼️ getImageUrl input:', imagePath);
+    console.log('🖼️ Input type:', typeof imagePath);
+    console.log('🖼️ Input length:', imagePath ? imagePath.length : 'N/A');
+  }
+  
   if (!imagePath) {
     return '';
   }
 
+  let result;
+
   // If it's a relative path starting with /uploads/, prepend the backend URL
   if (imagePath.startsWith('/uploads/')) {
-    return `${ASSETS_URL}${imagePath}`;
+    result = `${ASSETS_URL}${imagePath}`;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖼️ Using /uploads/ path logic');
+    }
   }
-
-  // If it's already a full URL, return as is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
+  // If it's already a full URL, check if it needs localhost-to-network conversion
+  else if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    // Convert localhost URLs to current network IP
+    if (imagePath.includes('localhost:8080') || imagePath.includes('127.0.0.1:8080')) {
+      result = imagePath.replace(/http:\/\/(localhost|127\.0\.0\.1):8080/, ASSETS_URL);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🖼️ Using full URL logic - converted localhost to network IP');
+      }
+    } else {
+      result = imagePath;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🖼️ Using full URL logic - no conversion needed');
+      }
+    }
   }
-
   // For any other relative paths, prepend ASSETS_URL
-  if (imagePath.startsWith('/')) {
-    return `${ASSETS_URL}${imagePath}`;
+  else if (imagePath.startsWith('/')) {
+    result = `${ASSETS_URL}${imagePath}`;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖼️ Using relative path logic');
+    }
+  }
+  // Return as is for other cases
+  else {
+    result = imagePath;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖼️ Using fallback logic');
+    }
   }
 
-  // Return as is for other cases
-  return imagePath;
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🖼️ getImageUrl result:', result);
+    console.log('🖼️ Result length:', result ? result.length : 'N/A');
+    console.log('🖼️ ASSETS_URL:', ASSETS_URL);
+  }
+
+  return result;
 };
 
 /**

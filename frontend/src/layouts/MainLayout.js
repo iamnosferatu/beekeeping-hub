@@ -8,8 +8,11 @@ import Sidebar from "../components/layout/Sidebar";
 import ThemeSelector from "../components/theme/ThemeSelector";
 import ApiStatusBar from "../components/common/ApiStatusBar";
 import AlertBanner from "../components/common/AlertBanner";
+import AdBlock from "../components/ads/AdBlock";
+import { AD_PLACEMENTS } from "../utils/adManager";
 import ThemeContext from "../contexts/ThemeContext";
 import "./MainLayout.scss";
+import "../components/ads/AdBlock.scss";
 
 const MainLayout = () => {
   const { themeConfig } = useContext(ThemeContext) || {};
@@ -39,6 +42,14 @@ const MainLayout = () => {
       }}
     >
       {apiStatusBarComponent}
+      
+      {/* Top banner advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.BANNER_TOP}
+        className="container-fluid"
+        pageType="general"
+      />
+      
       {headerComponent}
 
       <Container fluid className="main-container py-4">
@@ -50,6 +61,13 @@ const MainLayout = () => {
           </div>
 
           <div className="col-lg-4 sidebar-area">
+            {/* Top sidebar advertisement */}
+            <AdBlock 
+              placement={AD_PLACEMENTS.SIDEBAR_TOP}
+              className="mb-4"
+              pageType="general"
+            />
+            
             {sidebarComponent}
 
             {/* Theme Selector */}
@@ -59,11 +77,30 @@ const MainLayout = () => {
               </div>
               <div className="card-body">{themeSelectorComponent}</div>
             </div>
+            
+            {/* Bottom sidebar advertisement */}
+            <AdBlock 
+              placement={AD_PLACEMENTS.SIDEBAR_BOTTOM}
+              pageType="general"
+            />
           </div>
         </div>
       </Container>
+      
+      {/* Bottom banner advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.BANNER_BOTTOM}
+        className="container-fluid"
+        pageType="general"
+      />
 
       {footerComponent}
+      
+      {/* Mobile sticky advertisement */}
+      <AdBlock 
+        placement={AD_PLACEMENTS.MOBILE_STICKY}
+        pageType="general"
+      />
     </div>
   );
 };

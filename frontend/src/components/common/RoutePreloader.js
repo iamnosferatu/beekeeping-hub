@@ -67,9 +67,9 @@ const RoutePreloader = () => {
     // Add event listeners for hover preloading
     document.addEventListener('mouseover', preloadOnHover);
     
-    // Preload critical routes after a delay
-    const preloadTimer = setTimeout(() => {
-      // Preload most common routes based on user role
+    // Preload critical routes after a longer delay to avoid interfering with page rendering
+    // Use requestIdleCallback if available, otherwise fallback to longer timeout
+    const schedulePreload = () => {
       const criticalRoutes = [
         preloadRoutes['/articles']?.(),
         preloadRoutes['/contact']?.(),
@@ -93,11 +93,25 @@ const RoutePreloader = () => {
       Promise.all(criticalRoutes.filter(Boolean)).catch(() => {
         // Silently fail
       });
-    }, 2000);
+    };
+
+    // Use idle callback to avoid interfering with rendering, fallback to 10-second delay
+    let preloadTimer;
+    if ('requestIdleCallback' in window) {
+      preloadTimer = requestIdleCallback(schedulePreload, { timeout: 10000 });
+    } else {
+      preloadTimer = setTimeout(schedulePreload, 10000); // 10 seconds instead of 2
+    }
 
     return () => {
       document.removeEventListener('mouseover', preloadOnHover);
-      clearTimeout(preloadTimer);
+      if (preloadTimer) {
+        if ('requestIdleCallback' in window && typeof preloadTimer !== 'number') {
+          cancelIdleCallback(preloadTimer);
+        } else {
+          clearTimeout(preloadTimer);
+        }
+      }
     };
   }, [user]); // Re-run when user changes
 

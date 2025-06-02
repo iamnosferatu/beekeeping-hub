@@ -12,7 +12,7 @@ const ArticleImage = ({
   src,
   alt,
   articleUrl,
-  loading = "lazy",
+  loading = "eager",
   className = "article-image-container",
 }) => {
   // Create a stable placeholder URL
@@ -25,10 +25,15 @@ const ArticleImage = ({
           src={src} // src is already processed by getImageUrl in ArticleCard
           className="card-img-top article-image"
           alt={alt}
-          loading={loading}
+          loading="eager"
           onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = placeholderUrl;
+            console.error('ArticleImage onError:', e.target.src);
+            console.error('ArticleImage error event:', e);
+            e.target.style.border = '3px solid red';
+            e.target.style.background = 'yellow';
+            // Temporarily disabled automatic placeholder replacement
+            // e.target.onerror = null;
+            // e.target.src = placeholderUrl;
           }}
         />
       </Link>
