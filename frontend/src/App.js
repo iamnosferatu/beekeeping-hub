@@ -324,6 +324,11 @@ function App() {
                 <AdminDiagnosticsPage />
               </ErrorBoundary>
             } />
+            <Route path="debug" element={
+              <ErrorBoundary level="page">
+                <DebugPage />
+              </ErrorBoundary>
+            } />
             <Route path="ads" element={
               <ErrorBoundary level="page">
                 <AdminAdsPage />

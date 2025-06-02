@@ -197,19 +197,19 @@ export const getArticlesDiagnostics = () => {
   return diagnostics;
 };
 
-// Make functions available globally in development
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-  window.articlesDebug = {
-    debugCache: debugArticlesCache,
-    debugQuery: debugArticleListQuery,
-    forceRefresh: forceRefreshArticles,
-    clearCache: clearArticlesCache,
-    monitor: monitorArticlesLoading,
-    diagnostics: getArticlesDiagnostics
-  };
+// Make functions available globally in development - TEMPORARILY DISABLED
+// if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+//   window.articlesDebug = {
+//     debugCache: debugArticlesCache,
+//     debugQuery: debugArticleListQuery,
+//     forceRefresh: forceRefreshArticles,
+//     clearCache: clearArticlesCache,
+//     monitor: monitorArticlesLoading,
+//     diagnostics: getArticlesDiagnostics
+//   };
   
-  console.log('🛠️ Articles debug tools available at window.articlesDebug');
-}
+//   console.log('🛠️ Articles debug tools available at window.articlesDebug');
+// }
 
 export default {
   debugArticlesCache,

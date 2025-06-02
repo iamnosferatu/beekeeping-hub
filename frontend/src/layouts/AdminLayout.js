@@ -88,7 +88,7 @@ const AdminLayout = () => {
       label: "Diagnostics",
     },
     {
-      path: "/debug",
+      path: "/admin/debug",
       icon: <BsBug size={20} />,
       label: "Debug",
     },

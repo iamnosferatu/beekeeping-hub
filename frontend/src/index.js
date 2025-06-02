@@ -160,8 +160,30 @@ if (typeof window !== 'undefined') {
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
+// Conditionally disable StrictMode in development to prevent component double-mounting
+// that interferes with image loading. StrictMode is automatically disabled in production.
+const AppWrapper = ({ children }) => {
+  // Disable StrictMode only if image loading issues are being debugged
+  const shouldUseStrictMode = process.env.NODE_ENV === 'production' || 
+                              !process.env.REACT_APP_DISABLE_STRICT_MODE;
+  
+  // Debug logging to confirm environment variables
+  console.log('🔧 StrictMode Configuration:');
+  console.log('  NODE_ENV:', process.env.NODE_ENV);
+  console.log('  REACT_APP_DISABLE_STRICT_MODE:', process.env.REACT_APP_DISABLE_STRICT_MODE);
+  console.log('  shouldUseStrictMode:', shouldUseStrictMode);
+  console.log('  StrictMode enabled:', shouldUseStrictMode ? 'YES' : 'NO');
+  
+  return shouldUseStrictMode ? (
+    <React.StrictMode>{children}</React.StrictMode>
+  ) : (
+    <>{children}</>
+  );
+};
+
 root.render(
-  <React.StrictMode>
+  <AppWrapper>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider>
@@ -174,7 +196,7 @@ root.render(
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
-  </React.StrictMode>
+  </AppWrapper>
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -233,7 +233,7 @@ const DiagnosticsPage = () => {
   }
 
   return (
-    <div className="diagnostics-page">
+    <>
       <div className="mb-4">
         <h1 className="mb-2">API Diagnostics</h1>
         <p className="text-muted">
@@ -744,7 +744,7 @@ const DiagnosticsPage = () => {
           </Card.Body>
         </Card>
       </Tab.Container>
-    </div>
+    </>
   );
 };
 

@@ -76,7 +76,7 @@ export const queryClient = new QueryClient({
       // Background refetching settings
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
-      refetchOnMount: false, // Don't refetch on mount if cache exists
+      refetchOnMount: 'stale', // Only refetch if data is stale (allows initial fetch)
       // Network mode for offline support
       networkMode: 'online',
       // Error handling

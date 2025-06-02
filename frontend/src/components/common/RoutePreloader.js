@@ -70,37 +70,51 @@ const RoutePreloader = () => {
     // Preload critical routes after a longer delay to avoid interfering with page rendering
     // Use requestIdleCallback if available, otherwise fallback to longer timeout
     const schedulePreload = () => {
-      const criticalRoutes = [
-        preloadRoutes['/articles']?.(),
-        preloadRoutes['/contact']?.(),
-      ];
+      // Get current path to avoid preloading current page components
+      const currentPath = window.location.pathname;
+      const criticalRoutes = [];
 
-      // Add user-specific critical routes
+      // Only preload routes that are NOT the current page
+      if (!currentPath.startsWith('/articles')) {
+        criticalRoutes.push(preloadRoutes['/articles']?.());
+      }
+      if (currentPath !== '/contact') {
+        criticalRoutes.push(preloadRoutes['/contact']?.());
+      }
+
+      // Add user-specific critical routes (avoiding current page)
       if (user) {
-        criticalRoutes.push(preloadRoutes['/profile']?.());
+        if (currentPath !== '/profile') {
+          criticalRoutes.push(preloadRoutes['/profile']?.());
+        }
         
         // Preload author routes for authors/admins
         if (user.role === 'author' || user.role === 'admin') {
-          criticalRoutes.push(preloadRoutes['/my-articles']?.());
+          if (currentPath !== '/my-articles') {
+            criticalRoutes.push(preloadRoutes['/my-articles']?.());
+          }
         }
         
         // Preload admin dashboard for admin users
         if (user.role === 'admin') {
-          criticalRoutes.push(preloadRoutes['/admin']?.());
+          if (!currentPath.startsWith('/admin')) {
+            criticalRoutes.push(preloadRoutes['/admin']?.());
+          }
         }
       }
 
+      console.log('🔄 Preloading routes (excluding current page):', criticalRoutes.length);
       Promise.all(criticalRoutes.filter(Boolean)).catch(() => {
         // Silently fail
       });
     };
 
-    // Use idle callback to avoid interfering with rendering, fallback to 10-second delay
-    let preloadTimer;
+    // Smart preloading that avoids current page components
+    let preloadTimer = null;
     if ('requestIdleCallback' in window) {
-      preloadTimer = requestIdleCallback(schedulePreload, { timeout: 10000 });
+      preloadTimer = requestIdleCallback(schedulePreload, { timeout: 30000 }); // 30 seconds
     } else {
-      preloadTimer = setTimeout(schedulePreload, 10000); // 10 seconds instead of 2
+      preloadTimer = setTimeout(schedulePreload, 30000); // 30 seconds
     }
 
     return () => {

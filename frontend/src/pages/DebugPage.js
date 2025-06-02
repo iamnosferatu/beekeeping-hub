@@ -38,7 +38,7 @@ const DebugPage = () => {
   }, []);
 
   return (
-    <div className="debug-page">
+    <>
       <h1>Debug Information</h1>
       <p className="text-muted mb-4">
         This page displays technical information about the application to help
@@ -460,7 +460,7 @@ const DebugPage = () => {
           </Card.Body>
         </Card>
       </Tab.Container>
-    </div>
+    </>
   );
 };
 

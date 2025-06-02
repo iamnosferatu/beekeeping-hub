@@ -24,6 +24,7 @@ import { getImageUrl } from "../../utils/imageHelpers";
  */
 const ArticleHeader = ({ article }) => {
   const { user } = useContext(AuthContext);
+  
 
   /**
    * Format author display name
@@ -68,6 +69,7 @@ const ArticleHeader = ({ article }) => {
         {article.featured_image && (
           <div className="article-image-container">
             <img
+              key={`article-image-${article.id}`}
               src={getImageUrl(article.featured_image)}
               className="card-img-top article-featured-image"
               alt={article.title}

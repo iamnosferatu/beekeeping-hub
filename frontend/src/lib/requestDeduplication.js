@@ -22,7 +22,7 @@ class RequestDeduplicator {
     this.config = {
       batchDelay: 50, // ms to wait before sending batch
       maxBatchSize: 10, // maximum requests per batch
-      deduplicationTTL: 5000, // ms to keep deduplication cache
+      deduplicationTTL: 0, // DISABLED FOR DEBUGGING - was causing 5-second image issues
     };
     
     // Statistics for monitoring

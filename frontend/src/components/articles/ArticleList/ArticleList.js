@@ -98,30 +98,30 @@ const ArticleList = ({
     };
   }, [page, limit, response]);
 
-  // Debug logging in development (only on error states)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // Only log when there are actual issues
-      if (isError || (articles.length === 0 && !isLoading && !isFetching)) {
-        console.log('📋 ArticleList issue:', {
-          isLoading,
-          isFetching,
-          isError,
-          hasResponse: !!response,
-          responseKeys: response ? Object.keys(response) : 'no response',
-          articlesLength: articles.length,
-          error: error?.message
-        });
+  // Debug logging in development (only on error states) - TEMPORARILY DISABLED
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === 'development') {
+  //     // Only log when there are actual issues
+  //     if (isError || (articles.length === 0 && !isLoading && !isFetching)) {
+  //       console.log('📋 ArticleList issue:', {
+  //         isLoading,
+  //         isFetching,
+  //         isError,
+  //         hasResponse: !!response,
+  //         responseKeys: response ? Object.keys(response) : 'no response',
+  //         articlesLength: articles.length,
+  //         error: error?.message
+  //       });
         
-        // Get diagnostics only when there are issues
-        const diagnostics = getArticlesDiagnostics();
-        console.log('🔍 Articles diagnostics:', diagnostics);
+  //       // Get diagnostics only when there are issues
+  //       const diagnostics = getArticlesDiagnostics();
+  //       console.log('🔍 Articles diagnostics:', diagnostics);
         
-        // Debug cache state only when there's an issue
-        debugArticleListQuery(params);
-      }
-    }
-  }, [isLoading, isFetching, isError, response, articles.length, error, params]);
+  //       // Debug cache state only when there's an issue
+  //       debugArticleListQuery(params);
+  //     }
+  //   }
+  // }, [isLoading, isFetching, isError, response, articles.length, error, params]);
 
   /**
    * Handle page change with scroll to top (memoized)

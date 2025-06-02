@@ -96,10 +96,10 @@ const Sidebar = () => {
         setNewsletterMessage(response.message || "Thank you for subscribing!");
         setEmail(""); // Clear the form
         
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          setNewsletterMessage(null);
-        }, 5000);
+        // Clear success message after 5 seconds - DISABLED FOR DEBUGGING
+        // setTimeout(() => {
+        //   setNewsletterMessage(null);
+        // }, 5000);
       } else {
         setNewsletterError(response.message || "Failed to subscribe");
       }

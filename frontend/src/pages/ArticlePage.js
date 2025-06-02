@@ -20,7 +20,12 @@ const ArticlePage = () => {
   const { slug } = useParams();
 
   // Fetch article data using React Query hook
-  const { data: article, isLoading, error } = useArticleBySlug(slug);
+  const { data: article, isLoading, error, isFetching, isPending } = useArticleBySlug(slug);
+  
+  // Handle different data structures from backend
+  // Fix for double-wrapped response: article.data.data or article.data or article
+  const articleData = article?.data?.data || article?.data || article;
+  
 
   // Loading state - show spinner while fetching article
   if (isLoading) {
@@ -50,10 +55,6 @@ const ArticlePage = () => {
       </Container>
     );
   }
-
-  // Handle different data structures from backend
-  // This is the key fix - backend might return data directly or wrapped
-  const articleData = article?.data || article;
 
   // Not found state - article doesn't exist or data is invalid
   if (!articleData || !articleData.title) {

@@ -4,8 +4,7 @@
  * Simplified and debugged version that actually works
  */
 import { useState, useEffect, useContext, useCallback } from "react";
-import axios from "axios";
-import { API_URL } from "../../config";
+import apiService from "../../services/api";
 import AuthContext from "../../contexts/AuthContext";
 
 export const useUserManagement = () => {
@@ -39,10 +38,6 @@ export const useUserManagement = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("beekeeper_auth_token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
 
       const params = {
         page: currentPage,
@@ -57,24 +52,15 @@ export const useUserManagement = () => {
       let usedFallback = false;
 
       try {
-        // Try admin endpoint first
-        // Trying admin endpoint
-        response = await axios.get(`${API_URL}/admin/users`, {
-          params,
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 10000,
-        });
+        // Try admin endpoint first using apiService
+        response = await apiService.admin.getUsers(params);
         // Admin endpoint successful
       } catch (adminError) {
         // Admin endpoint failed, trying fallback
         usedFallback = true;
 
         // Fallback: Get users from articles authors
-        const articlesResponse = await axios.get(`${API_URL}/articles`, {
-          params: { limit: 100 },
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 10000,
-        });
+        const articlesResponse = await apiService.articles.getAll({ limit: 100 });
 
         // Articles response received
 
@@ -223,17 +209,9 @@ export const useUserManagement = () => {
       }
 
       try {
-        const token = localStorage.getItem("beekeeper_auth_token");
-        const response = await axios.put(
-          `${API_URL}/admin/users/${userId}/role`,
-          { role: newRole },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            timeout: 10000,
-          }
-        );
+        const response = await apiService.admin.updateUserRole(userId, newRole);
 
-        if (response.data?.success) {
+        if (response.success) {
           // Update local state
           setUsers(prevUsers =>
             prevUsers.map(user =>
@@ -242,7 +220,7 @@ export const useUserManagement = () => {
           );
           return { success: true, message: `User role updated to ${newRole}` };
         } else {
-          throw new Error(response.data?.message || "Failed to update role");
+          throw new Error(response.message || "Failed to update role");
         }
       } catch (err) {
         // Role change error
@@ -270,23 +248,16 @@ export const useUserManagement = () => {
       }
 
       try {
-        const token = localStorage.getItem("beekeeper_auth_token");
-        const response = await axios.delete(
-          `${API_URL}/admin/users/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            timeout: 10000,
-          }
-        );
+        const response = await apiService.admin.deleteUser(userId);
 
-        if (response.data?.success) {
+        if (response.success) {
           // Remove from local state
           setUsers(prevUsers =>
             prevUsers.filter(user => user.id !== userId)
           );
           return { success: true, message: "User deleted successfully" };
         } else {
-          throw new Error(response.data?.message || "Failed to delete user");
+          throw new Error(response.message || "Failed to delete user");
         }
       } catch (err) {
         // Delete user error

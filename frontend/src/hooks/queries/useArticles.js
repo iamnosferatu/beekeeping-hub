@@ -125,7 +125,7 @@ export const useArticleBySlug = (slug) => {
     },
     enabled: !!slug,
     // Optimized settings to prevent component unmounting/remounting
-    refetchOnMount: false, // Don't refetch if data exists
+    refetchOnMount: 'stale', // Only refetch if data is stale (allows initial fetch)
     refetchOnWindowFocus: false, // Don't refetch on focus
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded
@@ -152,7 +152,7 @@ export const useArticleById = (id) => {
     },
     enabled: !!id,
     // Optimized settings to prevent component unmounting/remounting
-    refetchOnMount: false, // Don't refetch if data exists
+    refetchOnMount: 'stale', // Only refetch if data is stale (allows initial fetch)
     refetchOnWindowFocus: false, // Don't refetch on focus
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes once loaded

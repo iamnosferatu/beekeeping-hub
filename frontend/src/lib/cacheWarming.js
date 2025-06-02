@@ -233,6 +233,19 @@ class CacheWarmingManager {
    * Prefetch article and related data
    */
   async prefetchArticle(slugOrId) {
+    // Prevent prefetching the current article to avoid cache conflicts
+    const currentPath = window.location.pathname;
+    const currentArticleMatch = currentPath.match(/^\/articles\/(.+)$/);
+    
+    if (currentArticleMatch) {
+      const currentSlug = currentArticleMatch[1];
+      // Don't prefetch if this is the current article
+      if (slugOrId === currentSlug || slugOrId.toString() === currentSlug) {
+        console.log('🚫 Skipping prefetch for current article:', slugOrId);
+        return;
+      }
+    }
+
     const api = await this.getApiService();
     const strategies = [];
 
