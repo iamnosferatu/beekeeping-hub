@@ -14,7 +14,7 @@ class ApiService {
     // Create axios instance with default configuration
     this.client = axios.create({
       baseURL: API_URL,
-      timeout: 10000,
+      timeout: 15000, // Increased timeout to 15 seconds
       headers: {
         "Content-Type": "application/json",
       },
@@ -101,13 +101,16 @@ class ApiService {
     // Handle specific HTTP status codes
     switch (status) {
       case 401:
-        // Unauthorized - clear tokens from both storage locations and redirect to login
+        // Unauthorized - clear tokens from both storage locations 
         localStorage.removeItem(TOKEN_NAME);
         localStorage.removeItem(`${TOKEN_NAME}_remember`);
         sessionStorage.removeItem(TOKEN_NAME);
-        if (window.location.pathname !== "/login") {
+        
+        // Only redirect to login if not on profile page (to prevent redirect loops)
+        if (window.location.pathname !== "/login" && window.location.pathname !== "/profile") {
           window.location.href = "/login";
         }
+        
         return {
           type: "AUTH_ERROR",
           message: "Your session has expired. Please log in again.",
@@ -715,6 +718,37 @@ class ApiService {
   };
 
   // =============================================================================
+  // AUTHOR APPLICATIONS
+  // =============================================================================
+
+  authorApplications = {
+    // Submit new author application
+    submit: async (applicationData) => {
+      return this.request({
+        method: "POST",
+        url: "/author-applications",
+        data: applicationData,
+      });
+    },
+
+    // Get current user's application status
+    getMyApplication: async () => {
+      return this.request({
+        method: "GET",
+        url: "/author-applications/my-application",
+      });
+    },
+
+    // Check if user can apply for author status
+    canApply: async () => {
+      return this.request({
+        method: "GET",
+        url: "/author-applications/can-apply",
+      });
+    },
+  };
+
+  // =============================================================================
   // OTHER ENDPOINTS
   // =============================================================================
 
@@ -777,6 +811,42 @@ class ApiService {
         return this.request({
           method: "GET",
           url: "/admin/diagnostics/database",
+        });
+      },
+    },
+
+    // Author Applications Management
+    authorApplications: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/author-applications/admin/all${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      getPendingCount: async () => {
+        return this.request({
+          method: "GET",
+          url: "/author-applications/admin/pending-count",
+        });
+      },
+
+      getById: async (id) => {
+        return this.request({
+          method: "GET",
+          url: `/author-applications/admin/${id}`,
+        });
+      },
+
+      review: async (id, action, adminNotes = null) => {
+        return this.request({
+          method: "PUT",
+          url: `/author-applications/admin/${id}/review`,
+          data: {
+            action,
+            admin_notes: adminNotes,
+          },
         });
       },
     },

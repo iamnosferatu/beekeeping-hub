@@ -11,6 +11,7 @@ const Like = require("./Like")(sequelize, DataTypes);
 const SiteSettings = require("./SiteSettings")(sequelize, DataTypes);
 const Newsletter = require("./Newsletter")(sequelize, DataTypes);
 const Contact = require("./Contact")(sequelize, DataTypes);
+const AuthorApplication = require("./AuthorApplication")(sequelize, DataTypes);
 
 
 // Define relationships
@@ -19,6 +20,10 @@ Article.belongsTo(User, { foreignKey: "user_id", as: "author" });
 
 User.hasMany(Comment, { foreignKey: "user_id", as: "comments" });
 Comment.belongsTo(User, { foreignKey: "user_id", as: "author" });
+
+// Comment reporting relationship
+User.hasMany(Comment, { foreignKey: "reported_by", as: "reportedComments" });
+Comment.belongsTo(User, { foreignKey: "reported_by", as: "reporter" });
 
 Article.hasMany(Comment, { foreignKey: "article_id", as: "comments" });
 Comment.belongsTo(Article, { foreignKey: "article_id", as: "article" });
@@ -41,6 +46,11 @@ Like.belongsTo(Article, { foreignKey: "article_id" });
 // Site Settings relationship with User (who updated it)
 SiteSettings.belongsTo(User, { foreignKey: "updated_by", as: "updatedBy" });
 
+// Author Application relationships
+User.hasMany(AuthorApplication, { foreignKey: "user_id", as: "authorApplications" });
+AuthorApplication.belongsTo(User, { foreignKey: "user_id", as: "applicant" });
+AuthorApplication.belongsTo(User, { foreignKey: "reviewed_by", as: "reviewer" });
+
 module.exports = {
   sequelize,
   User,
@@ -51,4 +61,5 @@ module.exports = {
   SiteSettings,
   Newsletter,
   Contact,
+  AuthorApplication,
 };

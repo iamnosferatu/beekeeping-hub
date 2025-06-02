@@ -301,4 +301,64 @@ router.put(
   commentController.updateCommentStatus
 );
 
+/**
+ * @swagger
+ * /comments/{id}/report:
+ *   post:
+ *     summary: Report a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Comment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 500
+ *                 example: This comment is inappropriate or spam
+ *     responses:
+ *       200:
+ *         description: Comment reported successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Comment reported successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       409:
+ *         description: Comment already reported or cannot report own comment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post("/:id/report", protect, commentController.reportComment);
+
 module.exports = router;

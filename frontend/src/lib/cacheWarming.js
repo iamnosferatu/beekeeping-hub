@@ -272,6 +272,14 @@ class CacheWarmingManager {
    * Prefetch article list
    */
   async prefetchArticleList(params = {}) {
+    // Don't prefetch article list if user is currently on an individual article page
+    // This prevents cache interference with the current article's images and data
+    const currentPath = window.location.pathname;
+    if (currentPath.startsWith('/articles/') && currentPath !== '/articles') {
+      console.log('🚫 Skipping article list prefetch - user is on individual article page');
+      return;
+    }
+
     const api = await this.getApiService();
     
     const strategy = {
@@ -505,8 +513,13 @@ class CacheWarmingManager {
       return { type: 'tag', params: { slug: tagMatch[1] } };
     }
     
-    // Article list
+    // Article list - but only prefetch if not already on an individual article page
     if (url === '/articles') {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/articles/') && currentPath !== '/articles') {
+        // Skip article list prefetch when on individual article pages to prevent interference
+        return null;
+      }
       return { type: 'articleList', params: {} };
     }
     

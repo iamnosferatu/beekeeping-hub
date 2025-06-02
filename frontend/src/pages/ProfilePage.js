@@ -19,6 +19,8 @@ import * as Yup from "yup";
 import { Formik } from "formik";
 import api from "../services/api";
 import { getAvatarUrl, getPlaceholderAvatar } from "../utils/imageHelpers";
+import AuthorApplicationStatus from "../components/auth/AuthorApplicationStatus";
+import AuthorApplicationDebugger from "../components/debug/AuthorApplicationDebugger";
 import "./ProfilePage.scss";
 
 const ProfilePage = () => {
@@ -439,6 +441,14 @@ const ProfilePage = () => {
                     </div>
                   </Card.Body>
                 </Card>
+
+                {/* Author Application Section */}
+                <AuthorApplicationStatus />
+                
+                {/* Debug Information (Development only) */}
+                {process.env.NODE_ENV === 'development' && (
+                  <AuthorApplicationDebugger />
+                )}
 
                 {/* Newsletter Subscription Section */}
                 <Card className="shadow-sm">

@@ -44,6 +44,7 @@ const AdminDashboardPage = lazy(() => import("./pages/admin/DashboardPage"));
 const AdminArticlesPage = lazy(() => import("./pages/admin/ArticlesPage"));
 const AdminCommentsPage = lazy(() => import("./pages/admin/CommentsPage"));
 const AdminUsersPage = lazy(() => import("./pages/admin/UsersPage"));
+const AdminAuthorApplicationsPage = lazy(() => import("./pages/admin/AuthorApplicationsPage"));
 const AdminTagsPage = lazy(() => import("./pages/admin/TagsPage"));
 const AdminDiagnosticsPage = lazy(() => import("./pages/admin/DiagnosticsPage"));
 const AdminSiteSettingsPage = lazy(() => import("./pages/admin/SiteSettingsPage"));
@@ -302,6 +303,11 @@ function App() {
             <Route path="users" element={
               <ErrorBoundary level="page">
                 <AdminUsersPage />
+              </ErrorBoundary>
+            } />
+            <Route path="author-applications" element={
+              <ErrorBoundary level="page">
+                <AdminAuthorApplicationsPage />
               </ErrorBoundary>
             } />
             <Route path="newsletter" element={

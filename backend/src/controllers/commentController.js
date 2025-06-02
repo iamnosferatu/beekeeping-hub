@@ -406,6 +406,145 @@ const commentController = {
       next(error);
     }
   },
+
+  /**
+   * Report a comment
+   * @route POST /api/comments/:id/report
+   * @access Private (authenticated users only)
+   */
+  reportComment: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      const userId = req.user.id;
+
+      // Validate reason - handle both string and object cases
+      let reasonText = reason;
+      
+      // If reason is an object, extract the reason property
+      if (typeof reason === 'object' && reason !== null) {
+        reasonText = reason.reason || reason;
+      }
+      
+      // Ensure reasonText is a string
+      if (typeof reasonText !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Report reason must be a string",
+            code: "VALIDATION_ERROR"
+          }
+        });
+      }
+
+      if (!reasonText || reasonText.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Report reason is required",
+            code: "VALIDATION_ERROR"
+          }
+        });
+      }
+
+      if (reasonText.length > 500) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Report reason must be 500 characters or less",
+            code: "VALIDATION_ERROR"
+          }
+        });
+      }
+
+      // Find the comment
+      const comment = await Comment.findByPk(id, {
+        include: [
+          {
+            model: User,
+            as: "author",
+            attributes: ["id", "username", "first_name", "last_name"],
+          },
+          {
+            model: Article,
+            as: "article",
+            attributes: ["id", "title", "slug"],
+          },
+        ],
+      });
+
+      if (!comment) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: "Comment not found",
+            code: "COMMENT_NOT_FOUND"
+          }
+        });
+      }
+
+      // Check if user is trying to report their own comment
+      if (comment.user_id === userId) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "You cannot report your own comment",
+            code: "CANNOT_REPORT_OWN_COMMENT"
+          }
+        });
+      }
+
+      // Check if comment is already reported
+      if (comment.reported) {
+        return res.status(409).json({
+          success: false,
+          error: {
+            message: "This comment has already been reported",
+            code: "COMMENT_ALREADY_REPORTED"
+          }
+        });
+      }
+
+      // Update comment with report information
+      await comment.update({
+        reported: true,
+        report_reason: reasonText.trim(),
+        reported_by: userId,
+        reported_at: new Date(),
+      });
+
+      // Get updated comment with associations
+      const updatedComment = await Comment.findByPk(id, {
+        include: [
+          {
+            model: User,
+            as: "author",
+            attributes: ["id", "username", "first_name", "last_name"],
+          },
+          {
+            model: User,
+            as: "reporter",
+            attributes: ["id", "username", "first_name", "last_name"],
+          },
+          {
+            model: Article,
+            as: "article",
+            attributes: ["id", "title", "slug"],
+          },
+        ],
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Comment reported successfully",
+        data: updatedComment,
+      });
+
+    } catch (error) {
+      console.error("Error reporting comment:", error);
+      next(error);
+    }
+  },
 };
 
 module.exports = commentController;

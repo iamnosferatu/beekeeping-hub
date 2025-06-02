@@ -268,7 +268,7 @@ const NestedCommentsSection = ({
     if (!reportingComment || !reason.trim()) return;
 
     try {
-      const response = await apiService.comments.report(reportingComment.id, { reason });
+      const response = await apiService.comments.report(reportingComment.id, reason);
 
       if (response.success) {
         setActionError(null);

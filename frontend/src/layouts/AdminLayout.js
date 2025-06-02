@@ -17,6 +17,7 @@ import {
   BsInboxFill,
   BsBullseye,
   BsBug,
+  BsPersonCheck,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
@@ -61,6 +62,11 @@ const AdminLayout = () => {
       path: "/admin/users",
       icon: <BsPeople size={20} />,
       label: "Users",
+    },
+    {
+      path: "/admin/author-applications",
+      icon: <BsPersonCheck size={20} />,
+      label: "Author Applications",
     },
     {
       path: "/admin/newsletter",

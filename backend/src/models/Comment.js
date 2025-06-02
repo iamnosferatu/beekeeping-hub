@@ -55,6 +55,28 @@ module.exports = (sequelize, DataTypes) => {
         key: "id",
       },
     },
+    // Comment reporting fields
+    reported: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
+    report_reason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    reported_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    },
+    reported_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   });
 
   return Comment;
