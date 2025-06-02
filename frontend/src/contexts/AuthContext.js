@@ -1,5 +1,6 @@
 // frontend/src/contexts/AuthContext.js
 import React, { createContext, useState, useEffect, useMemo, useCallback } from "react";
+import { reportError, withErrorReporting, ERROR_TYPES, ERROR_SEVERITY } from "../utils/errorReporting";
 import { TOKEN_NAME } from "../config";
 import apiService from "../services/api";
 
@@ -40,8 +41,10 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, [token]);
 
-  // Login user
-  const login = async (email, password, rememberMeOption = false) => {
+  // Enhanced login with error reporting
+  const login = useCallback(async (email, password, rememberMeOption = false) => {
+    const reportAuthError = withErrorReporting({ component: 'AuthContext', action: 'login' });
+    
     try {
       setLoading(true);
       setError(null);
@@ -70,19 +73,37 @@ export const AuthProvider = ({ children }) => {
         const errorMessage =
           response.error?.message || "Login failed. Please try again.";
         setError(errorMessage);
+        
+        // Report login failure
+        reportAuthError(new Error(errorMessage), {
+          email: email?.substring(0, 3) + '***', // Partially masked email for debugging
+          rememberMe: rememberMeOption,
+          severity: ERROR_SEVERITY.MEDIUM,
+        });
+        
         throw new Error(errorMessage);
       }
     } catch (err) {
       const errorMessage = err.message || "Login failed. Please try again.";
       setError(errorMessage);
+      
+      // Report unexpected login error
+      reportAuthError(err, {
+        email: email?.substring(0, 3) + '***',
+        rememberMe: rememberMeOption,
+        severity: err.type === ERROR_TYPES.NETWORK ? ERROR_SEVERITY.HIGH : ERROR_SEVERITY.MEDIUM,
+      });
+      
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Register user
-  const register = async (userData) => {
+  // Enhanced register with error reporting
+  const register = useCallback(async (userData) => {
+    const reportAuthError = withErrorReporting({ component: 'AuthContext', action: 'register' });
+    
     try {
       setLoading(true);
       setError(null);
@@ -100,17 +121,31 @@ export const AuthProvider = ({ children }) => {
         const errorMessage =
           response.error?.message || "Registration failed. Please try again.";
         setError(errorMessage);
+        
+        reportAuthError(new Error(errorMessage), {
+          username: userData.username,
+          email: userData.email?.substring(0, 3) + '***',
+          severity: ERROR_SEVERITY.MEDIUM,
+        });
+        
         throw new Error(errorMessage);
       }
     } catch (err) {
       const errorMessage =
         err.message || "Registration failed. Please try again.";
       setError(errorMessage);
+      
+      reportAuthError(err, {
+        username: userData.username,
+        email: userData.email?.substring(0, 3) + '***',
+        severity: err.type === ERROR_TYPES.VALIDATION ? ERROR_SEVERITY.LOW : ERROR_SEVERITY.MEDIUM,
+      });
+      
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Logout user
   const logout = () => {
@@ -123,8 +158,10 @@ export const AuthProvider = ({ children }) => {
     setRememberMe(false);
   };
 
-  // Update user profile
-  const updateProfile = async (userData) => {
+  // Enhanced update profile with error reporting
+  const updateProfile = useCallback(async (userData) => {
+    const reportAuthError = withErrorReporting({ component: 'AuthContext', action: 'updateProfile' });
+    
     try {
       setLoading(true);
       setError(null);
@@ -139,20 +176,36 @@ export const AuthProvider = ({ children }) => {
           response.error?.message ||
           "Failed to update profile. Please try again.";
         setError(errorMessage);
+        
+        reportAuthError(new Error(errorMessage), {
+          userId: user?.id,
+          fieldsUpdated: Object.keys(userData),
+          severity: ERROR_SEVERITY.LOW,
+        });
+        
         throw new Error(errorMessage);
       }
     } catch (err) {
       const errorMessage =
         err.message || "Failed to update profile. Please try again.";
       setError(errorMessage);
+      
+      reportAuthError(err, {
+        userId: user?.id,
+        fieldsUpdated: Object.keys(userData),
+        severity: ERROR_SEVERITY.MEDIUM,
+      });
+      
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  // Change password
-  const changePassword = async (passwords) => {
+  // Enhanced change password with error reporting
+  const changePassword = useCallback(async (passwords) => {
+    const reportAuthError = withErrorReporting({ component: 'AuthContext', action: 'changePassword' });
+    
     try {
       setLoading(true);
       setError(null);
@@ -166,17 +219,29 @@ export const AuthProvider = ({ children }) => {
           response.error?.message ||
           "Failed to change password. Please try again.";
         setError(errorMessage);
+        
+        reportAuthError(new Error(errorMessage), {
+          userId: user?.id,
+          severity: ERROR_SEVERITY.MEDIUM,
+        });
+        
         throw new Error(errorMessage);
       }
     } catch (err) {
       const errorMessage =
         err.message || "Failed to change password. Please try again.";
       setError(errorMessage);
+      
+      reportAuthError(err, {
+        userId: user?.id,
+        severity: ERROR_SEVERITY.MEDIUM,
+      });
+      
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // Check if user has specific role (memoized)
   const hasRole = useCallback((roles) => {

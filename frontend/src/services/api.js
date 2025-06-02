@@ -2,9 +2,11 @@
 import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
 import { smartRequest } from "../lib/requestDeduplication";
+import { reportError, shouldRetryError, getRetryDelay, ERROR_TYPES, ERROR_SEVERITY } from "../utils/errorReporting";
 
 /**
- * Centralized API service for all HTTP requests - WITH DEBUGGING
+ * Enhanced API service with comprehensive error handling, retry mechanisms,
+ * and monitoring similar to backend error handling patterns
  */
 class ApiService {
   constructor() {
