@@ -59,6 +59,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: "Optional link URL for the alert",
     },
+    // Forum settings
+    forum_enabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+      comment: "Whether the forum feature is enabled",
+    },
     // Tracking who made changes
     updated_by: {
       type: DataTypes.INTEGER,

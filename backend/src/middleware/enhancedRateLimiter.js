@@ -187,7 +187,7 @@ const rateLimiters = {
   // General API access
   generalApi: createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 requests in development, 100 in production
+    max: process.env.NODE_ENV === 'development' ? 2000 : 200, // 2000 requests in development, 200 in production
     message: "Too many requests. Please try again in 15 minutes."
   }),
 

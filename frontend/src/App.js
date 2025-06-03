@@ -51,6 +51,7 @@ const AdminSiteSettingsPage = lazy(() => import("./pages/admin/SiteSettingsPage"
 const AdminNewsletterPage = lazy(() => import("./pages/admin/NewsletterPage"));
 const AdminContactMessagesPage = lazy(() => import("./pages/admin/ContactMessagesPage"));
 const AdminAdsPage = lazy(() => import("./pages/admin/AdsPage"));
+const AdminForumManagementPage = lazy(() => import("./pages/admin/ForumManagementPage"));
 
 // Lazy loaded static pages
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -59,6 +60,12 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const SitemapPage = lazy(() => import('./pages/SitemapPage'));
+
+// Lazy loaded forum pages
+const ForumIndexPage = lazy(() => import('./pages/ForumIndexPage'));
+const ForumCategoryPage = lazy(() => import('./pages/ForumCategoryPage'));
+const ForumThreadPage = lazy(() => import('./pages/ForumThreadPage'));
+const ForumNewThreadPage = lazy(() => import('./pages/ForumNewThreadPage'));
 
 // Lazy loaded debug pages (low priority)
 const AuthDebugPage = lazy(() => import("./pages/AuthDebugPage"));
@@ -230,6 +237,28 @@ function App() {
             </ErrorBoundary>
           } />
           
+          {/* Forum Routes */}
+          <Route path="forum" element={
+            <ErrorBoundary level="page">
+              <ForumIndexPage />
+            </ErrorBoundary>
+          } />
+          <Route path="forum/categories/:slug" element={
+            <ErrorBoundary level="page">
+              <ForumCategoryPage />
+            </ErrorBoundary>
+          } />
+          <Route path="forum/threads/new" element={
+            <ErrorBoundary level="page">
+              <ForumNewThreadPage />
+            </ErrorBoundary>
+          } />
+          <Route path="forum/threads/:slug" element={
+            <ErrorBoundary level="page">
+              <ForumThreadPage />
+            </ErrorBoundary>
+          } />
+          
           {/* Static page routes */}
           <Route path="about" element={
             <ErrorBoundary level="page">
@@ -335,6 +364,11 @@ function App() {
             <Route path="diagnostics" element={
               <ErrorBoundary level="page">
                 <AdminDiagnosticsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="forum" element={
+              <ErrorBoundary level="page">
+                <AdminForumManagementPage />
               </ErrorBoundary>
             } />
             <Route path="debug" element={

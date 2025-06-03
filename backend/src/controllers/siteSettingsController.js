@@ -57,6 +57,7 @@ const siteSettingsController = {
           alert_dismissible: settings.alert_dismissible,
           alert_link_text: settings.alert_link_text,
           alert_link_url: settings.alert_link_url,
+          forum_enabled: settings.forum_enabled,
         };
 
         return res.status(200).json({

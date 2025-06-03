@@ -12,11 +12,13 @@ import {
 import { BsSearch } from "react-icons/bs";
 import AuthContext from "../../contexts/AuthContext";
 import ThemeContext from "../../contexts/ThemeContext";
+import { useSiteSettings } from "../../contexts/SiteSettingsContext";
 import { trackNavRender } from "../../utils/navigationPerformance";
 
 const Header = memo(() => {
   const { user, logout } = useContext(AuthContext);
   const { themeConfig } = useContext(ThemeContext);
+  const { settings } = useSiteSettings();
   const navigate = useNavigate();
 
   // Track renders in development
@@ -58,6 +60,11 @@ const Header = memo(() => {
             <Nav.Link as={Link} to="/articles">
               Articles
             </Nav.Link>
+            {settings?.forum_enabled && user && (
+              <Nav.Link as={Link} to="/forum">
+                Forum
+              </Nav.Link>
+            )}
             {/* Add these new navigation items */}
             <Nav.Link as={Link} to="/about">
               About

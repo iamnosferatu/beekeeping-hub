@@ -1,7 +1,7 @@
 // frontend/src/layouts/AdminLayout.js
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { Container, Nav, Button, Navbar } from "react-bootstrap";
+import { Container, Nav, Button, Navbar, Modal } from "react-bootstrap";
 import {
   BsSpeedometer2,
   BsFileEarmarkText,
@@ -18,6 +18,8 @@ import {
   BsBullseye,
   BsBug,
   BsPersonCheck,
+  BsChatSquareDots,
+  BsFileCode,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
 import "./AdminLayout.scss";
@@ -32,6 +34,30 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [showSafariWarning, setShowSafariWarning] = useState(false);
+
+  /**
+   * Check if browser is Safari
+   */
+  const isSafari = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf('safari') > -1 && ua.indexOf('chrome') === -1;
+  };
+
+  /**
+   * Handle Swagger documentation link click
+   */
+  const handleSwaggerClick = (e) => {
+    e.preventDefault();
+    
+    if (isSafari()) {
+      setShowSafariWarning(true);
+    } else {
+      // Get the backend URL from environment or use default
+      const backendUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8080';
+      window.open(`${backendUrl}/api-docs`, '_blank');
+    }
+  };
 
   /**
    * Navigation items configuration
@@ -84,6 +110,11 @@ const AdminLayout = () => {
       label: "Advertisements",
     },
     {
+      path: "/admin/forum",
+      icon: <BsChatSquareDots size={20} />,
+      label: "Forum Management",
+    },
+    {
       path: "/admin/settings",
       icon: <BsGear size={20} />,
       label: "Settings",
@@ -97,6 +128,18 @@ const AdminLayout = () => {
       path: "/admin/debug",
       icon: <BsBug size={20} />,
       label: "Debug",
+    },
+  ];
+
+  /**
+   * External links (not NavLink items)
+   */
+  const externalLinks = [
+    {
+      id: "swagger",
+      icon: <BsFileCode size={20} />,
+      label: "API Documentation",
+      onClick: handleSwaggerClick,
     },
   ];
 
@@ -193,6 +236,28 @@ const AdminLayout = () => {
                 </NavLink>
               </Nav.Item>
             ))}
+            
+            {/* Divider */}
+            <hr className="sidebar-divider" />
+            
+            {/* External Links */}
+            {externalLinks.map((link) => (
+              <Nav.Item key={link.id}>
+                <Nav.Link
+                  href="#"
+                  onClick={link.onClick}
+                  className="nav-link"
+                  title={sidebarCollapsed ? link.label : ""}
+                >
+                  <span className="nav-icon">{link.icon}</span>
+                  <span
+                    className={`nav-label ${sidebarCollapsed ? "d-none" : ""}`}
+                  >
+                    {link.label}
+                  </span>
+                </Nav.Link>
+              </Nav.Item>
+            ))}
           </Nav>
 
           {/* Sidebar Footer */}
@@ -231,6 +296,35 @@ const AdminLayout = () => {
         </main>
       </div>
     </div>
+    
+    {/* Safari Warning Modal */}
+    <Modal show={showSafariWarning} onHide={() => setShowSafariWarning(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Browser Compatibility Warning</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Safari browser may have compatibility issues with the Swagger API documentation interface. 
+          For the best experience, we recommend using one of the following browsers:
+        </p>
+        <ul>
+          <li>Google Chrome</li>
+          <li>Mozilla Firefox</li>
+          <li>Microsoft Edge</li>
+        </ul>
+        <p>
+          If you still want to proceed with Safari, you can access the API documentation at:
+        </p>
+        <code className="d-block p-2 bg-light">
+          {process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:8080'}/api-docs
+        </code>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowSafariWarning(false)}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

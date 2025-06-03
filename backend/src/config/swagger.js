@@ -119,6 +119,84 @@ const swaggerOptions = {
               }
             }
           }
+        },
+        ForumCategory: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            name: { type: 'string' },
+            slug: { type: 'string' },
+            description: { type: 'string' },
+            userId: { type: 'integer' },
+            isBlocked: { type: 'boolean' },
+            blockedAt: { type: 'string', format: 'date-time', nullable: true },
+            blockedBy: { type: 'integer', nullable: true },
+            blockedReason: { type: 'string', nullable: true },
+            creator: { $ref: '#/components/schemas/User' },
+            threadCount: { type: 'integer' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ForumThread: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            title: { type: 'string' },
+            slug: { type: 'string' },
+            content: { type: 'string' },
+            categoryId: { type: 'integer' },
+            userId: { type: 'integer' },
+            isPinned: { type: 'boolean' },
+            isLocked: { type: 'boolean' },
+            isBlocked: { type: 'boolean' },
+            blockedAt: { type: 'string', format: 'date-time', nullable: true },
+            blockedBy: { type: 'integer', nullable: true },
+            blockedReason: { type: 'string', nullable: true },
+            viewCount: { type: 'integer' },
+            lastActivityAt: { type: 'string', format: 'date-time' },
+            author: { $ref: '#/components/schemas/User' },
+            category: { $ref: '#/components/schemas/ForumCategory' },
+            commentCount: { type: 'integer' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ForumComment: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            content: { type: 'string' },
+            threadId: { type: 'integer' },
+            userId: { type: 'integer' },
+            parentCommentId: { type: 'integer', nullable: true },
+            isBlocked: { type: 'boolean' },
+            blockedAt: { type: 'string', format: 'date-time', nullable: true },
+            blockedBy: { type: 'integer', nullable: true },
+            blockedReason: { type: 'string', nullable: true },
+            author: { $ref: '#/components/schemas/User' },
+            thread: { $ref: '#/components/schemas/ForumThread' },
+            parentComment: { $ref: '#/components/schemas/ForumComment' },
+            replies: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ForumComment' }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        UserForumBan: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            userId: { type: 'integer' },
+            bannedBy: { type: 'integer' },
+            reason: { type: 'string' },
+            expiresAt: { type: 'string', format: 'date-time', nullable: true },
+            bannedAt: { type: 'string', format: 'date-time' },
+            bannedUser: { $ref: '#/components/schemas/User' },
+            bannedByUser: { $ref: '#/components/schemas/User' }
+          }
         }
       },
       responses: {
@@ -181,6 +259,14 @@ const swaggerOptions = {
       {
         name: 'Admin',
         description: 'Administrative endpoints (admin role required)'
+      },
+      {
+        name: 'Forum',
+        description: 'Forum categories, threads, and comments'
+      },
+      {
+        name: 'Forum Admin',
+        description: 'Forum administrative endpoints (admin role required)'
       }
     ]
   },

@@ -278,6 +278,17 @@ $transition-speed: 0.3s;
     }
 }
 
+// Sidebar divider
+.sidebar-divider {
+    margin: 1rem 1.5rem;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    
+    .admin-sidebar.collapsed & {
+        margin: 1rem 0.5rem;
+    }
+}
+
 // Print styles
 @media print {
 

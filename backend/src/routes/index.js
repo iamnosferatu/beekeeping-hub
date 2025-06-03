@@ -18,6 +18,8 @@ const contactRoutes = require("./contactRoutes");
 const likeRoutes = require("./likeRoutes");
 const sitemapRoutes = require("./sitemapRoutes");
 const authorApplicationRoutes = require("./authorApplicationRoutes");
+const forumRoutes = require("./forumRoutes");
+const adminForumRoutes = require("./adminForumRoutes");
 
 // API root
 router.get("/", (req, res) => {
@@ -41,6 +43,8 @@ router.get("/", (req, res) => {
       "/debug",
       "/sitemap",
       "/author-applications",
+      "/forum",
+      "/admin/forum",
     ],
   });
 });
@@ -56,6 +60,8 @@ router.use("/newsletter", newsletterRoutes);
 router.use("/contact", contactRoutes);
 router.use("/likes", likeRoutes);
 router.use("/author-applications", authorApplicationRoutes);
+router.use("/forum", forumRoutes);
+router.use("/admin/forum", adminForumRoutes);
 router.use("/", sitemapRoutes); // Sitemap routes at root level for sitemap.xml
 
 // API health check

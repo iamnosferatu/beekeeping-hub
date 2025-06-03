@@ -7,12 +7,13 @@ import { API_URL } from "../../config";
 import api from "../../services/api";
 import TagCloud from "../common/TagCloud";
 import RelatedArticles from "../articles/RelatedArticles";
+import RecentThreads from "../forum/RecentThreads";
 
 /**
  * Sidebar Component
  *
- * Displays popular tags and recent articles in the sidebar.
- * Fetches real data from the API and handles loading/error states.
+ * Context-aware sidebar that displays different content based on the current section.
+ * Shows forum-specific widgets in forum pages, article-specific widgets in article pages.
  */
 const Sidebar = () => {
   const location = useLocation();
@@ -29,6 +30,9 @@ const Sidebar = () => {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterMessage, setNewsletterMessage] = useState(null);
   const [newsletterError, setNewsletterError] = useState(null);
+
+  // Determine if we're in the forum section
+  const isForumSection = location.pathname.startsWith('/forum');
 
   /**
    * Fetch recent articles from the API
@@ -156,87 +160,102 @@ const Sidebar = () => {
    * Fetch data on component mount
    */
   useEffect(() => {
-    fetchRecentArticles();
-  }, []);
+    // Only fetch recent articles if not in forum section
+    if (!isForumSection) {
+      fetchRecentArticles();
+    }
+  }, [isForumSection]);
 
   return (
     <>
       {/* Related Articles - Only show on article pages */}
-      {currentArticleId && (
+      {currentArticleId && !isForumSection && (
         <RelatedArticles articleId={currentArticleId} limit={5} />
       )}
       
-      {/* Tag Cloud Widget */}
-      <TagCloud limit={20} title="Popular Tags" />
+      {/* Forum Section Widgets */}
+      {isForumSection ? (
+        <>
+          {/* Recent Threads - Forum section only */}
+          <RecentThreads limit={5} />
+          
+          {/* Newsletter signup is shown in both sections */}
+        </>
+      ) : (
+        <>
+          {/* Tag Cloud Widget - Main section only */}
+          <TagCloud limit={20} title="Popular Tags" />
 
-      {/* Recent Articles Card */}
-      <Card className="mb-4 shadow-sm">
-        <Card.Header>
-          <h5 className="mb-0">Recent Articles</h5>
-        </Card.Header>
-        {articlesLoading ? (
-          // Loading state
-          <Card.Body>
-            <div className="text-center py-3">
-              <Spinner animation="border" size="sm" variant="primary" />
-              <p className="mt-2 mb-0 small text-muted">Loading articles...</p>
-            </div>
-          </Card.Body>
-        ) : articlesError ? (
-          // Error state
-          <Card.Body>
-            <Alert variant="warning" className="mb-0">
-              <small>{articlesError}</small>
-            </Alert>
-          </Card.Body>
-        ) : recentArticles.length > 0 ? (
-          // Articles list
-          <ListGroup variant="flush">
-            {recentArticles.map((article) => (
-              <ListGroup.Item
-                key={article.id}
-                className="px-3 py-2"
-                style={{
-                  transition: "background-color 0.2s ease",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f8f9fa";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
-              >
-                <Link
-                  to={`/articles/${article.slug}`}
-                  className="text-decoration-none d-block"
-                  title={article.title}
-                >
-                  <div className="text-truncate">{article.title}</div>
+          {/* Recent Articles Card - Main section only */}
+          <Card className="mb-4 shadow-sm">
+            <Card.Header>
+              <h5 className="mb-0">Recent Articles</h5>
+            </Card.Header>
+            {articlesLoading ? (
+              // Loading state
+              <Card.Body>
+                <div className="text-center py-3">
+                  <Spinner animation="border" size="sm" variant="primary" />
+                  <p className="mt-2 mb-0 small text-muted">Loading articles...</p>
+                </div>
+              </Card.Body>
+            ) : articlesError ? (
+              // Error state
+              <Card.Body>
+                <Alert variant="warning" className="mb-0">
+                  <small>{articlesError}</small>
+                </Alert>
+              </Card.Body>
+            ) : recentArticles.length > 0 ? (
+              // Articles list
+              <ListGroup variant="flush">
+                {recentArticles.map((article) => (
+                  <ListGroup.Item
+                    key={article.id}
+                    className="px-3 py-2"
+                    style={{
+                      transition: "background-color 0.2s ease",
+                      cursor: "pointer",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f8f9fa";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <Link
+                      to={`/articles/${article.slug}`}
+                      className="text-decoration-none d-block"
+                      title={article.title}
+                    >
+                      <div className="text-truncate">{article.title}</div>
+                    </Link>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            ) : (
+              // Empty state
+              <Card.Body>
+                <p className="text-muted mb-0 text-center">
+                  <small>No recent articles available</small>
+                </p>
+              </Card.Body>
+            )}
+
+            {/* View all articles link */}
+            {recentArticles.length > 0 && (
+              <Card.Footer className="text-center">
+                <Link to="/articles" className="text-decoration-none small">
+                  View all articles →
                 </Link>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        ) : (
-          // Empty state
-          <Card.Body>
-            <p className="text-muted mb-0 text-center">
-              <small>No recent articles available</small>
-            </p>
-          </Card.Body>
-        )}
+              </Card.Footer>
+            )}
+          </Card>
+        </>
+      )}
 
-        {/* View all articles link */}
-        {recentArticles.length > 0 && (
-          <Card.Footer className="text-center">
-            <Link to="/articles" className="text-decoration-none small">
-              View all articles →
-            </Link>
-          </Card.Footer>
-        )}
-      </Card>
-
-      {/* Newsletter Signup Card */}
+      {/* Newsletter Signup Card - Shown in both sections */}
       <Card className="mb-4 shadow-sm">
         <Card.Header>
           <h5 className="mb-0">Newsletter</h5>

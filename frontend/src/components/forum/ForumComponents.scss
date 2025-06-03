@@ -1,0 +1,343 @@
+// Forum components styles
+
+// Category Card
+.forum-category-card {
+  transition: all 0.3s ease;
+  border: 1px solid var(--bs-gray-300);
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .category-title {
+    margin-bottom: 0.75rem;
+    
+    a {
+      color: var(--bs-dark);
+      
+      &:hover {
+        color: var(--bs-primary);
+      }
+    }
+  }
+  
+  .category-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  
+  .category-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  .category-meta {
+    border-top: 1px solid var(--bs-gray-200);
+    padding-top: 0.5rem;
+    margin-top: 0.75rem;
+  }
+}
+
+// Thread List
+.forum-thread-list {
+  .thread-item {
+    padding: 1.25rem;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: var(--bs-gray-100);
+    }
+    
+    .thread-title {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      
+      a {
+        color: var(--bs-dark);
+        
+        &:hover {
+          color: var(--bs-primary);
+        }
+      }
+    }
+    
+    .thread-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      
+      a {
+        color: var(--bs-primary);
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    
+    .thread-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 60px;
+      
+      .stat-item {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Comment Styles
+.forum-comments {
+  .forum-comment {
+    .comment-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .parent-comment-ref {
+      font-size: 0.813rem;
+      margin-bottom: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      background-color: var(--bs-gray-200);
+      border-left: 2px solid var(--bs-gray-400);
+      border-radius: 0.25rem;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+      opacity: 0.85;
+      
+      // Ensure it doesn't overflow
+      display: block;
+      
+      // Quote styling
+      &::before {
+        content: "Replying to:";
+        display: block;
+        font-weight: 500;
+        color: var(--bs-gray-600);
+        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
+      }
+      
+      // The actual quoted text
+      .quoted-text {
+        color: var(--bs-gray-600);
+        font-size: 0.875rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; // Limit to 3 lines
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      // Author attribution
+      .quote-author {
+        font-size: 0.75rem;
+        color: var(--bs-gray-600);
+        margin-top: 0.25rem;
+        font-style: italic;
+      }
+    }
+    
+    .comment-content {
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .comment-actions {
+      display: flex;
+      gap: 0.5rem;
+      
+      .btn-link {
+        font-size: 0.875rem;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// Thread View
+.forum-thread-view {
+  .thread-header {
+    border-bottom: 2px solid var(--bs-primary);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    
+    .thread-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .thread-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: var(--bs-secondary);
+      
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+    }
+  }
+  
+  .thread-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  
+  .thread-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.25rem;
+    margin-bottom: 2rem;
+  }
+}
+
+// Forum Navigation
+.forum-nav {
+  background-color: var(--bs-light);
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1.5rem;
+  
+  .breadcrumb {
+    margin-bottom: 0;
+    background-color: transparent;
+    
+    .breadcrumb-item {
+      &.active {
+        color: var(--bs-secondary);
+      }
+      
+      a {
+        color: var(--bs-primary);
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// Dark theme adjustments
+[data-theme="dark"] {
+  .forum-category-card {
+    border-color: var(--bs-gray-700);
+    
+    .category-title a {
+      color: var(--bs-light);
+    }
+    
+    .category-meta {
+      border-top-color: var(--bs-gray-700);
+    }
+  }
+  
+  .forum-comments {
+    .parent-comment-ref {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-left-color: var(--bs-gray-600);
+      opacity: 0.8;
+      
+      &::before {
+        color: var(--bs-gray-500);
+      }
+      
+      .quoted-text {
+        color: var(--bs-gray-500);
+      }
+      
+      .quote-author {
+        color: var(--bs-gray-500);
+      }
+    }
+  }
+  
+  .forum-thread-list {
+    .thread-item {
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      .thread-title a {
+        color: var(--bs-light);
+      }
+    }
+  }
+  
+  .forum-thread-view {
+    .thread-header {
+      border-bottom-color: var(--bs-gray-600);
+    }
+  }
+  
+  .forum-nav {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .forum-thread-list {
+    .thread-item {
+      .thread-stats {
+        flex-direction: row;
+        gap: 1rem;
+        
+        .stat-item {
+          justify-content: flex-start;
+        }
+      }
+    }
+  }
+  
+  .forum-thread-view {
+    .thread-header {
+      .thread-title {
+        font-size: 1.5rem;
+      }
+    }
+  }
+  
+  .forum-comments {
+    .parent-comment-ref {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      
+      .quoted-text {
+        -webkit-line-clamp: 2; // Even shorter on mobile
+      }
+    }
+  }
+}
