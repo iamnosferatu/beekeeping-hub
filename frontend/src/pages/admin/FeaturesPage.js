@@ -36,62 +36,68 @@ const FeaturesPage = () => {
     setActionError(null);
     setSuccessMessage(null);
     
-    toggleFeature(
-      { featureName: feature.name, enabled: !feature.enabled },
-      {
-        onSuccess: () => {
-          setSuccessMessage(`Feature '${feature.name}' ${!feature.enabled ? 'enabled' : 'disabled'} successfully`);
-          refetch();
-          // Clear success message after 3 seconds
-          setTimeout(() => setSuccessMessage(null), 3000);
-        },
-        onError: (error) => {
-          setActionError(error.message || "Failed to toggle feature");
-        }
+    try {
+      const result = await toggleFeature(feature.name, !feature.enabled);
+      
+      if (result.success) {
+        setSuccessMessage(`Feature '${feature.name}' ${!feature.enabled ? 'enabled' : 'disabled'} successfully`);
+        refetch();
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(result.error?.message || "Failed to toggle feature");
       }
-    );
+    } catch (error) {
+      setActionError(error.message || "Failed to toggle feature");
+    }
   };
 
   /**
    * Handle feature creation
    */
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setActionError(null);
     
-    createFeature(newFeature, {
-      onSuccess: () => {
+    try {
+      const result = await createFeature(newFeature);
+      
+      if (result.success) {
         setShowCreateModal(false);
         setNewFeature({ name: "", enabled: false });
         setSuccessMessage(`Feature '${newFeature.name}' created successfully`);
         refetch();
         setTimeout(() => setSuccessMessage(null), 3000);
-      },
-      onError: (error) => {
-        setActionError(error.message || "Failed to create feature");
+      } else {
+        setActionError(result.error?.message || "Failed to create feature");
       }
-    });
+    } catch (error) {
+      setActionError(error.message || "Failed to create feature");
+    }
   };
 
   /**
    * Handle feature deletion
    */
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedFeature) return;
     
     setActionError(null);
     
-    deleteFeature(selectedFeature.name, {
-      onSuccess: () => {
+    try {
+      const result = await deleteFeature(selectedFeature.name);
+      
+      if (result.success) {
         setShowDeleteModal(false);
         setSuccessMessage(`Feature '${selectedFeature.name}' deleted successfully`);
         setSelectedFeature(null);
         refetch();
         setTimeout(() => setSuccessMessage(null), 3000);
-      },
-      onError: (error) => {
-        setActionError(error.message || "Failed to delete feature");
+      } else {
+        setActionError(result.error?.message || "Failed to delete feature");
       }
-    });
+    } catch (error) {
+      setActionError(error.message || "Failed to delete feature");
+    }
   };
 
   /**
@@ -197,7 +203,7 @@ const FeaturesPage = () => {
                     </td>
                     <td>
                       <Button
-                        variant={feature.enabled ? "outline-secondary" : "outline-success"}
+                        variant={feature.enabled ? "outline-warning" : "outline-success"}
                         size="sm"
                         onClick={() => handleToggle(feature)}
                         disabled={toggling}
