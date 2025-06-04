@@ -9,6 +9,7 @@ import ArticleContent from "../components/articles/ArticleContent";
 import NestedCommentsSection from "../components/articles/Comments/NestedCommentsSection";
 import AdBlock from "../components/ads/AdBlock";
 import { AD_PLACEMENTS } from "../utils/adManager";
+import { SEO } from "../contexts/SEOContext";
 import "./ArticlePage.scss";
 
 /**
@@ -81,6 +82,17 @@ const ArticlePage = () => {
   // Render the article
   return (
     <div className="article-page">
+      <SEO
+        title={articleData.title}
+        description={articleData.excerpt || articleData.content?.substring(0, 160)}
+        image={articleData.featured_image}
+        article={true}
+        author={articleData.author?.username}
+        publishedTime={articleData.created_at}
+        modifiedTime={articleData.updated_at}
+        tags={articleData.tags?.map(tag => tag.name)}
+      />
+      
       {/* Top article advertisement */}
       <AdBlock 
         placement={AD_PLACEMENTS.ARTICLE_TOP}

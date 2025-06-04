@@ -5,6 +5,7 @@ import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
 import { useResendVerification } from "../hooks/queries/useAuth";
 import AuthContext from "../contexts/AuthContext";
 import FormField from "../components/common/FormField";
+import { SEO } from "../contexts/SEOContext";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -74,6 +75,10 @@ const LoginPage = () => {
 
   return (
     <div className="login-page py-5">
+      <SEO 
+        title="Login"
+        description="Login to your BeeKeeper's Hub account to access exclusive beekeeping content, manage your articles, and connect with the beekeeping community."
+      />
       <Card className="mx-auto" style={{ maxWidth: "500px" }}>
         <Card.Header className="bg-primary text-white text-center">
           <h4 className="mb-0">Login to BeeKeeper's Blog</h4>

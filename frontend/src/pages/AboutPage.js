@@ -9,6 +9,7 @@ import {
   BsTreeFill,
   BsShieldCheck,
 } from "react-icons/bs";
+import { SEO } from "../contexts/SEOContext";
 import "./AboutPage.scss";
 
 /**
@@ -78,8 +79,14 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="about-page">
-      {/* Hero Section */}
+    <>
+      <SEO 
+        title="About Us"
+        description="Learn about BeeKeeper's Hub - your trusted resource for beekeeping knowledge. Discover our mission, values, and the passionate team dedicated to supporting beekeepers worldwide."
+        type="website"
+      />
+      <div className="about-page">
+        {/* Hero Section */}
       <div className="hero-section text-center py-5 mb-5">
         <Container>
           <h1 className="display-4 mb-4">About BeeKeeper's Blog</h1>
@@ -256,6 +263,7 @@ const AboutPage = () => {
         </Row>
       </Container>
     </div>
+    </>
   );
 };
 

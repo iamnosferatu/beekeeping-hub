@@ -6,6 +6,7 @@ import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
 import ThreadForm from '../components/forum/ThreadForm';
 import LoadingIndicator from '../components/common/LoadingIndicator';
+import { SEO } from '../contexts/SEOContext';
 
 const ForumNewThreadPage = () => {
   const location = useLocation();
@@ -72,8 +73,14 @@ const ForumNewThreadPage = () => {
   }
 
   return (
-    <Container className="py-4">
-      {error && (
+    <>
+      <SEO 
+        title="Create New Thread"
+        description="Start a new discussion in the BeeKeeper's Hub community forum. Share your beekeeping experiences, ask questions, or discuss topics with fellow beekeepers."
+        type="website"
+      />
+      <Container className="py-4">
+        {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
         </Alert>
@@ -84,6 +91,7 @@ const ForumNewThreadPage = () => {
         defaultCategoryId={defaultCategoryId}
       />
     </Container>
+    </>
   );
 };
 

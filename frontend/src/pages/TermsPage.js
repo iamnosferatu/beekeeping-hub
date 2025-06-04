@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col, Card, Alert } from "react-bootstrap";
 import { BsFileText, BsExclamationTriangle } from "react-icons/bs";
+import { SEO } from "../contexts/SEOContext";
 import "./StaticPages.scss";
 
 /**
@@ -24,8 +25,14 @@ const TermsPage = () => {
   });
 
   return (
-    <div className="static-page terms-page">
-      <Container>
+    <>
+      <SEO 
+        title="Terms of Service"
+        description="Review BeeKeeper's Hub terms of service. Learn about the rules and agreements for using our beekeeping community platform, user responsibilities, and content guidelines."
+        type="website"
+      />
+      <div className="static-page terms-page">
+        <Container>
         <Row>
           <Col lg={8} className="mx-auto">
             {/* Header */}
@@ -287,6 +294,7 @@ const TermsPage = () => {
         </Row>
       </Container>
     </div>
+    </>
   );
 };
 

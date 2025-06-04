@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Form, Button, Card, Alert, Row, Col } from "react-bootstrap";
 import { BsEnvelopeFill } from "react-icons/bs";
 import AuthContext from "../contexts/AuthContext";
+import { SEO } from "../contexts/SEOContext";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -73,6 +74,10 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page py-5">
+      <SEO 
+        title="Register"
+        description="Join the BeeKeeper's Hub community! Create your free account to share beekeeping experiences, learn from experts, and connect with fellow beekeepers worldwide."
+      />
       <Card className="mx-auto" style={{ maxWidth: "800px" }}>
         {registrationSuccess ? (
           // Success message

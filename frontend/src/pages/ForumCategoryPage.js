@@ -10,6 +10,7 @@ import CategoryForm from '../components/forum/CategoryForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import LoadingIndicator from '../components/common/LoadingIndicator';
 import Pagination from '../components/ui/Pagination';
+import { SEO } from '../contexts/SEOContext';
 
 /**
  * ForumCategoryPage Component
@@ -122,8 +123,14 @@ const ForumCategoryPage = () => {
   }
 
   return (
-    <Container className="py-4">
-      {error && (
+    <>
+      <SEO 
+        title={category.name}
+        description={category.description || `Explore discussions and threads in the ${category.name} category. Join the conversation about beekeeping topics related to ${category.name}.`}
+        type="website"
+      />
+      <Container className="py-4">
+        {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
         </Alert>
@@ -222,6 +229,7 @@ const ForumCategoryPage = () => {
         confirmVariant="danger"
       />
     </Container>
+    </>
   );
 };
 

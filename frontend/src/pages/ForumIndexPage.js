@@ -9,6 +9,7 @@ import { useForum } from '../hooks/api/useForum';
 import CategoryList from '../components/forum/CategoryList';
 import CategoryForm from '../components/forum/CategoryForm';
 import LoadingIndicator from '../components/common/LoadingIndicator';
+import { SEO } from '../contexts/SEOContext';
 
 /**
  * ForumIndexPage Component
@@ -82,8 +83,14 @@ const ForumIndexPage = () => {
   }
 
   return (
-    <Container className="py-4">
-      <Row className="mb-4">
+    <>
+      <SEO 
+        title="Forum"
+        description="Join the BeeKeeper's Hub community forum. Discuss beekeeping techniques, share experiences, ask questions, and connect with fellow beekeepers from around the world."
+        type="website"
+      />
+      <Container className="py-4">
+        <Row className="mb-4">
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <div>
@@ -133,6 +140,7 @@ const ForumIndexPage = () => {
         <CategoryList categories={categories} loading={loading} />
       )}
     </Container>
+    </>
   );
 };
 

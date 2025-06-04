@@ -23,6 +23,7 @@ import {
   BsFacebook,
 } from "react-icons/bs";
 import { useSendContactMessage, useApiErrorDisplay } from "../hooks";
+import { SEO } from "../contexts/SEOContext";
 import "./ContactPage.scss";
 
 /**
@@ -209,8 +210,14 @@ const ContactPage = () => {
   ];
 
   return (
-    <div className="contact-page">
-      {/* Hero Section */}
+    <>
+      <SEO 
+        title="Contact Us"
+        description="Get in touch with BeeKeeper's Hub. Have questions about beekeeping? Want to contribute? Send us a message and we'll get back to you soon."
+        type="website"
+      />
+      <div className="contact-page">
+        {/* Hero Section */}
       <div className="hero-section text-center py-5 mb-5">
         <Container>
           <h1 className="display-4 mb-4">Get in Touch</h1>
@@ -435,6 +442,7 @@ const ContactPage = () => {
         </Row> */}
       </Container>
     </div>
+    </>
   );
 };
 

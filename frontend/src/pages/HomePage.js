@@ -8,6 +8,7 @@ import ArticleList from "../components/articles/ArticleList";
 import AuthContext from "../contexts/AuthContext";
 import ThemeContext from "../contexts/ThemeContext";
 import BackToTopButton from "../components/common/BackToTopButton";
+import { SEO } from "../contexts/SEOContext";
 
 /**
  * HomePage Component
@@ -52,6 +53,11 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
+      <SEO
+        title="Home"
+        description="Discover expert beekeeping tips, guides, and community insights. Join our community of beekeepers to learn about hive management, honey production, and sustainable beekeeping practices."
+      />
+      
       {/* Admin Notice about Blocked Articles */}
       {isAdmin && (
         <Alert variant="info" className="d-flex align-items-center">

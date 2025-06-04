@@ -12,6 +12,7 @@ import ThreadForm from '../components/forum/ThreadForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import LoadingIndicator from '../components/common/LoadingIndicator';
 import Avatar from '../components/common/Avatar';
+import { SEO } from '../contexts/SEOContext';
 
 const ForumThreadPage = () => {
   const { slug } = useParams();
@@ -138,9 +139,18 @@ const ForumThreadPage = () => {
   const canComment = canCreateComment() && !thread.isLocked && !thread.isBlocked;
 
   return (
-    <Container className="py-4 forum-thread-view">
+    <>
+      <SEO 
+        title={thread.title}
+        description={`${thread.content.substring(0, 150)}...`}
+        type="article"
+        author={thread.author?.username}
+        publishedTime={thread.created_at || thread.createdAt}
+        modifiedTime={thread.updated_at || thread.updatedAt}
+      />
+      <Container className="py-4 forum-thread-view">
 
-      {error && (
+        {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
         </Alert>
@@ -307,6 +317,7 @@ const ForumThreadPage = () => {
         confirmVariant="danger"
       />
     </Container>
+    </>
   );
 };
 

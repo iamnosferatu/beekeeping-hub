@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col, Card, Alert } from "react-bootstrap";
 import { BsShieldLock, BsInfoCircle } from "react-icons/bs";
+import { SEO } from "../contexts/SEOContext";
 import "./StaticPages.scss";
 
 /**
@@ -24,8 +25,14 @@ const PrivacyPage = () => {
   });
 
   return (
-    <div className="static-page privacy-page">
-      <Container>
+    <>
+      <SEO 
+        title="Privacy Policy"
+        description="Read BeeKeeper's Hub privacy policy to understand how we collect, use, and protect your personal information. Learn about your privacy rights and our data handling practices."
+        type="website"
+      />
+      <div className="static-page privacy-page">
+        <Container>
         <Row>
           <Col lg={8} className="mx-auto">
             {/* Header */}
@@ -208,6 +215,7 @@ const PrivacyPage = () => {
         </Row>
       </Container>
     </div>
+    </>
   );
 };
 

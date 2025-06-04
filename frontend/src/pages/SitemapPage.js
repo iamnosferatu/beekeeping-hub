@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { BsHouseDoor, BsFileText, BsTag, BsPerson } from 'react-icons/bs';
 import apiService from '../services/api';
 import { API_URL } from '../config';
+import { SEO } from '../contexts/SEOContext';
 import './SitemapPage.scss';
 
 /**
@@ -65,8 +66,14 @@ const SitemapPage = () => {
   }
 
   return (
-    <Container className="sitemap-page py-5">
-      <h1 className="mb-4">Sitemap</h1>
+    <>
+      <SEO 
+        title="Sitemap"
+        description="Navigate through all pages and content on BeeKeeper's Hub. Find articles, tags, and sections organized for easy browsing."
+        type="website"
+      />
+      <Container className="sitemap-page py-5">
+        <h1 className="mb-4">Sitemap</h1>
       <p className="lead mb-5">
         Explore all pages and content available on BeeKeeper's Hub
       </p>
@@ -221,6 +228,7 @@ const SitemapPage = () => {
         </p>
       </div>
     </Container>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Container, Row, Col, Card, Alert, Table, Badge } from "react-bootstrap";
 import { BsCookie, BsInfoCircle } from "react-icons/bs";
 import { getCookieConfig, COOKIE_CATEGORIES } from "../utils/cookieConsent";
+import { SEO } from "../contexts/SEOContext";
 import "./StaticPages.scss";
 
 /**
@@ -27,8 +28,14 @@ const CookiePolicyPage = () => {
   const cookieConfig = getCookieConfig();
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
+    <>
+      <SEO 
+        title="Cookie Policy"
+        description="Learn about how BeeKeeper's Hub uses cookies and tracking technologies. Understand your options for managing cookie preferences and protecting your privacy."
+        type="website"
+      />
+      <Container className="py-5">
+        <Row className="justify-content-center">
         <Col lg={10} xl={8}>
           <div className="text-center mb-5">
             <BsCookie size={48} className="text-warning mb-3" />
@@ -223,6 +230,7 @@ const CookiePolicyPage = () => {
         </Col>
       </Row>
     </Container>
+    </>
   );
 };
 

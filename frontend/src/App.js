@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import { useSiteSettings } from "./contexts/SiteSettingsContext";
 import AuthContext from "./contexts/AuthContext";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
+import { SEOProvider } from "./contexts/SEOContext";
 import MaintenanceMode from "./components/MaintenanceMode";
 
 // Loading component for Suspense fallback
@@ -100,16 +101,17 @@ function App() {
   }
 
   return (
-    <BreadcrumbProvider>
-      <ErrorBoundary level="app" userId={user?.id}>
-        {/* Re-enabled with image loading safeguards */}
-        <RoutePreloader />
-        <PerformanceMonitor />
-        <CookieConsentBanner />
-        <ScrollToTop />
-        <Suspense 
-          fallback={LoadingIndicator.presets.fullPage()}
-        >
+    <SEOProvider>
+      <BreadcrumbProvider>
+        <ErrorBoundary level="app" userId={user?.id}>
+          {/* Re-enabled with image loading safeguards */}
+          <RoutePreloader />
+          <PerformanceMonitor />
+          <CookieConsentBanner />
+          <ScrollToTop />
+          <Suspense 
+            fallback={LoadingIndicator.presets.fullPage()}
+          >
           <Routes>
         {/* Public Routes */}
         <Route path="/" element={
@@ -387,6 +389,7 @@ function App() {
       </Suspense>
     </ErrorBoundary>
     </BreadcrumbProvider>
+    </SEOProvider>
   );
 }
 
