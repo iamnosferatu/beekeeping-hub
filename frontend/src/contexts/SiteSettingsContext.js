@@ -52,7 +52,7 @@ export const SiteSettingsProvider = ({ children }) => {
   
   // Use the site settings hooks
   const { data: settingsData, loading: settingsLoading, error: settingsError, refetch } = useSiteSettingsHook();
-  const { mutate: updateSettingsMutation, loading: updateLoading } = useUpdateSiteSettings({
+  const { mutate: updateSettingsMutation } = useUpdateSiteSettings({
     onSuccess: (response) => {
       if (response.success && response.data) {
         setSettings(response.data);
@@ -76,7 +76,7 @@ export const SiteSettingsProvider = ({ children }) => {
         setAlertDismissed(false);
       }
     }
-  }, [settingsData]);
+  }, [settingsData]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Update loading and error states
   useEffect(() => {
@@ -98,7 +98,7 @@ export const SiteSettingsProvider = ({ children }) => {
         },
       });
     });
-  }, []);
+  }, [updateSettingsMutation]);
 
   /**
    * Toggle maintenance mode (admin only) (memoized)

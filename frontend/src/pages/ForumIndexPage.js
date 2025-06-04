@@ -28,7 +28,7 @@ const ForumIndexPage = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Fetches forum categories from the API

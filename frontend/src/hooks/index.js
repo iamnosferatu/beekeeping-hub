@@ -7,6 +7,9 @@ export { default as useFormValidation, commonValidations } from "./useFormValida
 // Data fetching hooks
 export { default as useArticleFetch } from "./useArticleFetch";
 
+// Error handling hooks
+export { useErrorDisplay, useApiErrorDisplay } from "./useErrorDisplay";
+
 // Generic API hooks
 export { useApi, usePaginatedApi, useMutation } from "./useApi";
 

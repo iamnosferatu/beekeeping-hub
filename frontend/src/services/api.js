@@ -2,8 +2,7 @@
 import axios from "axios";
 import { API_URL, TOKEN_NAME } from "../config";
 // Removed smartRequest - using direct axios calls for better React Query compatibility
-import { reportError, shouldRetryError, getRetryDelay, ERROR_TYPES, ERROR_SEVERITY } from "../utils/errorReporting";
-import PerformanceMonitor, { METRIC_TYPES } from "../utils/performanceMonitoring";
+import PerformanceMonitor from "../utils/performanceMonitoring";
 
 /**
  * Enhanced API service with comprehensive error handling, retry mechanisms,

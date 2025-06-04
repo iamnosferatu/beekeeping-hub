@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Alert, Breadcrumb, Card } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaHome } from 'react-icons/fa';
-import AuthContext from '../contexts/AuthContext';
 import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
 import ThreadList from '../components/forum/ThreadList';
@@ -21,16 +20,13 @@ import Pagination from '../components/ui/Pagination';
 const ForumCategoryPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
   const { settings } = useSiteSettings();
   const { 
     getCategory, 
-    getThreads, 
     deleteCategory,
     canCreateThread, 
     canEditContent,
-    canDeleteContent,
-    loading 
+    canDeleteContent
   } = useForum();
   
   const [category, setCategory] = useState(null);
@@ -44,7 +40,7 @@ const ForumCategoryPage = () => {
 
   useEffect(() => {
     fetchCategoryData();
-  }, [slug, currentPage]); // Use currentPage instead of pagination.page
+  }, [slug, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCategoryData = async () => {
     try {

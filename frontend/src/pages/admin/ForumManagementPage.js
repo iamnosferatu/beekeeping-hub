@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Nav, Tab, Alert, Badge, Button, Table, Form } from 'react-bootstrap';
-import { FaBan, FaLock, FaUsers, FaChartBar } from 'react-icons/fa';
+import { Container, Row, Col, Card, Nav, Tab, Alert, Badge, Button, Table } from 'react-bootstrap';
+import { FaBan, FaLock, FaChartBar } from 'react-icons/fa';
 import { BsChatSquareDots } from 'react-icons/bs';
 import { useForum } from '../../hooks/api/useForum';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const ForumManagementPage = () => {
   const {
@@ -22,13 +21,11 @@ const ForumManagementPage = () => {
   const [stats, setStats] = useState(null);
   const [blockedContent, setBlockedContent] = useState({ categories: [], threads: [], comments: [] });
   const [bannedUsers, setBannedUsers] = useState([]);
-  const [confirmAction, setConfirmAction] = useState(null);
-  const [blockReason, setBlockReason] = useState('');
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     try {
@@ -48,6 +45,10 @@ const ForumManagementPage = () => {
         case 'banned':
           const banned = await getBannedUsers();
           setBannedUsers(banned);
+          break;
+          
+        default:
+          // No action needed for other tabs
           break;
       }
     } catch (error) {

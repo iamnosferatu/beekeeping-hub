@@ -23,7 +23,7 @@ const ForumNewThreadPage = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchCategories = async () => {
     try {

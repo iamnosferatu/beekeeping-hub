@@ -11,18 +11,18 @@ import {
   Spinner,
 } from "react-bootstrap";
 import FormField from "../components/common/FormField";
+import ErrorAlert from "../components/common/ErrorAlert";
 import {
   BsEnvelope,
   BsGeoAlt,
   BsTelephone,
   BsClock,
   BsCheckCircle,
-  BsExclamationTriangle,
   BsGithub,
   BsTwitter,
   BsFacebook,
 } from "react-icons/bs";
-import { useSendContactMessage } from "../hooks";
+import { useSendContactMessage, useApiErrorDisplay } from "../hooks";
 import "./ContactPage.scss";
 
 /**
@@ -52,6 +52,11 @@ const ContactPage = () => {
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' or 'error'
   const [submitMessage, setSubmitMessage] = useState("");
   
+  // Use error display hook
+  const { error: apiError, setApiError, clearError } = useApiErrorDisplay({
+    autoDismissTimeout: 10000 // Auto-dismiss after 10 seconds
+  });
+  
   // Use the contact API hook
   const { mutate: sendMessage, loading: isSubmitting } = useSendContactMessage({
     onSuccess: (response) => {
@@ -67,12 +72,10 @@ const ContactPage = () => {
         message: "",
       });
       setErrors({});
+      clearError(); // Clear any previous errors
     },
     onError: (error) => {
-      setSubmitStatus("error");
-      setSubmitMessage(
-        error.message || "Failed to send message. Please try again."
-      );
+      setApiError(error);
     },
   });
 
@@ -226,7 +229,7 @@ const ContactPage = () => {
               <Card.Body className="p-4">
                 <h2 className="mb-4">Send us a Message</h2>
 
-                {/* Success/Error Messages */}
+                {/* Success Message */}
                 {submitStatus === "success" && (
                   <Alert
                     variant="success"
@@ -237,12 +240,14 @@ const ContactPage = () => {
                   </Alert>
                 )}
 
-                {submitStatus === "error" && (
-                  <Alert variant="danger" className="d-flex align-items-center">
-                    <BsExclamationTriangle className="me-2" size={20} />
-                    {submitMessage}
-                  </Alert>
-                )}
+                {/* Error Message using ErrorAlert */}
+                <ErrorAlert
+                  errorObject={apiError}
+                  onDismiss={clearError}
+                  onRetry={() => handleSubmit(new Event('submit'))}
+                  showDetails
+                  showTimestamp
+                />
 
                 <Form onSubmit={handleSubmit}>
                   <Row>

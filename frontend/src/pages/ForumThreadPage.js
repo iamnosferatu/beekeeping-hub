@@ -24,8 +24,7 @@ const ForumThreadPage = () => {
     toggleThreadPin,
     canCreateComment,
     canEditContent,
-    canDeleteContent,
-    loading 
+    canDeleteContent
   } = useForum();
   
   const [thread, setThread] = useState(null);
@@ -37,7 +36,7 @@ const ForumThreadPage = () => {
 
   useEffect(() => {
     fetchThreadData();
-  }, [slug]);
+  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchThreadData = async () => {
     try {

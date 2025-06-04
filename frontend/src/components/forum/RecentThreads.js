@@ -18,7 +18,7 @@ const RecentThreads = ({ limit = 5 }) => {
 
   useEffect(() => {
     fetchRecentThreads();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchRecentThreads = async () => {
     try {

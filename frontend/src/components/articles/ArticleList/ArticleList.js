@@ -1,15 +1,14 @@
 // frontend/src/components/articles/ArticleList/ArticleList.js
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useArticles } from "../../../hooks/queries/useArticles";
 import useScrollToTop from "../../../hooks/useScrollToTop";
-import { PAGINATION_CONFIG, LOADING_CONFIG } from "../../../constants/ui";
+import { PAGINATION_CONFIG } from "../../../constants/ui";
 import ArticleCard from "../ArticleCard";
 import Pagination from "../../ui/Pagination";
 import LoadingIndicator from "../../common/LoadingIndicator";
 import ErrorState from "./ErrorState";
 import EmptyState from "./EmptyState";
 import ArticleGrid from "./ArticleGrid";
-import { debugArticleListQuery, getArticlesDiagnostics } from "../../../utils/articlesDebug";
 import "./ArticleList.scss";
 
 /**
@@ -60,8 +59,6 @@ const ArticleList = ({
     isLoading,
     error,
     refetch,
-    isFetching,
-    isError,
   } = useArticles(params);
 
   // Extract articles and pagination from response (memoized)
