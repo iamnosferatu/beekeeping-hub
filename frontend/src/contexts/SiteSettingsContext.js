@@ -58,7 +58,8 @@ export const SiteSettingsProvider = ({ children }) => {
   const { data: forumFeatureData, loading: forumLoading } = useFeatureStatus('forum');
   const { mutate: updateSettingsMutation } = useUpdateSiteSettings({
     onSuccess: (response) => {
-      if (response.success && response.data) {
+      // The response here is the full backend response with success, message, and data
+      if (response && response.data) {
         setSettings(response.data);
         // Reset alert dismissed state if alert content changed
         if (response.data.alert_message !== settings.alert_message) {
@@ -109,16 +110,15 @@ export const SiteSettingsProvider = ({ children }) => {
    * Update site settings (admin only) (memoized)
    */
   const updateSettings = useCallback(async (newSettings) => {
-    return new Promise((resolve, reject) => {
-      updateSettingsMutation(newSettings, {
-        onSuccess: (response) => {
-          resolve({ success: true });
-        },
-        onError: (error) => {
-          reject(error);
-        },
-      });
-    });
+    try {
+      const result = await updateSettingsMutation(newSettings);
+      return result;
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.message || error.message || 'Failed to update settings' 
+      };
+    }
   }, [updateSettingsMutation]);
 
   /**

@@ -90,22 +90,31 @@ const AdminSiteSettingsPage = () => {
     setIsSaving(true);
     setSaveStatus(null);
 
-    const result = await updateSettings({
-      ...maintenanceForm,
-      maintenance_estimated_time:
-        maintenanceForm.maintenance_estimated_time || null,
-    });
+    try {
+      const result = await updateSettings({
+        ...maintenanceForm,
+        maintenance_estimated_time:
+          maintenanceForm.maintenance_estimated_time || null,
+      });
 
-    setIsSaving(false);
-    setSaveStatus({
-      type: result.success ? "success" : "danger",
-      message: result.success
-        ? "Maintenance settings saved successfully!"
-        : result.error || "Failed to save maintenance settings",
-    });
+      setIsSaving(false);
+      setSaveStatus({
+        type: result.success ? "success" : "danger",
+        message: result.success
+          ? "Maintenance settings saved successfully!"
+          : result.error || "Failed to save maintenance settings",
+      });
 
-    // Clear status after 5 seconds
-    setTimeout(() => setSaveStatus(null), 5000);
+      // Clear status after 5 seconds
+      setTimeout(() => setSaveStatus(null), 5000);
+    } catch (error) {
+      setIsSaving(false);
+      setSaveStatus({
+        type: "danger",
+        message: error.message || "Failed to save maintenance settings",
+      });
+      setTimeout(() => setSaveStatus(null), 5000);
+    }
   };
 
   /**
@@ -115,22 +124,31 @@ const AdminSiteSettingsPage = () => {
     setIsSaving(true);
     setSaveStatus(null);
 
-    const result = await updateSettings({
-      ...alertForm,
-      alert_link_text: alertForm.alert_link_text || null,
-      alert_link_url: alertForm.alert_link_url || null,
-    });
+    try {
+      const result = await updateSettings({
+        ...alertForm,
+        alert_link_text: alertForm.alert_link_text || null,
+        alert_link_url: alertForm.alert_link_url || null,
+      });
 
-    setIsSaving(false);
-    setSaveStatus({
-      type: result.success ? "success" : "danger",
-      message: result.success
-        ? "Alert settings saved successfully!"
-        : result.error || "Failed to save alert settings",
-    });
+      setIsSaving(false);
+      setSaveStatus({
+        type: result.success ? "success" : "danger",
+        message: result.success
+          ? "Alert settings saved successfully!"
+          : result.error || "Failed to save alert settings",
+      });
 
-    // Clear status after 5 seconds
-    setTimeout(() => setSaveStatus(null), 5000);
+      // Clear status after 5 seconds
+      setTimeout(() => setSaveStatus(null), 5000);
+    } catch (error) {
+      setIsSaving(false);
+      setSaveStatus({
+        type: "danger",
+        message: error.message || "Failed to save alert settings",
+      });
+      setTimeout(() => setSaveStatus(null), 5000);
+    }
   };
 
   /**
@@ -342,7 +360,7 @@ const AdminSiteSettingsPage = () => {
               {settings.alert_enabled ? "VISIBLE" : "HIDDEN"}
             </Badge>
             <Button
-              variant={settings.alert_enabled ? "secondary" : "success"}
+              variant={settings.alert_enabled ? "warning" : "success"}
               size="sm"
               onClick={handleToggleAlert}
               disabled={!alertForm.alert_message}
