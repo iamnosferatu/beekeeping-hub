@@ -13,6 +13,7 @@ import {
 } from "react-icons/bs";
 import moment from "moment";
 import StatusBadge, { StatusTypes } from "../../common/StatusBadge";
+import Avatar from "../../common/Avatar.js";
 
 const UserTable = ({
   users,
@@ -67,17 +68,7 @@ const UserTable = ({
                       {/* User Info */}
                       <td>
                         <div className="d-flex align-items-center">
-                          <img
-                            src={
-                              user.avatar ||
-                              "https://via.placeholder.com/40x40?text=👤"
-                            }
-                            alt={user.username}
-                            className="rounded-circle me-2"
-                            width="40"
-                            height="40"
-                            style={{ objectFit: "cover" }}
-                          />
+                          <Avatar user={user} size={40} className="me-2" />
                           <div>
                             <strong>{user.username}</strong>
                             {isCurrentUserRow && (
