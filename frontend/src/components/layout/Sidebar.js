@@ -1,11 +1,12 @@
 // frontend/src/components/layout/Sidebar.js
 import React, { useState, useEffect } from "react";
-import { Card, ListGroup, Badge, Alert, Spinner, Form } from "react-bootstrap";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Card, ListGroup, Alert, Spinner, Form } from "react-bootstrap";
+import { Link, useLocation } from "react-router-dom";
 import { useArticles, useNewsletterSubscribe } from "../../hooks";
 import TagCloud from "../common/TagCloud";
 import RelatedArticles from "../articles/RelatedArticles";
 import RecentThreads from "../forum/RecentThreads";
+import api from "../../services/api";
 
 /**
  * Sidebar Component
@@ -16,7 +17,6 @@ import RecentThreads from "../forum/RecentThreads";
 const Sidebar = () => {
   const location = useLocation();
   const [currentArticleId, setCurrentArticleId] = useState(null);
-  const [currentArticleData, setCurrentArticleData] = useState(null);
   
   // State for newsletter
   const [email, setEmail] = useState("");
@@ -91,7 +91,6 @@ const Sidebar = () => {
     } else {
       // Not on an article page
       setCurrentArticleId(null);
-      setCurrentArticleData(null);
     }
   }, [location.pathname]);
 
@@ -106,13 +105,11 @@ const Sidebar = () => {
         const article = response.data.data || response.data.article || response.data;
         if (article && article.id) {
           setCurrentArticleId(article.id);
-          setCurrentArticleData(article);
         }
       }
     } catch (error) {
       // Error fetching article data
       setCurrentArticleId(null);
-      setCurrentArticleData(null);
     }
   };
 

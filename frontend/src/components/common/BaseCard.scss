@@ -1,0 +1,172 @@
+// frontend/src/components/common/BaseCard.scss
+
+// BaseCard styles
+.base-card {
+  &-hoverable {
+    transition: all 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+  }
+  
+  &-clickable {
+    cursor: pointer;
+    user-select: none;
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  &-selected {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
+  }
+  
+  &-disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+  
+  // Horizontal card layout
+  &-horizontal {
+    .card-img-left,
+    .card-img-right {
+      flex-shrink: 0;
+    }
+    
+    > div {
+      align-items: stretch;
+    }
+  }
+  
+  &-horizontal-reverse {
+    > div {
+      flex-direction: row-reverse;
+    }
+  }
+  
+  // Header styles
+  &-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--bs-gray-900);
+      margin-bottom: 0;
+    }
+    
+    .card-subtitle {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+  }
+  
+  // Body styles
+  &-body {
+    flex: 1 1 auto;
+  }
+  
+  // Footer styles
+  &-footer {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    font-size: 0.875rem;
+  }
+}
+
+// Stats card specific styles
+.stats-card {
+  .base-card-body {
+    padding: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+  
+  h6 {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+  }
+}
+
+// Article card specific styles
+.article-card {
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// User card specific styles
+.user-card {
+  .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+// Dark theme support
+[data-bs-theme="dark"] {
+  .base-card {
+    &-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+      
+      .card-title {
+        color: var(--bs-gray-100);
+      }
+    }
+    
+    &-footer {
+      background-color: rgba(255, 255, 255, 0.03);
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 767px) {
+  .base-card-horizontal {
+    > div {
+      flex-direction: column !important;
+    }
+    
+    .card-img-left,
+    .card-img-right {
+      width: 100% !important;
+      height: 200px;
+    }
+  }
+}

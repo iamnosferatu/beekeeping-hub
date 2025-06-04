@@ -1,5 +1,5 @@
 // frontend/src/pages/admin/CommentsPage.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   Table,
@@ -14,7 +14,6 @@ import {
 import {
   BsCheck2Circle,
   BsXCircle,
-  BsClock,
   BsTrash,
   BsEye,
   BsExclamationTriangle,
@@ -52,7 +51,7 @@ const CommentsPage = () => {
   /**
    * Fetch comments from the backend
    */
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -117,11 +116,11 @@ const CommentsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, searchTerm]);
 
   useEffect(() => {
     fetchComments();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, fetchComments]);
 
   /**
    * Handle search submission
@@ -511,14 +510,10 @@ const CommentsPage = () => {
               </div>
               <div className="mb-3">
                 <strong>Status:</strong>{" "}
-                <Badge
-                  bg={
-                    getStatusBadge(selectedComment.status || "pending").variant
-                  }
-                >
-                  {getStatusBadge(selectedComment.status || "pending").icon}
-                  {getStatusBadge(selectedComment.status || "pending").text}
-                </Badge>
+                <StatusBadge 
+                  status={selectedComment.status || "pending"}
+                  type={StatusTypes.COMMENT}
+                />
               </div>
               <hr />
               <div>

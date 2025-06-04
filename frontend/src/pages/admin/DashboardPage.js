@@ -1,6 +1,6 @@
 // frontend/src/pages/admin/DashboardPage.js
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, Row, Col, Alert, Spinner, Table, Button } from "react-bootstrap";
+import { Row, Col, Alert, Spinner, Table, Button } from "react-bootstrap";
 import {
   BsFileEarmarkText,
   BsChatSquareText,
@@ -8,13 +8,13 @@ import {
   BsTag,
   BsEye,
   BsArrowUp,
-  BsArrowDown,
   BsArrowRepeat,
   BsExclamationTriangle,
 } from "react-icons/bs";
 import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
+import BaseCard from "../../components/common/BaseCard";
 
 /**
  * Admin Dashboard Page - Fixed Version
@@ -310,7 +310,7 @@ const DashboardPage = () => {
   // Fetch data on mount
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   /**
    * Manual refresh handler (memoized)
@@ -404,19 +404,11 @@ const DashboardPage = () => {
       <Row xs={1} md={2} xl={3} className="g-4 mb-4">
         {/* Articles Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">Articles</h6>
-                  <h3 className="mb-0 display-5">{displayStats.articles.total}</h3>
-                </div>
-                <BsFileEarmarkText
-                  size={40}
-                  className="text-primary opacity-75"
-                />
-              </div>
-              <hr />
+          <BaseCard.Stats
+            title="Articles"
+            value={displayStats.articles.total}
+            icon={BsFileEarmarkText}
+            footer={
               <div className="d-flex justify-content-between small">
                 <span className="text-success">
                   Published: <strong>{displayStats.articles.published}</strong>
@@ -430,25 +422,17 @@ const DashboardPage = () => {
                   </span>
                 )}
               </div>
-            </Card.Body>
-          </Card>
+            }
+          />
         </Col>
 
         {/* Comments Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">Comments</h6>
-                  <h3 className="mb-0 display-5">{displayStats.comments.total}</h3>
-                </div>
-                <BsChatSquareText
-                  size={40}
-                  className="text-warning opacity-75"
-                />
-              </div>
-              <hr />
+          <BaseCard.Stats
+            title="Comments"
+            value={displayStats.comments.total}
+            icon={BsChatSquareText}
+            footer={
               <div className="d-flex justify-content-between small">
                 <span className="text-success">
                   Approved: <strong>{displayStats.comments.approved}</strong>
@@ -462,22 +446,17 @@ const DashboardPage = () => {
                   </span>
                 )}
               </div>
-            </Card.Body>
-          </Card>
+            }
+          />
         </Col>
 
         {/* Users Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">Users</h6>
-                  <h3 className="mb-0 display-5">{displayStats.users.total}</h3>
-                </div>
-                <BsPeople size={40} className="text-success opacity-75" />
-              </div>
-              <hr />
+          <BaseCard.Stats
+            title="Users"
+            value={displayStats.users.total}
+            icon={BsPeople}
+            footer={
               <div className="d-flex justify-content-between small">
                 <span className="text-danger">
                   Admin: <strong>{displayStats.users.admin}</strong>
@@ -489,83 +468,75 @@ const DashboardPage = () => {
                   User: <strong>{displayStats.users.user}</strong>
                 </span>
               </div>
-            </Card.Body>
-          </Card>
+            }
+          />
         </Col>
 
         {/* Tags Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">Tags</h6>
-                  <h3 className="mb-0 display-5">{displayStats.tags.total}</h3>
-                </div>
-                <BsTag size={40} className="text-info opacity-75" />
-              </div>
-              <hr />
-              <div>
-                <small className="text-muted">
-                  Used to categorize and organize articles
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
+          <BaseCard.Stats
+            title="Tags"
+            value={displayStats.tags.total}
+            icon={BsTag}
+            footer={
+              <small className="text-muted">
+                Used to categorize and organize articles
+              </small>
+            }
+          />
         </Col>
 
         {/* Views Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">Total Views</h6>
-                  <h3 className="mb-0 display-5">{displayStats.views.total}</h3>
-                </div>
-                <BsEye size={40} className="text-danger opacity-75" />
-              </div>
-              <hr />
+          <BaseCard.Stats
+            title="Total Views"
+            value={displayStats.views.total}
+            icon={BsEye}
+            footer={
               <div className="text-center">
                 <small className="text-muted">
                   Aggregate views across all articles
                 </small>
               </div>
-            </Card.Body>
-          </Card>
+            }
+          />
         </Col>
 
         {/* System Status Card */}
         <Col>
-          <Card className="h-100 shadow-sm stats-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="text-muted mb-1">System Status</h6>
-                  <h3 className="mb-0">
-                    <span className="badge bg-success">Operational</span>
-                  </h3>
-                </div>
-                <BsArrowUp size={40} className="text-success opacity-75" />
+          <BaseCard
+            title="System Status"
+            height="full"
+            className="stats-card"
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <h3 className="mb-0">
+                  <span className="badge bg-success">Operational</span>
+                </h3>
               </div>
-              <hr />
-              <div className="text-center">
-                <small className="text-muted">
-                  All systems functioning normally
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
+              <BsArrowUp size={40} className="text-success opacity-75" />
+            </div>
+            <hr />
+            <div className="text-center">
+              <small className="text-muted">
+                All systems functioning normally
+              </small>
+            </div>
+          </BaseCard>
         </Col>
       </Row>
 
       {/* Recent Activity */}
-      <Card className="shadow-sm">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Recent Activity</h5>
-          <small className="text-muted">Last 10 activities</small>
-        </Card.Header>
-        <Card.Body className="p-0">
+      <BaseCard
+        header={
+          <div className="d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">Recent Activity</h5>
+            <small className="text-muted">Last 10 activities</small>
+          </div>
+        }
+        padding={false}
+      >
           {displayActivity.length > 0 ? (
             <div className="table-responsive">
               <Table hover className="mb-0">
@@ -617,8 +588,7 @@ const DashboardPage = () => {
               <p className="mb-0">No recent activity to display</p>
             </div>
           )}
-        </Card.Body>
-      </Card>
+      </BaseCard>
     </div>
   );
 };

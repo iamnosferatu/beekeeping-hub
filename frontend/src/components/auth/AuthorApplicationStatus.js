@@ -7,7 +7,8 @@ import {
   Spinner,
   Modal,
   Row,
-  Col
+  Col,
+  Badge
 } from 'react-bootstrap';
 import { 
   BsCheckCircle, 
