@@ -4,7 +4,6 @@ import {
   Card,
   Table,
   Button,
-  Badge,
   Alert,
   Spinner,
   Form,
@@ -27,6 +26,7 @@ import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
 import ErrorAlert from "../../components/common/ErrorAlert";
+import StatusBadge, { StatusTypes } from "../../components/common/StatusBadge";
 
 /**
  * Admin Articles Management Page
@@ -176,15 +176,11 @@ const ArticlesPage = () => {
   };
 
   /**
-   * Get status badge variant
+   * Get article status - prioritize blocked status
    */
-  const getStatusBadge = (article) => {
-    if (article.blocked) return { variant: "danger", text: "Blocked" };
-    if (article.status === "published")
-      return { variant: "success", text: "Published" };
-    if (article.status === "draft")
-      return { variant: "secondary", text: "Draft" };
-    return { variant: "warning", text: article.status };
+  const getArticleStatus = (article) => {
+    if (article.blocked) return 'blocked';
+    return article.status;
   };
 
   if (loading) {
@@ -299,9 +295,10 @@ const ArticlesPage = () => {
                       </td>
                       <td>{article.author?.username || "Unknown"}</td>
                       <td>
-                        <Badge bg={getStatusBadge(article).variant}>
-                          {getStatusBadge(article).text}
-                        </Badge>
+                        <StatusBadge 
+                          status={getArticleStatus(article)} 
+                          type={StatusTypes.ARTICLE}
+                        />
                       </td>
                       <td>
                         {article.published_at

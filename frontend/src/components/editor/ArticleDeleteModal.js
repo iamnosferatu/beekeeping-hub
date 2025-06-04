@@ -1,32 +1,24 @@
 // frontend/src/components/editor/ArticleDeleteModal.js
 import React from "react";
-import { Modal, Button } from "react-bootstrap";
-import { BsExclamationTriangle } from "react-icons/bs";
+import BaseModal from "../common/BaseModal";
 
 const ArticleDeleteModal = ({ show, onHide, onConfirmDelete }) => (
-  <Modal show={show} onHide={onHide}>
-    <Modal.Header closeButton>
-      <Modal.Title>Delete Article</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <div className="text-center">
-        <BsExclamationTriangle size={50} className="text-danger mb-3" />
-        <h5>Are you sure you want to delete this article?</h5>
-        <p className="text-muted">
-          This action cannot be undone. The article will be permanently removed
-          from your account.
-        </p>
-      </div>
-    </Modal.Body>
-    <Modal.Footer>
-      <Button variant="secondary" onClick={onHide}>
-        Cancel
-      </Button>
-      <Button variant="danger" onClick={onConfirmDelete}>
-        Delete Article
-      </Button>
-    </Modal.Footer>
-  </Modal>
+  <BaseModal
+    show={show}
+    onHide={onHide}
+    title="Delete Article"
+    variant="danger"
+    onConfirm={onConfirmDelete}
+    confirmText="Delete Article"
+  >
+    <div className="text-center">
+      <h5>Are you sure you want to delete this article?</h5>
+      <p className="text-muted">
+        This action cannot be undone. The article will be permanently removed
+        from your account.
+      </p>
+    </div>
+  </BaseModal>
 );
 
 export default ArticleDeleteModal;

@@ -2,6 +2,10 @@
 /* Import Bootstrap */
 @import '~bootstrap/scss/bootstrap';
 
+/* Import component styles */
+@import './components/common/StatusBadge.scss';
+@import './components/common/DataTable.scss';
+
 :root {
     --primary-color: #ffc107;
     --secondary-color: #6c757d;

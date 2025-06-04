@@ -4,10 +4,11 @@
  * Shows detailed information about why an article was blocked
  */
 import React from "react";
-import { Modal, Button, Alert } from "react-bootstrap";
+import { Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { BsShieldExclamation, BsInfoCircleFill } from "react-icons/bs";
 import moment from "moment";
+import BaseModal from "../common/BaseModal";
 
 const BlockedInfoModal = ({ show, article, onHide }) => {
   if (!article) return null;
@@ -33,71 +34,78 @@ const BlockedInfoModal = ({ show, article, onHide }) => {
     return moment(article.blocked_at).format("MMMM D, YYYY [at] h:mm A");
   };
 
+  const customFooter = (
+    <>
+      <Button variant="secondary" onClick={onHide}>
+        Close
+      </Button>
+      <Button
+        variant="primary"
+        as={Link}
+        to={`/editor/${article.id}`}
+        onClick={onHide}
+      >
+        Edit Article
+      </Button>
+    </>
+  );
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton className="bg-danger text-white">
-        <Modal.Title>
+    <BaseModal
+      show={show}
+      onHide={onHide}
+      title={
+        <>
           <BsShieldExclamation className="me-2" />
           Article Blocked
-        </Modal.Title>
-      </Modal.Header>
+        </>
+      }
+      size="lg"
+      centered
+      headerVariant="danger"
+      showConfirm={false}
+      footer={customFooter}
+    >
+      <div className="mb-4">
+        {/* Article Title */}
+        <h5 className="mb-3">{article.title}</h5>
 
-      <Modal.Body>
-        <div className="mb-4">
-          {/* Article Title */}
-          <h5 className="mb-3">{article.title}</h5>
-
-          {/* Block Reason */}
-          <div className="border-top border-bottom py-3 mb-3">
-            <h6 className="text-danger mb-2">Reason for blocking:</h6>
-            <p className="mb-0">
-              {article.blocked_reason || "No specific reason provided."}
-            </p>
-          </div>
-
-          {/* Block Details */}
-          <div className="mb-3">
-            <div className="row">
-              <div className="col-sm-4">
-                <strong>Blocked by:</strong>
-              </div>
-              <div className="col-sm-8">{getAdminName()}</div>
-            </div>
-            <div className="row">
-              <div className="col-sm-4">
-                <strong>Blocked on:</strong>
-              </div>
-              <div className="col-sm-8">{getBlockedDate()}</div>
-            </div>
-          </div>
-
-          {/* Information Alert */}
-          <Alert variant="info">
-            <BsInfoCircleFill className="me-2" />
-            <strong>What you can do:</strong>
-            <ul className="mb-0 mt-2">
-              <li>Edit this article to address the issues mentioned above</li>
-              <li>Contact an administrator after making changes</li>
-              <li>Only administrators can remove the block status</li>
-            </ul>
-          </Alert>
+        {/* Block Reason */}
+        <div className="border-top border-bottom py-3 mb-3">
+          <h6 className="text-danger mb-2">Reason for blocking:</h6>
+          <p className="mb-0">
+            {article.blocked_reason || "No specific reason provided."}
+          </p>
         </div>
-      </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          Close
-        </Button>
-        <Button
-          variant="primary"
-          as={Link}
-          to={`/editor/${article.id}`}
-          onClick={onHide}
-        >
-          Edit Article
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        {/* Block Details */}
+        <div className="mb-3">
+          <div className="row">
+            <div className="col-sm-4">
+              <strong>Blocked by:</strong>
+            </div>
+            <div className="col-sm-8">{getAdminName()}</div>
+          </div>
+          <div className="row">
+            <div className="col-sm-4">
+              <strong>Blocked on:</strong>
+            </div>
+            <div className="col-sm-8">{getBlockedDate()}</div>
+          </div>
+        </div>
+
+        {/* Information Alert */}
+        <Alert variant="info">
+          <BsInfoCircleFill className="me-2" />
+          <strong>What you can do:</strong>
+          <ul className="mb-0 mt-2">
+            <li>Edit this article to address the issues mentioned above</li>
+            <li>Contact an administrator after making changes</li>
+            <li>Only administrators can remove the block status</li>
+          </ul>
+        </Alert>
+      </div>
+    </BaseModal>
   );
 };
 

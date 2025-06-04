@@ -2,7 +2,6 @@
 import React, { useState, useContext } from 'react';
 import { 
   Card, 
-  Badge, 
   Button, 
   Alert, 
   Spinner,
@@ -25,6 +24,7 @@ import {
 } from '../../hooks/queries/useAuthorApplications';
 import AuthorApplicationForm from './AuthorApplicationForm';
 import AuthContext from '../../contexts/AuthContext';
+import StatusBadge, { StatusTypes } from '../common/StatusBadge';
 
 /**
  * AuthorApplicationStatus Component
@@ -281,10 +281,11 @@ const AuthorApplicationStatus = () => {
           <Card.Body>
             <div className="d-flex align-items-center justify-content-between mb-3">
               <h5 className="mb-0">Author Application</h5>
-              <Badge bg={statusConfig.variant} className="px-3 py-2">
-                {statusConfig.icon}
-                {statusConfig.text}
-              </Badge>
+              <StatusBadge 
+                status={applicationData.status}
+                type={StatusTypes.APPLICATION}
+                size="lg"
+              />
             </div>
 
             <p className="text-muted mb-3">

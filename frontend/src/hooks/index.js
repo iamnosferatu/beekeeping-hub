@@ -2,6 +2,7 @@
 
 // Form hooks
 export { default as useArticleForm } from "./useArticleForm";
+export { default as useFormValidation, commonValidations } from "./useFormValidation";
 
 // Data fetching hooks
 export { default as useArticleFetch } from "./useArticleFetch";

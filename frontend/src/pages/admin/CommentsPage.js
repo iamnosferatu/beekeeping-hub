@@ -4,7 +4,6 @@ import {
   Card,
   Table,
   Button,
-  Badge,
   Alert,
   Spinner,
   Form,
@@ -27,6 +26,7 @@ import axios from "axios";
 import { API_URL } from "../../config";
 import moment from "moment";
 import Avatar from "../../components/common/Avatar";
+import StatusBadge, { StatusTypes } from "../../components/common/StatusBadge";
 
 /**
  * Admin Comments Management Page
@@ -207,33 +207,6 @@ const CommentsPage = () => {
     }
   };
 
-  /**
-   * Get status badge configuration
-   */
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "approved":
-        return {
-          variant: "success",
-          icon: <BsCheck2Circle className="me-1" />,
-          text: "Approved",
-        };
-      case "rejected":
-        return {
-          variant: "danger",
-          icon: <BsXCircle className="me-1" />,
-          text: "Rejected",
-        };
-      case "pending":
-        return {
-          variant: "warning",
-          icon: <BsClock className="me-1" />,
-          text: "Pending",
-        };
-      default:
-        return { variant: "secondary", icon: null, text: status };
-    }
-  };
 
   if (loading) {
     return (
@@ -388,14 +361,10 @@ const CommentsPage = () => {
                         )}
                       </td>
                       <td>
-                        <Badge
-                          bg={
-                            getStatusBadge(comment.status || "pending").variant
-                          }
-                        >
-                          {getStatusBadge(comment.status || "pending").icon}
-                          {getStatusBadge(comment.status || "pending").text}
-                        </Badge>
+                        <StatusBadge 
+                          status={comment.status || "pending"}
+                          type={StatusTypes.COMMENT}
+                        />
                       </td>
                       <td>
                         {moment(comment.created_at).format("MMM D, YYYY")}

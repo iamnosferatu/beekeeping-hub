@@ -5,14 +5,14 @@
  */
 import React from "react";
 import { Link } from "react-router-dom";
-import { Card, Table, Button, Badge, Pagination } from "react-bootstrap";
+import { Card, Table, Button, Pagination } from "react-bootstrap";
 import {
   BsPencilSquare,
   BsTrash,
   BsEnvelope,
-  BsShieldFill,
 } from "react-icons/bs";
 import moment from "moment";
+import StatusBadge, { StatusTypes } from "../../common/StatusBadge";
 
 const UserTable = ({
   users,
@@ -23,18 +23,6 @@ const UserTable = ({
   onRoleChange,
   onDelete,
 }) => {
-  /**
-   * Get role badge configuration
-   */
-  const getRoleBadge = (role) => {
-    const badgeConfig = {
-      admin: { variant: "danger", icon: <BsShieldFill className="me-1" /> },
-      author: { variant: "warning", icon: null },
-      user: { variant: "info", icon: null },
-    };
-
-    return badgeConfig[role] || { variant: "secondary", icon: null };
-  };
 
   /**
    * Format user display name
@@ -69,7 +57,6 @@ const UserTable = ({
             <tbody>
               {users.length > 0 ? (
                 users.map((user) => {
-                  const roleBadge = getRoleBadge(user.role);
                   const isCurrentUserRow = isCurrentUser(user.id);
 
                   return (
@@ -94,9 +81,16 @@ const UserTable = ({
                           <div>
                             <strong>{user.username}</strong>
                             {isCurrentUserRow && (
-                              <Badge bg="primary" className="ms-2 small">
-                                You
-                              </Badge>
+                              <StatusBadge 
+                                status="You" 
+                                customConfig={{
+                                  variant: 'primary',
+                                  text: 'You',
+                                  icon: null
+                                }}
+                                size="sm"
+                                className="ms-2"
+                              />
                             )}
                             <div className="small text-muted">
                               {getUserDisplayName(user)}
@@ -118,10 +112,10 @@ const UserTable = ({
 
                       {/* Role */}
                       <td>
-                        <Badge bg={roleBadge.variant}>
-                          {roleBadge.icon}
-                          {user.role}
-                        </Badge>
+                        <StatusBadge 
+                          status={user.role}
+                          type={StatusTypes.ROLE}
+                        />
                       </td>
 
                       {/* Article Count */}

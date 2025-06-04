@@ -1,0 +1,77 @@
+// StatusBadge.scss
+// Styles for the StatusBadge component
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  vertical-align: middle;
+  
+  // Icon styling
+  .status-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    
+    svg {
+      width: 0.875em;
+      height: 0.875em;
+    }
+  }
+  
+  // Size variations
+  &.status-badge-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    
+    .status-badge-icon svg {
+      width: 0.75em;
+      height: 0.75em;
+    }
+  }
+  
+  &.status-badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    
+    .status-badge-icon svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+}
+
+// Ensure proper contrast for all badge variants
+.badge {
+  &.bg-secondary {
+    color: #fff !important;
+  }
+  
+  &.bg-info {
+    color: #fff !important;
+  }
+  
+  &.bg-warning {
+    color: #000 !important;
+  }
+}
+
+// Animation for status changes
+.status-badge {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Inline usage spacing
+.status-badge + .status-badge {
+  margin-left: 0.5rem;
+}
+
+// Table cell alignment
+td .status-badge,
+th .status-badge {
+  vertical-align: middle;
+}
