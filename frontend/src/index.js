@@ -92,17 +92,16 @@ const initializeCache = async () => {
   // Restore cache from localStorage
   persistenceUtils.restoreFromStorage();
   
-  // DISABLED: Cache warming causing image loading issues
-  // await warmCache.onAppInit();
-  console.log('⚠️ Cache warming DISABLED - fixing image loading issues');
+  // Re-enable cache warming now that SCSS issue has been resolved
+  await warmCache.onAppInit();
 };
 
 // Initialize cache asynchronously
-// TEMPORARILY DISABLED cache warming due to image conflicts
 initializeCache().catch(error => {
-  console.warn('Cache initialization failed:', error);
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('Cache initialization failed:', error);
+  }
 });
-console.log('🔧 Cache warming DISABLED to fix image loading issues');
 
 // Add global debugging helpers for cache inspection
 if (typeof window !== 'undefined') {
@@ -153,11 +152,13 @@ if (typeof window !== 'undefined') {
   };
   
   window.queryClient = queryClient;
-  console.log('🔧 Debug helpers available:');
-  console.log('  window.debugCache.getStats() - Get cache statistics');
-  console.log('  window.debugCache.getAllQueries() - List all cached queries');
-  console.log('  window.debugCache.clearCache() - Clear all cache');
-  console.log('  window.queryClient - Direct access to QueryClient');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 Debug helpers available:');
+    console.log('  window.debugCache.getStats() - Get cache statistics');
+    console.log('  window.debugCache.getAllQueries() - List all cached queries');
+    console.log('  window.debugCache.clearCache() - Clear all cache');
+    console.log('  window.queryClient - Direct access to QueryClient');
+  }
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -170,11 +171,13 @@ const AppWrapper = ({ children }) => {
                               !process.env.REACT_APP_DISABLE_STRICT_MODE;
   
   // Debug logging to confirm environment variables
-  console.log('🔧 StrictMode Configuration:');
-  console.log('  NODE_ENV:', process.env.NODE_ENV);
-  console.log('  REACT_APP_DISABLE_STRICT_MODE:', process.env.REACT_APP_DISABLE_STRICT_MODE);
-  console.log('  shouldUseStrictMode:', shouldUseStrictMode);
-  console.log('  StrictMode enabled:', shouldUseStrictMode ? 'YES' : 'NO');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 StrictMode Configuration:');
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+    console.log('  REACT_APP_DISABLE_STRICT_MODE:', process.env.REACT_APP_DISABLE_STRICT_MODE);
+    console.log('  shouldUseStrictMode:', shouldUseStrictMode);
+    console.log('  StrictMode enabled:', shouldUseStrictMode ? 'YES' : 'NO');
+  }
   
   return shouldUseStrictMode ? (
     <React.StrictMode>{children}</React.StrictMode>

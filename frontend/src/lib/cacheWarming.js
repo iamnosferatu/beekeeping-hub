@@ -30,9 +30,8 @@ class CacheWarmingManager {
     };
     
     this.setupDefaultStrategies();
-    // DISABLED: Behavior tracking causing image conflicts
-    // this.startBehaviorTracking();
-    console.log('⚠️ Cache warming behavior tracking DISABLED');
+    // Re-enable behavior tracking now that SCSS issue has been resolved
+    this.startBehaviorTracking();
   }
 
   /**
@@ -44,11 +43,6 @@ class CacheWarmingManager {
       priority: 'critical',
       triggers: ['app.mount'],
       prefetch: async () => {
-        // DISABLED: Temporarily disabled to prevent image loading conflicts
-        console.log('🚫 App init cache warming temporarily disabled');
-        return;
-        
-        /* Original implementation - commented out
         // SIMPLIFIED CACHE WARMING - Only warm the most critical query
         // Use the exact same query function as components to avoid conflicts
         const apiService = await this.getApiService();
@@ -71,7 +65,6 @@ class CacheWarmingManager {
 
 
         await cacheUtils.warmCache(strategies);
-        */
       },
     });
 

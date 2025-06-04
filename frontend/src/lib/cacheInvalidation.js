@@ -306,7 +306,9 @@ class CacheInvalidationManager {
       this.invalidate('time.daily');
     }, 24 * 60 * 60 * 1000); // 24 hours
 
-    console.debug('Cache invalidation scheduler started');
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Cache invalidation scheduler started');
+    }
   }
 
   /**
