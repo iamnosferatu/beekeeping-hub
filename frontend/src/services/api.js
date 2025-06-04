@@ -101,6 +101,20 @@ class ApiService {
     // Handle specific HTTP status codes
     switch (status) {
       case 401:
+        // Check if this is a login attempt
+        const isLoginAttempt = error.config?.url === "/auth/login";
+        
+        if (isLoginAttempt) {
+          // For login failures, return a more appropriate message
+          return {
+            type: "AUTH_ERROR",
+            message: data?.message || "Invalid email or password. Please try again.",
+            status,
+            data,
+          };
+        }
+        
+        // For other 401 errors, treat as session expiration
         // Unauthorized - clear tokens from both storage locations 
         localStorage.removeItem(TOKEN_NAME);
         localStorage.removeItem(`${TOKEN_NAME}_remember`);

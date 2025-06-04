@@ -163,7 +163,7 @@ export const SiteSettingsProvider = ({ children }) => {
     toggleMaintenanceMode,
     toggleAlert,
     dismissAlert,
-    refreshSettings: fetchSettings,
+    refreshSettings: refetch,
   }), [
     settings,
     loading,
@@ -173,7 +173,7 @@ export const SiteSettingsProvider = ({ children }) => {
     toggleMaintenanceMode,
     toggleAlert,
     dismissAlert,
-    fetchSettings,
+    refetch,
   ]);
 
   return (

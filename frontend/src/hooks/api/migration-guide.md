@@ -28,9 +28,9 @@ This guide shows how to migrate from direct axios calls to using the centralized
 - `useUpdateTagAdmin` - Update tag
 - `useDeleteTagAdmin` - Delete tag
 - `useMergeTags` - Merge two tags
-- `useContactMessages` - Fetch contact messages
-- `useMarkContactMessageRead` - Mark message as read
-- `useDeleteContactMessage` - Delete contact message
+- `useAdminContactMessages` - Fetch contact messages (admin)
+- `useMarkContactMessageReadAdmin` - Mark message as read (admin)
+- `useDeleteContactMessageAdmin` - Delete contact message (admin)
 
 ### Comment Hooks (`useComments.js`)
 - `useComments` - Fetch comments for an article

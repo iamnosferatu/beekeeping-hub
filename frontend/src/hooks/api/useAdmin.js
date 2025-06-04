@@ -93,9 +93,9 @@ export const useDeleteArticleAdmin = (options = {}) => {
 // ========== COMMENT MANAGEMENT HOOKS ==========
 
 /**
- * Hook to update comment status
+ * Hook to update comment status (admin)
  */
-export const useUpdateCommentStatus = (options = {}) => {
+export const useUpdateCommentStatusAdmin = (options = {}) => {
   return useMutation(
     ({ commentId, status }) => apiService.admin.comments.updateStatus(commentId, status),
     options
@@ -168,9 +168,9 @@ export const useMergeTags = (options = {}) => {
 // ========== CONTACT MESSAGE HOOKS ==========
 
 /**
- * Hook to fetch contact messages
+ * Hook to fetch contact messages (admin)
  */
-export const useContactMessages = (filters = {}, options = {}) => {
+export const useAdminContactMessages = (filters = {}, options = {}) => {
   return usePaginatedApi(
     (params) => apiService.admin.contactMessages.getAll(params),
     filters,
@@ -179,9 +179,9 @@ export const useContactMessages = (filters = {}, options = {}) => {
 };
 
 /**
- * Hook to mark contact message as read
+ * Hook to mark contact message as read (admin)
  */
-export const useMarkContactMessageRead = (options = {}) => {
+export const useMarkContactMessageReadAdmin = (options = {}) => {
   return useMutation(
     (messageId) => apiService.admin.contactMessages.markAsRead(messageId),
     options
@@ -189,9 +189,9 @@ export const useMarkContactMessageRead = (options = {}) => {
 };
 
 /**
- * Hook to delete contact message
+ * Hook to delete contact message (admin)
  */
-export const useDeleteContactMessage = (options = {}) => {
+export const useDeleteContactMessageAdmin = (options = {}) => {
   return useMutation(
     (messageId) => apiService.admin.contactMessages.delete(messageId),
     options
