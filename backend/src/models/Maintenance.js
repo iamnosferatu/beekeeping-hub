@@ -1,6 +1,6 @@
-// backend/src/models/SiteSettings.js
+// backend/src/models/Maintenance.js
 module.exports = (sequelize, DataTypes) => {
-  const SiteSettings = sequelize.define("SiteSettings", {
+  const Maintenance = sequelize.define("Maintenance", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -59,13 +59,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: "Optional link URL for the alert",
     },
-    // Forum settings
-    forum_enabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: false,
-      comment: "Whether the forum feature is enabled",
-    },
     // Tracking who made changes
     updated_by: {
       type: DataTypes.INTEGER,
@@ -75,7 +68,11 @@ module.exports = (sequelize, DataTypes) => {
         key: "id",
       },
     },
+  }, {
+    tableName: 'maintenance',
+    underscored: true,
+    timestamps: true
   });
 
-  return SiteSettings;
+  return Maintenance;
 };

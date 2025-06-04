@@ -1,4 +1,4 @@
-const { ForumComment, ForumThread, User, UserForumBan, SiteSettings } = require('../models');
+const { ForumComment, ForumThread, User, UserForumBan } = require('../models');
 const { asyncHandler } = require('../utils/errors');
 
 // Check if user is banned from forum
@@ -13,15 +13,6 @@ exports.createComment = asyncHandler(async (req, res) => {
   console.log('Creating forum comment - Request body:', req.body);
   console.log('User:', req.user?.id, req.user?.role);
   
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Check if user is banned
   try {
     const isBanned = await checkForumBan(req.user.id);
@@ -122,15 +113,6 @@ exports.createComment = asyncHandler(async (req, res) => {
 // @route   PUT /api/forum/comments/:id
 // @access  Owner/Admin
 exports.updateComment = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Check if user is banned
   if (await checkForumBan(req.user.id)) {
     return res.status(403).json({
@@ -208,15 +190,6 @@ exports.updateComment = asyncHandler(async (req, res) => {
 // @route   DELETE /api/forum/comments/:id
 // @access  Owner/Admin
 exports.deleteComment = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   const comment = await ForumComment.findByPk(req.params.id);
 
   if (!comment) {

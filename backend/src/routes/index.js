@@ -12,7 +12,8 @@ const articleRoutes = require("./articleRoutes");
 const commentRoutes = require("./commentRoutes");
 const tagRoutes = require("./tagRoutes");
 const adminRoutes = require("./adminRoutes");
-const siteSettingsRoutes = require("./siteSettingsRoutes");
+const maintenanceRoutes = require("./maintenanceRoutes");
+const featureRoutes = require("./featureRoutes");
 const newsletterRoutes = require("./newsletterRoutes");
 const contactRoutes = require("./contactRoutes");
 const likeRoutes = require("./likeRoutes");
@@ -35,7 +36,8 @@ router.get("/", (req, res) => {
       "/comments",
       "/tags",
       "/admin",
-      "/site-settings",
+      "/maintenance",
+      "/features",
       "/newsletter",
       "/contact",
       "/likes",
@@ -55,7 +57,9 @@ router.use("/articles", articleRoutes);
 router.use("/comments", commentRoutes);
 router.use("/tags", tagRoutes);
 router.use("/admin", adminRoutes);
-router.use("/site-settings", siteSettingsRoutes);
+router.use("/maintenance", maintenanceRoutes);
+router.use("/site-settings", maintenanceRoutes); // Backward compatibility
+router.use("/features", featureRoutes);
 router.use("/newsletter", newsletterRoutes);
 router.use("/contact", contactRoutes);
 router.use("/likes", likeRoutes);

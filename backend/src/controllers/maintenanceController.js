@@ -1,22 +1,22 @@
-// backend/src/controllers/siteSettingsController.js
-const { SiteSettings, User } = require("../models");
+// backend/src/controllers/maintenanceController.js
+const { Maintenance, User } = require("../models");
 
 /**
- * Site Settings Controller
+ * Maintenance Controller
  *
- * Manages site-wide settings including maintenance mode and alert banners.
+ * Manages maintenance mode and alert banners.
  * Only accessible by admin users.
  */
-const siteSettingsController = {
+const maintenanceController = {
   /**
-   * Get current site settings
+   * Get current maintenance settings
    * @route GET /api/site-settings
    * @access Public (anyone can check if site is in maintenance)
    */
   getSettings: async (req, res, next) => {
     try {
       // First, try to find existing settings
-      let settings = await SiteSettings.findOne({
+      let settings = await Maintenance.findOne({
         include: [
           {
             model: User,
@@ -28,8 +28,8 @@ const siteSettingsController = {
 
       // If no settings exist, create default settings
       if (!settings) {
-        console.log("No site settings found, creating defaults...");
-        settings = await SiteSettings.create({
+        console.log("No maintenance settings found, creating defaults...");
+        settings = await Maintenance.create({
           maintenance_mode: false,
           maintenance_title: "Site Under Maintenance",
           maintenance_message:
@@ -57,7 +57,6 @@ const siteSettingsController = {
           alert_dismissible: settings.alert_dismissible,
           alert_link_text: settings.alert_link_text,
           alert_link_url: settings.alert_link_url,
-          forum_enabled: settings.forum_enabled,
         };
 
         return res.status(200).json({
@@ -72,23 +71,23 @@ const siteSettingsController = {
         data: settings,
       });
     } catch (error) {
-      console.error("Error fetching site settings:", error);
+      console.error("Error fetching maintenance settings:", error);
       next(error);
     }
   },
 
   /**
-   * Update site settings
+   * Update maintenance settings
    * @route PUT /api/site-settings
    * @access Private (Admin only)
    */
   updateSettings: async (req, res, next) => {
     try {
       // Find or create settings
-      let settings = await SiteSettings.findOne();
+      let settings = await Maintenance.findOne();
 
       if (!settings) {
-        settings = await SiteSettings.create({});
+        settings = await Maintenance.create({});
       }
 
       // Extract allowed fields from request body
@@ -181,11 +180,11 @@ const siteSettingsController = {
 
       res.status(200).json({
         success: true,
-        message: "Site settings updated successfully",
+        message: "Maintenance settings updated successfully",
         data: settings,
       });
     } catch (error) {
-      console.error("Error updating site settings:", error);
+      console.error("Error updating maintenance settings:", error);
       next(error);
     }
   },
@@ -197,10 +196,10 @@ const siteSettingsController = {
    */
   toggleMaintenanceMode: async (req, res, next) => {
     try {
-      let settings = await SiteSettings.findOne();
+      let settings = await Maintenance.findOne();
 
       if (!settings) {
-        settings = await SiteSettings.create({});
+        settings = await Maintenance.create({});
       }
 
       // Toggle maintenance mode
@@ -233,10 +232,10 @@ const siteSettingsController = {
    */
   toggleAlert: async (req, res, next) => {
     try {
-      let settings = await SiteSettings.findOne();
+      let settings = await Maintenance.findOne();
 
       if (!settings) {
-        settings = await SiteSettings.create({});
+        settings = await Maintenance.create({});
       }
 
       // Check if there's a message to display
@@ -272,4 +271,4 @@ const siteSettingsController = {
   },
 };
 
-module.exports = siteSettingsController;
+module.exports = maintenanceController;

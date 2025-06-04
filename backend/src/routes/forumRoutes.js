@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
+const { Feature } = require('../models');
 const {
   getCategories,
   getCategory,
@@ -20,6 +21,26 @@ const {
   updateComment,
   deleteComment
 } = require('../controllers/forumCommentController');
+
+// Middleware to check if forum feature is enabled
+const checkForumEnabled = async (req, res, next) => {
+  try {
+    const isEnabled = await Feature.getFeatureStatus('forum');
+    if (!isEnabled) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forum feature is currently disabled'
+      });
+    }
+    next();
+  } catch (error) {
+    console.error('Error checking forum feature status:', error);
+    next(error);
+  }
+};
+
+// Apply forum check to all routes
+router.use(checkForumEnabled);
 
 // Validation middleware
 const { 

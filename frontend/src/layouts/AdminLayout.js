@@ -18,6 +18,7 @@ import {
   BsBullseye,
   BsBug,
   BsPersonCheck,
+  BsToggleOn,
   BsChatSquareDots,
   BsFileCode,
 } from "react-icons/bs";
@@ -120,6 +121,11 @@ const AdminLayout = () => {
       path: "/admin/settings",
       icon: <BsGear size={20} />,
       label: "Settings",
+    },
+    {
+      path: "/admin/features",
+      icon: <BsToggleOn size={20} />,
+      label: "Features",
     },
     {
       path: "/admin/diagnostics",

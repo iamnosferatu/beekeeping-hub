@@ -60,7 +60,7 @@ const Header = memo(() => {
             <Nav.Link as={Link} to="/articles">
               Articles
             </Nav.Link>
-            {settings?.forum_enabled && user && (
+            {settings?.forum_enabled && (
               <Nav.Link as={Link} to="/forum">
                 Forum
               </Nav.Link>

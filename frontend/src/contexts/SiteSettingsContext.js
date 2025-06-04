@@ -1,6 +1,6 @@
 // frontend/src/contexts/SiteSettingsContext.js
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from "react";
-import { useSiteSettings as useSiteSettingsHook, useUpdateSiteSettings } from "../hooks";
+import { useSiteSettings as useSiteSettingsHook, useUpdateSiteSettings, useFeatureStatus } from "../hooks";
 
 /**
  * Site Settings Context
@@ -44,6 +44,7 @@ export const SiteSettingsProvider = ({ children }) => {
     alert_dismissible: true,
     alert_link_text: null,
     alert_link_url: null,
+    forum_enabled: false, // Default to false
   });
 
   // Loading and error states
@@ -52,6 +53,9 @@ export const SiteSettingsProvider = ({ children }) => {
   
   // Use the site settings hooks
   const { data: settingsData, loading: settingsLoading, error: settingsError, refetch } = useSiteSettingsHook();
+  
+  // Check forum feature status
+  const { data: forumFeatureData, loading: forumLoading } = useFeatureStatus('forum');
   const { mutate: updateSettingsMutation } = useUpdateSiteSettings({
     onSuccess: (response) => {
       if (response.success && response.data) {
@@ -70,19 +74,36 @@ export const SiteSettingsProvider = ({ children }) => {
   // Update settings when data from hook changes
   useEffect(() => {
     if (settingsData?.success && settingsData.data) {
-      setSettings(settingsData.data);
+      const newSettings = { ...settingsData.data };
+      
+      // Add forum_enabled from feature flag
+      if (forumFeatureData?.success && forumFeatureData.data) {
+        newSettings.forum_enabled = forumFeatureData.data.enabled;
+      }
+      
+      setSettings(newSettings);
       // Check if alert has changed (reset dismissed state)
-      if (settingsData.data.alert_message !== settings.alert_message) {
+      if (newSettings.alert_message !== settings.alert_message) {
         setAlertDismissed(false);
       }
     }
-  }, [settingsData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settingsData, forumFeatureData]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Update forum_enabled when feature data changes
+  useEffect(() => {
+    if (forumFeatureData?.success && forumFeatureData.data) {
+      setSettings(prev => ({
+        ...prev,
+        forum_enabled: forumFeatureData.data.enabled
+      }));
+    }
+  }, [forumFeatureData]);
   
   // Update loading and error states
   useEffect(() => {
-    setLoading(settingsLoading);
+    setLoading(settingsLoading || forumLoading);
     setError(settingsError?.message || null);
-  }, [settingsLoading, settingsError]);
+  }, [settingsLoading, settingsError, forumLoading]);
 
   /**
    * Update site settings (admin only) (memoized)

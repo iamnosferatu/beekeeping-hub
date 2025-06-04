@@ -1,4 +1,4 @@
-const { ForumCategory, ForumThread, User, SiteSettings } = require('../models');
+const { ForumCategory, ForumThread, User } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../utils/errors');
 
@@ -6,15 +6,6 @@ const { asyncHandler } = require('../utils/errors');
 // @route   GET /api/forum/categories
 // @access  Public (but check if forum is enabled)
 exports.getCategories = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Build query conditions
   const where = {};
   
@@ -60,15 +51,6 @@ exports.getCategories = asyncHandler(async (req, res) => {
 // @route   GET /api/forum/categories/:slug
 // @access  Public (logged in users only)
 exports.getCategory = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Only logged in users can view category details
   if (!req.user) {
     return res.status(401).json({
@@ -138,15 +120,6 @@ exports.getCategory = asyncHandler(async (req, res) => {
 // @route   POST /api/forum/categories
 // @access  Author/Admin
 exports.createCategory = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Only authors and admins can create categories
   if (!req.user || (req.user.role !== 'author' && req.user.role !== 'admin')) {
     return res.status(403).json({
@@ -183,15 +156,6 @@ exports.createCategory = asyncHandler(async (req, res) => {
 // @route   PUT /api/forum/categories/:id
 // @access  Owner/Admin
 exports.updateCategory = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   const category = await ForumCategory.findByPk(req.params.id);
 
   if (!category) {
@@ -236,15 +200,6 @@ exports.updateCategory = asyncHandler(async (req, res) => {
 // @route   DELETE /api/forum/categories/:id
 // @access  Owner/Admin
 exports.deleteCategory = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   const category = await ForumCategory.findByPk(req.params.id);
 
   if (!category) {

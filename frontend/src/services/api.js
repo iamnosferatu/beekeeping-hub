@@ -782,7 +782,7 @@ class ApiService {
   // =============================================================================
   siteSettings = {
     /**
-     * Get site settings
+     * Get site settings (maintenance settings)
      */
     get: async () => {
       return this.request({
@@ -799,6 +799,63 @@ class ApiService {
         method: "PUT",
         url: "/site-settings",
         data: settings,
+      });
+    },
+  };
+
+  // =============================================================================
+  // FEATURES ENDPOINTS
+  // =============================================================================
+  features = {
+    /**
+     * Get all features (admin only)
+     */
+    getAll: async () => {
+      return this.request({
+        method: "GET",
+        url: "/features",
+      });
+    },
+
+    /**
+     * Get feature status
+     */
+    getStatus: async (featureName) => {
+      return this.request({
+        method: "GET",
+        url: `/features/${featureName}`,
+      });
+    },
+
+    /**
+     * Toggle feature (admin only)
+     */
+    toggle: async (featureName, enabled) => {
+      return this.request({
+        method: "PUT",
+        url: `/features/${featureName}`,
+        data: { enabled },
+      });
+    },
+
+    /**
+     * Create new feature (admin only)
+     */
+    create: async (featureData) => {
+      return this.request({
+        method: "POST",
+        url: "/features",
+        data: featureData,
+      });
+    },
+
+    /**
+     * Delete feature (admin only)
+     */
+    delete: async (featureName) => {
+      return this.request({
+        method: "DELETE",
+        url: `/features/${featureName}`,
       });
     },
   };

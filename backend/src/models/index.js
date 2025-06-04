@@ -8,7 +8,8 @@ const Article = require("./Article")(sequelize, DataTypes);
 const Comment = require("./Comment")(sequelize, DataTypes);
 const Tag = require("./Tag")(sequelize, DataTypes);
 const Like = require("./Like")(sequelize, DataTypes);
-const SiteSettings = require("./SiteSettings")(sequelize, DataTypes);
+const Maintenance = require("./Maintenance")(sequelize, DataTypes);
+const Feature = require("./Feature")(sequelize, DataTypes);
 const Newsletter = require("./Newsletter")(sequelize, DataTypes);
 const Contact = require("./Contact")(sequelize, DataTypes);
 const AuthorApplication = require("./AuthorApplication")(sequelize, DataTypes);
@@ -47,8 +48,8 @@ Like.belongsTo(User, { foreignKey: "user_id" });
 Article.hasMany(Like, { foreignKey: "article_id" });
 Like.belongsTo(Article, { foreignKey: "article_id" });
 
-// Site Settings relationship with User (who updated it)
-SiteSettings.belongsTo(User, { foreignKey: "updated_by", as: "updatedBy" });
+// Maintenance relationship with User (who updated it)
+Maintenance.belongsTo(User, { foreignKey: "updated_by", as: "updatedBy" });
 
 // Author Application relationships
 User.hasMany(AuthorApplication, { foreignKey: "user_id", as: "authorApplications" });
@@ -91,7 +92,8 @@ module.exports = {
   Comment,
   Tag,
   Like,
-  SiteSettings,
+  Maintenance,
+  Feature,
   Newsletter,
   Contact,
   AuthorApplication,

@@ -1,4 +1,4 @@
-const { ForumThread, ForumCategory, ForumComment, User, UserForumBan, SiteSettings } = require('../models');
+const { ForumThread, ForumCategory, ForumComment, User, UserForumBan } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../utils/errors');
 
@@ -11,15 +11,6 @@ const checkForumBan = async (userId) => {
 // @route   GET /api/forum/threads?category=:categoryId
 // @access  Private (logged in users)
 exports.getThreads = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -100,15 +91,6 @@ exports.getThreads = asyncHandler(async (req, res) => {
 // @route   GET /api/forum/threads/:slug
 // @access  Private (logged in users)
 exports.getThread = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -192,15 +174,6 @@ exports.getThread = asyncHandler(async (req, res) => {
 // @route   POST /api/forum/threads
 // @access  Author/Admin
 exports.createThread = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Check if user is banned
   if (await checkForumBan(req.user.id)) {
     return res.status(403).json({
@@ -267,15 +240,6 @@ exports.createThread = asyncHandler(async (req, res) => {
 // @route   PUT /api/forum/threads/:id
 // @access  Owner/Admin
 exports.updateThread = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   // Check if user is banned
   if (await checkForumBan(req.user.id)) {
     return res.status(403).json({
@@ -333,15 +297,6 @@ exports.updateThread = asyncHandler(async (req, res) => {
 // @route   DELETE /api/forum/threads/:id
 // @access  Owner/Admin
 exports.deleteThread = asyncHandler(async (req, res) => {
-  // Check if forum is enabled
-  const settings = await SiteSettings.findOne();
-  if (!settings?.forum_enabled) {
-    return res.status(403).json({
-      success: false,
-      message: 'Forum feature is currently disabled'
-    });
-  }
-
   const thread = await ForumThread.findByPk(req.params.id);
 
   if (!thread) {
