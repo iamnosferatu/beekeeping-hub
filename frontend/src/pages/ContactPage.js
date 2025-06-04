@@ -10,6 +10,7 @@ import {
   Alert,
   Spinner,
 } from "react-bootstrap";
+import FormField from "../components/common/FormField";
 import {
   BsEnvelope,
   BsGeoAlt,
@@ -245,75 +246,58 @@ const ContactPage = () => {
 
                 <Form onSubmit={handleSubmit}>
                   <Row>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Your Name *</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          isInvalid={!!errors.name}
-                          placeholder="John Doe"
-                          disabled={isSubmitting}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.name}
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
+                    <FormField
+                      col={6}
+                      name="name"
+                      label="Your Name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      disabled={isSubmitting}
+                      required
+                      error={errors.name}
+                    />
 
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Your Email *</Form.Label>
-                        <Form.Control
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          isInvalid={!!errors.email}
-                          placeholder="john@example.com"
-                          disabled={isSubmitting}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.email}
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
+                    <FormField
+                      col={6}
+                      name="email"
+                      label="Your Email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                      disabled={isSubmitting}
+                      required
+                      error={errors.email}
+                    />
                   </Row>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Subject *</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      isInvalid={!!errors.subject}
-                      placeholder="How can we help?"
-                      disabled={isSubmitting}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.subject}
-                    </Form.Control.Feedback>
-                  </Form.Group>
+                  <FormField
+                    name="subject"
+                    label="Subject"
+                    type="text"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    placeholder="How can we help?"
+                    disabled={isSubmitting}
+                    required
+                    error={errors.subject}
+                  />
 
-                  <Form.Group className="mb-4">
-                    <Form.Label>Message *</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={6}
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      isInvalid={!!errors.message}
-                      placeholder="Tell us more about your inquiry..."
-                      disabled={isSubmitting}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.message}
-                    </Form.Control.Feedback>
-                  </Form.Group>
+                  <FormField
+                    name="message"
+                    label="Message"
+                    type="textarea"
+                    rows={6}
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Tell us more about your inquiry..."
+                    disabled={isSubmitting}
+                    required
+                    error={errors.message}
+                    groupClassName="mb-4"
+                  />
 
                   <div className="d-grid gap-2 d-md-block">
                     <Button

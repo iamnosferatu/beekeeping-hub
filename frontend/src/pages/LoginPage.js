@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Form, Button, Card, Alert, Spinner } from "react-bootstrap";
 import { useResendVerification } from "../hooks/queries/useAuth";
 import AuthContext from "../contexts/AuthContext";
+import FormField from "../components/common/FormField";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -129,46 +130,39 @@ const LoginPage = () => {
           )}
 
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-              />
-              <Form.Control.Feedback type="invalid">
-                Please provide a valid email.
-              </Form.Control.Feedback>
-            </Form.Group>
+            <FormField
+              name="email"
+              label="Email address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
+              autoComplete="email"
+              required
+              error={validated && !email ? "Please provide a valid email." : ""}
+            />
 
-            <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                minLength={8}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please provide a valid password (minimum 8 characters).
-              </Form.Control.Feedback>
-            </Form.Group>
+            <FormField
+              name="password"
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              autoComplete="current-password"
+              required
+              minLength={8}
+              error={validated && (!password || password.length < 8) ? "Please provide a valid password (minimum 8 characters)." : ""}
+            />
 
-            <Form.Group className="mb-4" controlId="rememberMe">
-              <Form.Check
-                type="checkbox"
-                id="rememberMe"
-                label="Remember me for 30 days"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-            </Form.Group>
+            <FormField
+              name="rememberMe"
+              type="checkbox"
+              value={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              placeholder="Remember me for 30 days"
+              groupClassName="mb-4"
+            />
 
             <div className="d-grid">
               <Button 
