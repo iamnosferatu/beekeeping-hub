@@ -21,6 +21,10 @@
     user-select: none;
     border: 2px solid transparent;
     
+    // Ensure text is properly centered
+    line-height: 1;
+    text-align: center;
+    
     // Add subtle gradient for depth
     background-image: linear-gradient(
       135deg,

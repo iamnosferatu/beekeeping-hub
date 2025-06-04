@@ -59,7 +59,7 @@ exports.getThreads = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumCategory,
@@ -129,7 +129,7 @@ exports.getThread = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar', 'bio']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar', 'bio']
       },
       {
         model: ForumCategory,
@@ -161,7 +161,7 @@ exports.getThread = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumComment,
@@ -171,7 +171,7 @@ exports.getThread = asyncHandler(async (req, res) => {
           {
             model: User,
             as: 'author',
-            attributes: ['id', 'username']
+            attributes: ['id', 'username', 'first_name', 'last_name']
           }
         ]
       }
@@ -247,7 +247,7 @@ exports.createThread = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumCategory,
@@ -313,7 +313,7 @@ exports.updateThread = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumCategory,

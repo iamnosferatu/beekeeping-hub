@@ -12,6 +12,7 @@ import RoutePreloader from "./components/common/RoutePreloader";
 import PerformanceMonitor from "./components/common/PerformanceMonitor";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import CookieConsentBanner from "./components/common/CookieConsentBanner";
+import ScrollToTop from "./components/common/ScrollToTop";
 import { shouldLoadAdminComponents, logAdminOptimizationStatus } from "./utils/adminOptimization";
 
 // Eagerly loaded components (small, always needed)
@@ -105,6 +106,7 @@ function App() {
         <RoutePreloader />
         <PerformanceMonitor />
         <CookieConsentBanner />
+        <ScrollToTop />
         <Suspense 
           fallback={LoadingIndicator.presets.fullPage()}
         >

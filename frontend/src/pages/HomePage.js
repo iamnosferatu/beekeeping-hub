@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { BsShieldExclamation } from "react-icons/bs";
 import ArticleList from "../components/articles/ArticleList";
 import AuthContext from "../contexts/AuthContext";
+import ThemeContext from "../contexts/ThemeContext";
 import BackToTopButton from "../components/common/BackToTopButton";
 
 /**
@@ -16,7 +17,38 @@ import BackToTopButton from "../components/common/BackToTopButton";
  */
 const HomePage = () => {
   const { user } = useContext(AuthContext);
+  const { currentTheme, themeConfig } = useContext(ThemeContext);
   const isAdmin = user && user.role === "admin";
+
+  // Get theme-appropriate styles for the About section
+  const getAboutSectionStyle = () => {
+    switch (currentTheme) {
+      case 'nature':
+        return {
+          backgroundColor: 'rgba(40, 167, 69, 0.1)', // Light green background
+          border: '2px solid rgba(40, 167, 69, 0.2)',
+          color: themeConfig.textColor
+        };
+      case 'dark':
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          border: '2px solid rgba(255, 255, 255, 0.2)',
+          color: themeConfig.textColor
+        };
+      case 'elegant':
+        return {
+          backgroundColor: 'rgba(212, 175, 55, 0.05)', // Light gold background
+          border: '2px solid rgba(212, 175, 55, 0.2)',
+          color: themeConfig.textColor
+        };
+      default:
+        return {
+          backgroundColor: 'rgba(255, 193, 7, 0.1)', // Light honey yellow
+          border: '2px solid rgba(255, 193, 7, 0.2)',
+          color: themeConfig.textColor
+        };
+    }
+  };
 
   return (
     <div className="home-page">
@@ -60,7 +92,7 @@ const HomePage = () => {
       </Card>
 
       {/* Introduction Section */}
-      <div className="bg-dark p-4 rounded-3 mb-4">
+      <div className="p-4 rounded-3 mb-4" style={getAboutSectionStyle()}>
         <h2>About Our Blog</h2>
         <p>
           BeeKeeper's Blog is dedicated to sharing knowledge about beekeeping,
@@ -78,7 +110,7 @@ const HomePage = () => {
       {/* Featured Articles Section */}
       <h2 className="mb-4">Latest Articles</h2>
       <div className="articles-section">
-        <ArticleList limit={8} />
+        <ArticleList limit={12} />
       </div>
 
       {/* Call to Action Section */}

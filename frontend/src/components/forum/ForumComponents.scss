@@ -14,7 +14,7 @@
     margin-bottom: 0.75rem;
     
     a {
-      color: var(--bs-dark);
+      color: var(--text-color, #212529);
       
       &:hover {
         color: var(--bs-primary);
@@ -62,7 +62,7 @@
       margin-bottom: 0.5rem;
       
       a {
-        color: var(--bs-dark);
+        color: var(--text-color, #212529);
         
         &:hover {
           color: var(--bs-primary);
@@ -256,7 +256,7 @@
     border-color: var(--bs-gray-700);
     
     .category-title a {
-      color: var(--bs-light);
+      color: var(--text-color, #f8f9fa);
     }
     
     .category-meta {
@@ -291,7 +291,7 @@
       }
       
       .thread-title a {
-        color: var(--bs-light);
+        color: var(--text-color, #f8f9fa);
       }
     }
   }

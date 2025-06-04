@@ -3,6 +3,10 @@
 .ad-block {
   margin: 1rem 0;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   
   .ad-label {
     margin-bottom: 0.5rem;
@@ -13,6 +17,10 @@
   
   .ad-content {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
   }
   
   .ad-debug-info {

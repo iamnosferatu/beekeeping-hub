@@ -34,7 +34,7 @@ const GoogleAdSenseBlock = ({ ad, onAdClick }) => {
       <div 
         className="adsense-placeholder"
         style={{
-          width: ad.size.width,
+          width: ad.size.width === '100%' ? '100%' : ad.size.width,
           height: ad.size.height,
           backgroundColor: '#f8f9fa',
           border: '1px dashed #dee2e6',
@@ -43,7 +43,8 @@ const GoogleAdSenseBlock = ({ ad, onAdClick }) => {
           justifyContent: 'center',
           flexDirection: 'column',
           textAlign: 'center',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          margin: '0 auto'
         }}
         onClick={onAdClick}
       >
@@ -57,14 +58,15 @@ const GoogleAdSenseBlock = ({ ad, onAdClick }) => {
   }
 
   return (
-    <div className="adsense-block" onClick={onAdClick}>
+    <div className="adsense-block" onClick={onAdClick} style={{ display: 'flex', justifyContent: 'center' }}>
       <ins
         ref={adRef}
         className="adsbygoogle"
         style={{
           display: 'block',
           width: ad.size.width === '100%' ? '100%' : `${ad.size.width}px`,
-          height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`
+          height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`,
+          margin: '0 auto'
         }}
         data-ad-client={ad.content.slotId.split('/')[0]}
         data-ad-slot={ad.content.slotId.split('/')[1]}

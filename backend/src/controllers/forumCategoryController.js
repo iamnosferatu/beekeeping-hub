@@ -29,7 +29,7 @@ exports.getCategories = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'creator',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumThread,
@@ -90,7 +90,7 @@ exports.getCategory = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'creator',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       }
     ]
   });
@@ -114,7 +114,7 @@ exports.getCategory = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       }
     ],
     order: [
@@ -168,7 +168,7 @@ exports.createCategory = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'creator',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       }
     ]
   });
@@ -221,7 +221,7 @@ exports.updateCategory = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'creator',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       }
     ]
   });

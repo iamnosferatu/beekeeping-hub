@@ -22,7 +22,8 @@ const AffiliateBlock = ({ ad, onAdClick }) => {
       style={{
         width: ad.size.width === '100%' ? '100%' : `${ad.size.width}px`,
         height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`,
-        cursor: 'pointer'
+        cursor: 'pointer',
+        margin: '0 auto'
       }}
       onClick={handleClick}
     >

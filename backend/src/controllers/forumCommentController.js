@@ -95,7 +95,7 @@ exports.createComment = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumComment,
@@ -181,7 +181,7 @@ exports.updateComment = asyncHandler(async (req, res) => {
       {
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'avatar']
+        attributes: ['id', 'username', 'first_name', 'last_name', 'avatar']
       },
       {
         model: ForumComment,

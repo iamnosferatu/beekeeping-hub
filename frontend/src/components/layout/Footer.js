@@ -4,14 +4,15 @@ import { Container, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ThemeContext from "../../contexts/ThemeContext";
 import { CookieStatusIndicator } from "../common/CookieConsentBanner";
+import "./Footer.scss";
 
 const Footer = () => {
-  const { themeConfig } = useContext(ThemeContext);
+  const { themeConfig, currentTheme } = useContext(ThemeContext);
   const year = new Date().getFullYear();
 
   return (
     <footer
-      className="mt-auto py-4"
+      className={`mt-auto py-4 footer-${currentTheme}`}
       style={{
         backgroundColor: themeConfig.footerBg,
         color: themeConfig.footerText,

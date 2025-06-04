@@ -45,13 +45,17 @@ const ArticleList = ({
   const { scrollToTop } = useScrollToTop();
   const [page, setPage] = useState(1);
 
+  // For now, let's just use the original limit without adjustment
+  // The issue is more complex than initially thought
+  const adjustedLimit = limit;
+
   // Build params for React Query (memoized)
   const params = useMemo(() => ({
     page,
-    limit,
+    limit: adjustedLimit,
     ...(tag && { tag }),
     ...(search && { search }),
-  }), [page, limit, tag, search]);
+  }), [page, adjustedLimit, tag, search]);
 
   // Fetch articles with React Query hook
   const {
@@ -89,11 +93,11 @@ const ArticleList = ({
     const total = response?.data?.total || response?.data?.count || response?.count || response?.total || 0;
     return {
       page,
-      limit,
+      limit: adjustedLimit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / adjustedLimit),
     };
-  }, [page, limit, response]);
+  }, [page, adjustedLimit, response]);
 
   // Debug logging in development (only on error states) - TEMPORARILY DISABLED
   // useEffect(() => {

@@ -8,7 +8,7 @@ import { AD_PLACEMENTS } from "../../../utils/adManager";
  * ArticleGrid Component
  * Responsive grid container for articles with different layout options
  */
-const ArticleGrid = ({ children, layout = "grid" }) => {
+const ArticleGrid = ({ children, layout = "grid", adsEnabled = true }) => {
   /**
    * Get column configuration based on layout
    */
@@ -44,8 +44,9 @@ const ArticleGrid = ({ children, layout = "grid" }) => {
           </Col>
         );
         
-        // Add advertisement between articles every 4th article
-        if ((index + 1) % 4 === 0 && index < React.Children.count(children) - 1) {
+        // Add advertisement between articles every 8th article (only if ads are enabled)
+        // This ensures we get 2 complete rows of 4 before an ad
+        if (adsEnabled && (index + 1) % 8 === 0 && index < React.Children.count(children) - 1) {
           elements.push(
             <Col key={`ad-${index}`} xs={12} className="mb-4">
               <AdBlock 

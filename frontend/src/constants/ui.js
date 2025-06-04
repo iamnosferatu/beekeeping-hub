@@ -78,10 +78,10 @@ export const LOADING_CONFIG = {
 
 // Pagination configurations
 export const PAGINATION_CONFIG = {
-  DEFAULT_PAGE_SIZE: 10, // Fixed to match usage in components
-  defaultPageSize: 10, // Keep both for backward compatibility
+  DEFAULT_PAGE_SIZE: 12, // Changed to 12 to show complete rows of 4
+  defaultPageSize: 12, // Keep both for backward compatibility
   maxVisiblePages: 5,
-  pageSizes: [5, 10, 20, 50],
+  pageSizes: [12, 24, 48],
   showFirstLast: true,
   showPrevNext: true,
 };

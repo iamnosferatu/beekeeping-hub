@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaComments, FaClock, FaUser } from 'react-icons/fa';
 import { useForum } from '../../hooks/api/useForum';
 import LoadingIndicator from '../common/LoadingIndicator';
 
@@ -40,29 +39,17 @@ const RecentThreads = ({ limit = 5 }) => {
     }
   };
 
-  /**
-   * Format time ago for last activity
-   */
-  const formatTimeAgo = (date) => {
-    const now = new Date();
-    const then = new Date(date);
-    const seconds = Math.floor((now - then) / 1000);
-    
-    if (seconds < 60) return 'just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-    return then.toLocaleDateString();
-  };
-
   if (loading) {
     return (
-      <Card className="mb-4">
+      <Card className="mb-4 shadow-sm">
         <Card.Header>
           <h5 className="mb-0">Recent Threads</h5>
         </Card.Header>
-        <Card.Body className="text-center py-4">
-          <LoadingIndicator size="sm" showMessage={false} inline />
+        <Card.Body>
+          <div className="text-center py-3">
+            <LoadingIndicator size="sm" showMessage={false} inline />
+            <p className="mt-2 mb-0 small text-muted">Loading threads...</p>
+          </div>
         </Card.Body>
       </Card>
     );
@@ -70,56 +57,60 @@ const RecentThreads = ({ limit = 5 }) => {
 
   if (!threads || threads.length === 0) {
     return (
-      <Card className="mb-4">
+      <Card className="mb-4 shadow-sm">
         <Card.Header>
           <h5 className="mb-0">Recent Threads</h5>
         </Card.Header>
         <Card.Body>
-          <p className="text-muted mb-0">No threads yet.</p>
+          <p className="text-muted mb-0 text-center">
+            <small>No recent threads available</small>
+          </p>
         </Card.Body>
       </Card>
     );
   }
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 shadow-sm">
       <Card.Header>
         <h5 className="mb-0">Recent Threads</h5>
       </Card.Header>
       <ListGroup variant="flush">
         {threads.map((thread) => (
-          <ListGroup.Item key={thread.id} className="px-3 py-2">
-            <Link 
+          <ListGroup.Item
+            key={thread.id}
+            className="px-3 py-2"
+            style={{
+              transition: "background-color 0.2s ease",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#f8f9fa";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <Link
               to={`/forum/threads/${thread.slug}`}
               className="text-decoration-none d-block"
+              title={thread.title}
             >
-              <h6 className="mb-1 text-dark">
+              <div className="text-truncate">
                 {thread.isPinned && <span className="text-primary me-1">📌</span>}
                 {thread.title}
-              </h6>
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  <FaUser className="me-1" />
-                  {thread.author?.username || 'Unknown'}
-                </small>
-                <small className="text-muted">
-                  <FaComments className="me-1" />
-                  {thread.commentCount || 0}
-                </small>
               </div>
-              <small className="text-muted">
-                <FaClock className="me-1" />
-                {formatTimeAgo(thread.lastActivityAt || thread.last_activity_at || thread.created_at)}
-              </small>
             </Link>
           </ListGroup.Item>
         ))}
       </ListGroup>
-      <Card.Footer className="text-center">
-        <Link to="/forum" className="btn btn-sm btn-outline-primary">
-          View All Threads
-        </Link>
-      </Card.Footer>
+      {threads.length > 0 && (
+        <Card.Footer className="text-center">
+          <Link to="/forum" className="text-decoration-none small">
+            View all threads →
+          </Link>
+        </Card.Footer>
+      )}
     </Card>
   );
 };

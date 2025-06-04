@@ -24,7 +24,8 @@ const DirectSponsorBlock = ({ ad, onAdClick }) => {
         style={{
           width: ad.size.width === '100%' ? '100%' : `${ad.size.width}px`,
           height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          margin: '0 auto'
         }}
         onClick={handleClick}
         dangerouslySetInnerHTML={{ __html: ad.content.html }}
@@ -40,7 +41,8 @@ const DirectSponsorBlock = ({ ad, onAdClick }) => {
         width: ad.size.width === '100%' ? '100%' : `${ad.size.width}px`,
         height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`,
         cursor: 'pointer',
-        border: '1px solid #e9ecef'
+        border: '1px solid #e9ecef',
+        margin: '0 auto'
       }}
       onClick={handleClick}
     >

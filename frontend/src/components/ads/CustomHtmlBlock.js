@@ -16,7 +16,8 @@ const CustomHtmlBlock = ({ ad, onAdClick }) => {
       style={{
         width: ad.size.width === '100%' ? '100%' : `${ad.size.width}px`,
         height: ad.size.height === 'auto' ? 'auto' : `${ad.size.height}px`,
-        cursor: ad.content.clickable !== false ? 'pointer' : 'default'
+        cursor: ad.content.clickable !== false ? 'pointer' : 'default',
+        margin: '0 auto'
       }}
       onClick={ad.content.clickable !== false ? handleClick : undefined}
       dangerouslySetInnerHTML={{ __html: ad.content.html }}
