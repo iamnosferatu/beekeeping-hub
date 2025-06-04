@@ -8,7 +8,7 @@ import { useForum } from '../hooks/api/useForum';
 import ThreadList from '../components/forum/ThreadList';
 import CategoryForm from '../components/forum/CategoryForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 import Pagination from '../components/ui/Pagination';
 
 /**
@@ -106,7 +106,7 @@ const ForumCategoryPage = () => {
   }
 
   if (loadingData) {
-    return <LoadingSpinner />;
+    return <LoadingIndicator message="Loading category..." />;
   }
 
   if (!category) {

@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Nav, Tab, Alert, Badge, Button, Table, Form 
 import { FaBan, FaLock, FaUsers, FaChartBar } from 'react-icons/fa';
 import { BsChatSquareDots } from 'react-icons/bs';
 import { useForum } from '../../hooks/api/useForum';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const ForumManagementPage = () => {
@@ -92,7 +92,7 @@ const ForumManagementPage = () => {
   };
 
   const renderOverview = () => {
-    if (!stats) return <LoadingSpinner />;
+    if (!stats) return LoadingIndicator.presets.dataFetch();
 
     return (
       <Row>
@@ -424,10 +424,10 @@ const ForumManagementPage = () => {
                 {renderOverview()}
               </Tab.Pane>
               <Tab.Pane eventKey="blocked">
-                {loading ? <LoadingSpinner /> : renderBlockedContent()}
+                {loading ? LoadingIndicator.presets.dataFetch() : renderBlockedContent()}
               </Tab.Pane>
               <Tab.Pane eventKey="banned">
-                {loading ? <LoadingSpinner /> : renderBannedUsers()}
+                {loading ? LoadingIndicator.presets.dataFetch() : renderBannedUsers()}
               </Tab.Pane>
             </Tab.Content>
           </Card.Body>

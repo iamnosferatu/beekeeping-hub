@@ -3,7 +3,7 @@ import { Card, ListGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaComments, FaClock, FaUser } from 'react-icons/fa';
 import { useForum } from '../../hooks/api/useForum';
-import LoadingSpinner from '../common/LoadingSpinner';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 /**
  * RecentThreads Component
@@ -62,7 +62,7 @@ const RecentThreads = ({ limit = 5 }) => {
           <h5 className="mb-0">Recent Threads</h5>
         </Card.Header>
         <Card.Body className="text-center py-4">
-          <LoadingSpinner size="sm" />
+          <LoadingIndicator size="sm" showMessage={false} inline />
         </Card.Body>
       </Card>
     );

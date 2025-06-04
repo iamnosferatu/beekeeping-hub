@@ -9,7 +9,7 @@ import CommentList from '../components/forum/CommentList';
 import CommentForm from '../components/forum/CommentForm';
 import ThreadForm from '../components/forum/ThreadForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 import Avatar from '../components/common/Avatar';
 
 const ForumThreadPage = () => {
@@ -114,7 +114,7 @@ const ForumThreadPage = () => {
   }
 
   if (loadingData) {
-    return <LoadingSpinner />;
+    return <LoadingIndicator message="Loading thread..." />;
   }
 
   if (!thread) {

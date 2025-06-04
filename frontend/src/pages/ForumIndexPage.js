@@ -8,7 +8,7 @@ import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
 import CategoryList from '../components/forum/CategoryList';
 import CategoryForm from '../components/forum/CategoryForm';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 
 /**
  * ForumIndexPage Component
@@ -133,7 +133,7 @@ const ForumIndexPage = () => {
       )}
 
       {loadingCategories ? (
-        <LoadingSpinner />
+        <LoadingIndicator message="Loading forum categories..." />
       ) : (
         <CategoryList categories={categories} loading={loading} />
       )}

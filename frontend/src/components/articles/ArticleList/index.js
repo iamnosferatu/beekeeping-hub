@@ -11,7 +11,6 @@
 export { default as ArticleList } from "./ArticleList";
 
 // Sub-components
-export { default as LoadingState } from "./LoadingState";
 export { default as ErrorState } from "./ErrorState";
 export { default as EmptyState } from "./EmptyState";
 

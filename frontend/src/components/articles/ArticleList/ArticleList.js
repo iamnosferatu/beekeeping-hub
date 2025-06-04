@@ -5,7 +5,7 @@ import useScrollToTop from "../../../hooks/useScrollToTop";
 import { PAGINATION_CONFIG, LOADING_CONFIG } from "../../../constants/ui";
 import ArticleCard from "../ArticleCard";
 import Pagination from "../../ui/Pagination";
-import LoadingState from "./LoadingState";
+import LoadingIndicator from "../../common/LoadingIndicator";
 import ErrorState from "./ErrorState";
 import EmptyState from "./EmptyState";
 import ArticleGrid from "./ArticleGrid";
@@ -141,13 +141,7 @@ const ArticleList = ({
 
   // Loading state
   if (isLoading) {
-    return (
-      <LoadingState
-        count={LOADING_CONFIG.SKELETON_ITEMS}
-        layout={layout}
-        className={className}
-      />
-    );
+    return LoadingIndicator.presets.articleList({ className });
   }
 
   // Error state

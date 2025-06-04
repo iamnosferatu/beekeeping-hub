@@ -20,7 +20,7 @@ import UserFilters from "../../components/Admin/Users/UserFilters";
 import UserTable from "../../components/Admin/Users/UserTable";
 import RoleChangeModal from "../../components/Admin/Users/RoleChangeModal";
 import DeleteUserModal from "../../components/Admin/Users/DeleteUserModal";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import LoadingIndicator from "../../components/common/LoadingIndicator";
 import ErrorAlert from "../../components/common/ErrorAlert";
 import EmptyState from "../../components/common/EmptyState";
 
@@ -120,7 +120,7 @@ const UsersPage = () => {
 
   // Loading state
   if (loading && users.length === 0) {
-    return <LoadingSpinner message="Loading users..." />;
+    return <LoadingIndicator message="Loading users..." />;
   }
 
   // Error state (only if no users loaded)

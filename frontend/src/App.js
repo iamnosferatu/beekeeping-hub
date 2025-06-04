@@ -6,7 +6,7 @@ import AuthContext from "./contexts/AuthContext";
 import MaintenanceMode from "./components/MaintenanceMode";
 
 // Loading component for Suspense fallback
-import LoadingSpinner from "./components/common/LoadingSpinner";
+import LoadingIndicator from "./components/common/LoadingIndicator";
 import RoutePreloader from "./components/common/RoutePreloader";
 import PerformanceMonitor from "./components/common/PerformanceMonitor";
 import ErrorBoundary from "./components/common/ErrorBoundary";
@@ -104,11 +104,7 @@ function App() {
       <PerformanceMonitor />
       <CookieConsentBanner />
       <Suspense 
-        fallback={
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-            <LoadingSpinner />
-          </div>
-        }
+        fallback={LoadingIndicator.presets.fullPage()}
       >
         <Routes>
         {/* Public Routes */}

@@ -6,7 +6,7 @@ import AuthContext from '../contexts/AuthContext';
 import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
 import ThreadForm from '../components/forum/ThreadForm';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import LoadingIndicator from '../components/common/LoadingIndicator';
 
 const ForumNewThreadPage = () => {
   const location = useLocation();
@@ -69,7 +69,7 @@ const ForumNewThreadPage = () => {
   }
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingIndicator message="Loading categories..." />;
   }
 
   return (
