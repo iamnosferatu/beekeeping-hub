@@ -7,7 +7,7 @@ import ArticleCard from "../ArticleCard";
 import Pagination from "../../ui/Pagination";
 import LoadingIndicator from "../../common/LoadingIndicator";
 import ErrorState from "./ErrorState";
-import EmptyState from "./EmptyState";
+import { EmptyStateEnhanced as EmptyState } from "../../common/EmptyState";
 import ArticleGrid from "./ArticleGrid";
 import "./ArticleList.scss";
 
@@ -156,7 +156,15 @@ const ArticleList = ({
 
   // Empty state
   if (!articles || articles.length === 0) {
-    return <EmptyState search={search} tag={tag} className={className} />;
+    return (
+      <EmptyState 
+        type="articles"
+        searchTerm={search}
+        filterTag={tag}
+        showSearchTips={!!search}
+        className={className}
+      />
+    );
   }
 
   return (
