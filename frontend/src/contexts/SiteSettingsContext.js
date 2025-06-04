@@ -1,7 +1,6 @@
 // frontend/src/contexts/SiteSettingsContext.js
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from "react";
-import axios from "axios";
-import { API_URL } from "../config";
+import { useSiteSettings as useSiteSettingsHook, useUpdateSiteSettings } from "../hooks";
 
 /**
  * Site Settings Context
@@ -50,131 +49,78 @@ export const SiteSettingsProvider = ({ children }) => {
   // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Track if user has dismissed the alert
-  const [alertDismissed, setAlertDismissed] = useState(false);
-
-  /**
-   * Fetch site settings from the API (memoized)
-   */
-  const fetchSettings = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API_URL}/site-settings`);
-
-      if (response.data.success) {
-        setSettings(response.data.data);
-
-        // Check if alert has changed (reset dismissed state)
-        if (response.data.data.alert_message !== settings.alert_message) {
+  
+  // Use the site settings hooks
+  const { data: settingsData, loading: settingsLoading, error: settingsError, refetch } = useSiteSettingsHook();
+  const { mutate: updateSettingsMutation, loading: updateLoading } = useUpdateSiteSettings({
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        setSettings(response.data);
+        // Reset alert dismissed state if alert content changed
+        if (response.data.alert_message !== settings.alert_message) {
           setAlertDismissed(false);
         }
       }
-    } catch (err) {
-      // Error fetching site settings
-      setError("Failed to load site settings");
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  // Track if user has dismissed the alert
+  const [alertDismissed, setAlertDismissed] = useState(false);
+  
+  // Update settings when data from hook changes
+  useEffect(() => {
+    if (settingsData?.success && settingsData.data) {
+      setSettings(settingsData.data);
+      // Check if alert has changed (reset dismissed state)
+      if (settingsData.data.alert_message !== settings.alert_message) {
+        setAlertDismissed(false);
+      }
     }
-  }, [settings.alert_message]);
+  }, [settingsData]);
+  
+  // Update loading and error states
+  useEffect(() => {
+    setLoading(settingsLoading);
+    setError(settingsError?.message || null);
+  }, [settingsLoading, settingsError]);
 
   /**
    * Update site settings (admin only) (memoized)
    */
   const updateSettings = useCallback(async (newSettings) => {
-    try {
-      const token = localStorage.getItem("beekeeper_auth_token");
-
-      const response = await axios.put(
-        `${API_URL}/site-settings`,
-        newSettings,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSettings(response.data.data);
-        // Reset alert dismissed state if alert content changed
-        if (newSettings.alert_message !== undefined) {
-          setAlertDismissed(false);
-        }
-        return { success: true };
-      }
-    } catch (err) {
-      // Error updating site settings
-      return {
-        success: false,
-        error: err.response?.data?.message || "Failed to update settings",
-      };
-    }
+    return new Promise((resolve, reject) => {
+      updateSettingsMutation(newSettings, {
+        onSuccess: (response) => {
+          resolve({ success: true });
+        },
+        onError: (error) => {
+          reject(error);
+        },
+      });
+    });
   }, []);
 
   /**
    * Toggle maintenance mode (admin only) (memoized)
    */
   const toggleMaintenanceMode = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("beekeeper_auth_token");
-
-      const response = await axios.post(
-        `${API_URL}/site-settings/maintenance/toggle`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSettings((prev) => ({
-          ...prev,
-          maintenance_mode: response.data.data.maintenance_mode,
-        }));
-        return { success: true };
-      }
-    } catch (err) {
-      // Error toggling maintenance mode
-      return {
-        success: false,
-        error:
-          err.response?.data?.message || "Failed to toggle maintenance mode",
-      };
-    }
-  }, []);
+    const newSettings = {
+      ...settings,
+      maintenance_mode: !settings.maintenance_mode,
+    };
+    return updateSettings(newSettings);
+  }, [settings, updateSettings]);
 
   /**
    * Toggle alert banner (admin only) (memoized)
    */
   const toggleAlert = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("beekeeper_auth_token");
-
-      const response = await axios.post(
-        `${API_URL}/site-settings/alert/toggle`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.success) {
-        setSettings((prev) => ({
-          ...prev,
-          alert_enabled: response.data.data.alert_enabled,
-        }));
-        // Reset dismissed state when toggling on
-        if (response.data.data.alert_enabled) {
-          setAlertDismissed(false);
-        }
-        return { success: true };
-      }
-    } catch (err) {
-      // Error toggling alert
-      return {
-        success: false,
-        error: err.response?.data?.message || "Failed to toggle alert",
-      };
-    }
-  }, []);
+    const newSettings = {
+      ...settings,
+      alert_enabled: !settings.alert_enabled,
+    };
+    return updateSettings(newSettings);
+  }, [settings, updateSettings]);
 
   /**
    * Dismiss the alert banner (user action) (memoized)
@@ -185,21 +131,22 @@ export const SiteSettingsProvider = ({ children }) => {
     localStorage.setItem("beekeeper_alert_dismissed", settings.alert_message);
   }, [settings.alert_message]);
 
-  // Fetch settings on mount
+  // Check for dismissed alert in localStorage on mount
   useEffect(() => {
-    fetchSettings();
-
-    // Check for dismissed alert in localStorage
     const dismissedMessage = localStorage.getItem("beekeeper_alert_dismissed");
     if (dismissedMessage === settings.alert_message) {
       setAlertDismissed(true);
     }
+  }, [settings.alert_message]);
 
-    // Set up periodic checks for maintenance mode (every 5 minutes)
-    const interval = setInterval(fetchSettings, 5 * 60 * 1000);
+  // Set up periodic refetch for settings (every 5 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [refetch]);
 
   // Check if alert should be shown (memoized)
   const shouldShowAlert = useMemo(() =>

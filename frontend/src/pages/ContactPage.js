@@ -21,8 +21,7 @@ import {
   BsTwitter,
   BsFacebook,
 } from "react-icons/bs";
-import axios from "axios";
-import { API_URL } from "../config";
+import { useSendContactMessage } from "../hooks";
 import "./ContactPage.scss";
 
 /**
@@ -49,9 +48,32 @@ const ContactPage = () => {
   const [errors, setErrors] = useState({});
 
   // Form submission state
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' or 'error'
   const [submitMessage, setSubmitMessage] = useState("");
+  
+  // Use the contact API hook
+  const { mutate: sendMessage, loading: isSubmitting } = useSendContactMessage({
+    onSuccess: (response) => {
+      setSubmitStatus("success");
+      setSubmitMessage(
+        "Thank you for your message! We'll get back to you soon."
+      );
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+      setErrors({});
+    },
+    onError: (error) => {
+      setSubmitStatus("error");
+      setSubmitMessage(
+        error.message || "Failed to send message. Please try again."
+      );
+    },
+  });
 
   /**
    * Handle input changes
@@ -126,51 +148,13 @@ const ContactPage = () => {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // Send contact form data to backend
-      const response = await axios.post(`${API_URL}/contact`, {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim(),
-        message: formData.message.trim(),
-      });
-
-      if (response.data.success) {
-        setSubmitStatus("success");
-        setSubmitMessage(
-          "Thank you for your message! We'll get back to you soon."
-        );
-
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: "",
-        });
-      } else {
-        throw new Error(response.data.message || "Failed to send message");
-      }
-    } catch (error) {
-      // Contact form error occurred
-      setSubmitStatus("error");
-
-      if (error.response?.status === 404) {
-        // If the contact endpoint doesn't exist, show a different message
-        setSubmitMessage(
-          "Contact form is being set up. Please email us directly at info@beekeeperblog.com"
-        );
-      } else {
-        setSubmitMessage(
-          error.response?.data?.message ||
-            "There was an error sending your message. Please try again later."
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Send the message using the API hook
+    sendMessage({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      subject: formData.subject.trim(),
+      message: formData.message.trim(),
+    });
   };
 
   // Contact information

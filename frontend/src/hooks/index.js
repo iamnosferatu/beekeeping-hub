@@ -18,3 +18,7 @@ export * from "./api/useTags";
 export * from "./api/useAdmin";
 export * from "./api/useLikes";
 export * from "./api/useForum";
+export * from "./api/useContact";
+export * from "./api/useSiteSettings";
+export * from "./api/useNewsletter";
+export * from "./api/useAuthorApplications";

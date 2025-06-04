@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, ListGroup, Badge, Alert, Spinner, Form } from "react-bootstrap";
 import { Link, useLocation, useParams } from "react-router-dom";
-import axios from "axios";
-import { API_URL } from "../../config";
-import api from "../../services/api";
+import { useArticles, useNewsletterSubscribe } from "../../hooks";
 import TagCloud from "../common/TagCloud";
 import RelatedArticles from "../articles/RelatedArticles";
 import RecentThreads from "../forum/RecentThreads";
@@ -20,62 +18,47 @@ const Sidebar = () => {
   const [currentArticleId, setCurrentArticleId] = useState(null);
   const [currentArticleData, setCurrentArticleData] = useState(null);
   
-  // State for recent articles
-  const [recentArticles, setRecentArticles] = useState([]);
-  const [articlesLoading, setArticlesLoading] = useState(true);
-  const [articlesError, setArticlesError] = useState(null);
-
   // State for newsletter
   const [email, setEmail] = useState("");
-  const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterMessage, setNewsletterMessage] = useState(null);
   const [newsletterError, setNewsletterError] = useState(null);
+  
+  // Use articles hook for recent articles
+  const { data: articlesData, loading: articlesLoading, error: articlesError } = useArticles(
+    { limit: 5, sort: "date-desc", status: "published" },
+    { immediate: true }
+  );
+  
+  // Use newsletter subscription hook
+  const { mutate: subscribeToNewsletter, loading: newsletterLoading } = useNewsletterSubscribe({
+    onSuccess: (response) => {
+      setNewsletterMessage(response.message || "Thank you for subscribing!");
+      setEmail(""); // Clear the form
+      setNewsletterError(null);
+    },
+    onError: (error) => {
+      setNewsletterError(
+        error.message || "Unable to subscribe. Please try again later."
+      );
+      setNewsletterMessage(null);
+    },
+  });
+  
+  // Process articles data
+  const recentArticles = articlesData
+    ? articlesData
+        .filter((article) => article.id && article.title && article.slug)
+        .slice(0, 5)
+        .map((article) => ({
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+        }))
+    : [];
 
   // Determine if we're in the forum section
   const isForumSection = location.pathname.startsWith('/forum');
 
-  /**
-   * Fetch recent articles from the API
-   */
-  const fetchRecentArticles = async () => {
-    try {
-      setArticlesLoading(true);
-      setArticlesError(null);
-
-
-      const response = await axios.get(`${API_URL}/articles`, {
-        params: {
-          limit: 5,
-          sort: "date-desc",
-          status: "published", // Only show published articles
-        },
-      });
-
-
-      if (response.data.success && response.data.data) {
-        const articles = response.data.data || [];
-        // Only show articles that have required fields
-        const validArticles = articles
-          .filter((article) => article.id && article.title && article.slug)
-          .slice(0, 5) // Limit to 5 articles
-          .map((article) => ({
-            id: article.id,
-            title: article.title,
-            slug: article.slug,
-          }));
-
-        setRecentArticles(validArticles);
-      } else {
-        setRecentArticles([]);
-      }
-    } catch (error) {
-      // Error fetching recent articles
-      setArticlesError("Unable to load recent articles");
-      setRecentArticles([]);
-    } finally {
-      setArticlesLoading(false);
-    }
-  };
 
   /**
    * Handle newsletter subscription
@@ -92,30 +75,7 @@ const Sidebar = () => {
       return;
     }
     
-    try {
-      setNewsletterLoading(true);
-      const response = await api.newsletter.subscribe(email);
-      
-      if (response.success) {
-        setNewsletterMessage(response.message || "Thank you for subscribing!");
-        setEmail(""); // Clear the form
-        
-        // Clear success message after 5 seconds - DISABLED FOR DEBUGGING
-        // setTimeout(() => {
-        //   setNewsletterMessage(null);
-        // }, 5000);
-      } else {
-        setNewsletterError(response.message || "Failed to subscribe");
-      }
-    } catch (error) {
-      // Newsletter subscription failed
-      setNewsletterError(
-        error.response?.data?.message || 
-        "Unable to subscribe. Please try again later."
-      );
-    } finally {
-      setNewsletterLoading(false);
-    }
+    subscribeToNewsletter(email);
   };
 
   /**
@@ -156,15 +116,6 @@ const Sidebar = () => {
     }
   };
 
-  /**
-   * Fetch data on component mount
-   */
-  useEffect(() => {
-    // Only fetch recent articles if not in forum section
-    if (!isForumSection) {
-      fetchRecentArticles();
-    }
-  }, [isForumSection]);
 
   return (
     <>
@@ -203,7 +154,7 @@ const Sidebar = () => {
               // Error state
               <Card.Body>
                 <Alert variant="warning" className="mb-0">
-                  <small>{articlesError}</small>
+                  <small>{articlesError?.message || "Unable to load recent articles"}</small>
                 </Alert>
               </Card.Body>
             ) : recentArticles.length > 0 ? (

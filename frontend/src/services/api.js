@@ -718,6 +718,79 @@ class ApiService {
   };
 
   // =============================================================================
+  // CONTACT ENDPOINTS
+  // =============================================================================
+  contact = {
+    /**
+     * Send a contact message
+     */
+    send: async (contactData) => {
+      return this.request({
+        method: "POST",
+        url: "/contact",
+        data: contactData,
+      });
+    },
+
+    /**
+     * Get contact messages (admin only)
+     */
+    getMessages: async (params = {}) => {
+      const queryString = new URLSearchParams(params).toString();
+      return this.request({
+        method: "GET",
+        url: `/contact/messages${queryString ? `?${queryString}` : ""}`,
+      });
+    },
+
+    /**
+     * Mark message as read (admin only)
+     */
+    markAsRead: async (id) => {
+      return this.request({
+        method: "PUT",
+        url: `/contact/messages/${id}/read`,
+      });
+    },
+
+    /**
+     * Delete contact message (admin only)
+     */
+    delete: async (id) => {
+      return this.request({
+        method: "DELETE",
+        url: `/contact/messages/${id}`,
+      });
+    },
+  };
+
+  // =============================================================================
+  // SITE SETTINGS ENDPOINTS
+  // =============================================================================
+  siteSettings = {
+    /**
+     * Get site settings
+     */
+    get: async () => {
+      return this.request({
+        method: "GET",
+        url: "/site-settings",
+      });
+    },
+
+    /**
+     * Update site settings (admin only)
+     */
+    update: async (settings) => {
+      return this.request({
+        method: "PUT",
+        url: "/site-settings",
+        data: settings,
+      });
+    },
+  };
+
+  // =============================================================================
   // AUTHOR APPLICATIONS
   // =============================================================================
 
@@ -749,6 +822,227 @@ class ApiService {
   };
 
   // =============================================================================
+  // FORUM ENDPOINTS
+  // =============================================================================
+  forum = {
+    // Categories
+    categories: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/forum/categories${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      getBySlug: async (slug) => {
+        return this.request({
+          method: "GET",
+          url: `/forum/categories/${slug}`,
+        });
+      },
+
+      create: async (categoryData) => {
+        return this.request({
+          method: "POST",
+          url: "/forum/categories",
+          data: categoryData,
+        });
+      },
+
+      update: async (id, categoryData) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/categories/${id}`,
+          data: categoryData,
+        });
+      },
+
+      delete: async (id) => {
+        return this.request({
+          method: "DELETE",
+          url: `/forum/categories/${id}`,
+        });
+      },
+    },
+
+    // Threads
+    threads: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/forum/threads${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      getBySlug: async (slug) => {
+        return this.request({
+          method: "GET",
+          url: `/forum/threads/${slug}`,
+        });
+      },
+
+      getByCategorySlug: async (categorySlug, params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/forum/categories/${categorySlug}/threads${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      create: async (threadData) => {
+        return this.request({
+          method: "POST",
+          url: "/forum/threads",
+          data: threadData,
+        });
+      },
+
+      update: async (id, threadData) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/threads/${id}`,
+          data: threadData,
+        });
+      },
+
+      delete: async (id) => {
+        return this.request({
+          method: "DELETE",
+          url: `/forum/threads/${id}`,
+        });
+      },
+
+      pin: async (id) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/threads/${id}/pin`,
+        });
+      },
+
+      unpin: async (id) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/threads/${id}/unpin`,
+        });
+      },
+
+      lock: async (id) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/threads/${id}/lock`,
+        });
+      },
+
+      unlock: async (id) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/threads/${id}/unlock`,
+        });
+      },
+    },
+
+    // Comments
+    comments: {
+      getByThreadId: async (threadId, params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/forum/threads/${threadId}/comments${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      create: async (threadId, commentData) => {
+        return this.request({
+          method: "POST",
+          url: `/forum/threads/${threadId}/comments`,
+          data: commentData,
+        });
+      },
+
+      update: async (commentId, commentData) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/comments/${commentId}`,
+          data: commentData,
+        });
+      },
+
+      delete: async (commentId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/forum/comments/${commentId}`,
+        });
+      },
+
+      report: async (commentId, reason) => {
+        return this.request({
+          method: "POST",
+          url: `/forum/comments/${commentId}/report`,
+          data: { reason },
+        });
+      },
+    },
+
+    // Admin functions
+    admin: {
+      banUser: async (userId, reason, expiresAt) => {
+        return this.request({
+          method: "POST",
+          url: `/forum/admin/users/${userId}/ban`,
+          data: { reason, expires_at: expiresAt },
+        });
+      },
+
+      unbanUser: async (userId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/forum/admin/users/${userId}/ban`,
+        });
+      },
+
+      getBannedUsers: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/forum/admin/banned-users${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      blockThread: async (threadId, reason) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/admin/threads/${threadId}/block`,
+          data: { reason },
+        });
+      },
+
+      unblockThread: async (threadId) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/admin/threads/${threadId}/unblock`,
+        });
+      },
+
+      blockComment: async (commentId, reason) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/admin/comments/${commentId}/block`,
+          data: { reason },
+        });
+      },
+
+      unblockComment: async (commentId) => {
+        return this.request({
+          method: "PUT",
+          url: `/forum/admin/comments/${commentId}/unblock`,
+        });
+      },
+    },
+  };
+
+  // =============================================================================
   // OTHER ENDPOINTS
   // =============================================================================
 
@@ -776,12 +1070,137 @@ class ApiService {
       });
     },
 
+    deleteUser: async (userId) => {
+      return this.request({
+        method: "DELETE",
+        url: `/admin/users/${userId}`,
+      });
+    },
+
     getCommentsForModeration: async (params = {}) => {
       const queryString = new URLSearchParams(params).toString();
       return this.request({
         method: "GET",
         url: `/admin/comments${queryString ? `?${queryString}` : ""}`,
       });
+    },
+
+    // Article management
+    articles: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/admin/articles${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      block: async (articleId, reason) => {
+        return this.request({
+          method: "PUT",
+          url: `/admin/articles/${articleId}/block`,
+          data: { reason },
+        });
+      },
+
+      unblock: async (articleId) => {
+        return this.request({
+          method: "PUT",
+          url: `/admin/articles/${articleId}/unblock`,
+        });
+      },
+
+      delete: async (articleId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/admin/articles/${articleId}`,
+        });
+      },
+    },
+
+    // Comment management
+    comments: {
+      updateStatus: async (commentId, status) => {
+        return this.request({
+          method: "PUT",
+          url: `/admin/comments/${commentId}/status`,
+          data: { status },
+        });
+      },
+
+      delete: async (commentId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/admin/comments/${commentId}`,
+        });
+      },
+    },
+
+    // Tag management
+    tags: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/admin/tags${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      create: async (tagData) => {
+        return this.request({
+          method: "POST",
+          url: "/admin/tags",
+          data: tagData,
+        });
+      },
+
+      update: async (tagId, tagData) => {
+        return this.request({
+          method: "PUT",
+          url: `/admin/tags/${tagId}`,
+          data: tagData,
+        });
+      },
+
+      delete: async (tagId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/admin/tags/${tagId}`,
+        });
+      },
+
+      merge: async (sourceTagId, targetTagId) => {
+        return this.request({
+          method: "POST",
+          url: `/admin/tags/${sourceTagId}/merge`,
+          data: { targetTagId },
+        });
+      },
+    },
+
+    // Contact messages
+    contactMessages: {
+      getAll: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request({
+          method: "GET",
+          url: `/admin/contact-messages${queryString ? `?${queryString}` : ""}`,
+        });
+      },
+
+      markAsRead: async (messageId) => {
+        return this.request({
+          method: "PUT",
+          url: `/admin/contact-messages/${messageId}/read`,
+        });
+      },
+
+      delete: async (messageId) => {
+        return this.request({
+          method: "DELETE",
+          url: `/admin/contact-messages/${messageId}`,
+        });
+      },
     },
 
     // Diagnostics endpoints
