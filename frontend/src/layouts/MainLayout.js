@@ -9,10 +9,12 @@ import ThemeSelector from "../components/theme/ThemeSelector";
 import ApiStatusBar from "../components/common/ApiStatusBar";
 import AlertBanner from "../components/common/AlertBanner";
 import AdBlock from "../components/ads/AdBlock";
+import EnhancedBreadcrumbs from "../components/common/EnhancedBreadcrumbs";
 import { AD_PLACEMENTS } from "../utils/adManager";
 import ThemeContext from "../contexts/ThemeContext";
 import "./MainLayout.scss";
 import "../components/ads/AdBlock.scss";
+import "../components/common/Breadcrumbs.scss";
 
 const MainLayout = () => {
   const { themeConfig } = useContext(ThemeContext) || {};
@@ -56,7 +58,7 @@ const MainLayout = () => {
         <div className="row">
           <div className="col-lg-8 content-area">
             {alertBannerComponent}
-            <br></br>
+            <EnhancedBreadcrumbs />
             <Outlet />
           </div>
 

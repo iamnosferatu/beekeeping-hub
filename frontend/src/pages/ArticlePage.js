@@ -3,6 +3,7 @@ import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { Container, Spinner, Alert, Button } from "react-bootstrap";
 import { useArticleBySlug } from "../hooks/queries/useArticles";
+import useDynamicBreadcrumb from "../hooks/useDynamicBreadcrumb";
 import ArticleHeader from "../components/articles/ArticleHeader";
 import ArticleContent from "../components/articles/ArticleContent";
 import NestedCommentsSection from "../components/articles/Comments/NestedCommentsSection";
@@ -26,6 +27,8 @@ const ArticlePage = () => {
   // Fix for double-wrapped response: article.data.data or article.data or article
   const articleData = article?.data?.data || article?.data || article;
   
+  // Set dynamic breadcrumb with article title
+  useDynamicBreadcrumb({ title: articleData?.title }, [articleData?.title]);
 
   // Loading state - show spinner while fetching article
   if (isLoading) {

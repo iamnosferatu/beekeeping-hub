@@ -3,6 +3,7 @@ import React, { useContext, useEffect, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useSiteSettings } from "./contexts/SiteSettingsContext";
 import AuthContext from "./contexts/AuthContext";
+import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import MaintenanceMode from "./components/MaintenanceMode";
 
 // Loading component for Suspense fallback
@@ -98,15 +99,16 @@ function App() {
   }
 
   return (
-    <ErrorBoundary level="app" userId={user?.id}>
-      {/* Re-enabled with image loading safeguards */}
-      <RoutePreloader />
-      <PerformanceMonitor />
-      <CookieConsentBanner />
-      <Suspense 
-        fallback={LoadingIndicator.presets.fullPage()}
-      >
-        <Routes>
+    <BreadcrumbProvider>
+      <ErrorBoundary level="app" userId={user?.id}>
+        {/* Re-enabled with image loading safeguards */}
+        <RoutePreloader />
+        <PerformanceMonitor />
+        <CookieConsentBanner />
+        <Suspense 
+          fallback={LoadingIndicator.presets.fullPage()}
+        >
+          <Routes>
         {/* Public Routes */}
         <Route path="/" element={
           <ErrorBoundary level="layout">
@@ -382,6 +384,7 @@ function App() {
         </Routes>
       </Suspense>
     </ErrorBoundary>
+    </BreadcrumbProvider>
   );
 }
 

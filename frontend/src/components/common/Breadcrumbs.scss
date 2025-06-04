@@ -1,0 +1,127 @@
+// frontend/src/components/common/Breadcrumbs.scss
+
+// Enhanced breadcrumbs styling
+.enhanced-breadcrumbs {
+  background-color: var(--bs-gray-100);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  
+  // Remove default Bootstrap margin
+  &.breadcrumb {
+    margin-bottom: 0;
+  }
+  
+  // Breadcrumb items
+  .breadcrumb-item {
+    // Links
+    a {
+      color: var(--bs-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: var(--bs-primary-dark);
+        text-decoration: underline;
+      }
+    }
+    
+    // Active item
+    &.active {
+      color: var(--bs-gray-700);
+      font-weight: 500;
+    }
+    
+    // Separator
+    + .breadcrumb-item::before {
+      color: var(--bs-gray-500);
+    }
+    
+    // Home icon
+    svg {
+      vertical-align: text-bottom;
+    }
+  }
+  
+  // Ellipsis for truncated breadcrumbs
+  .breadcrumb-item:has(.ellipsis) {
+    a {
+      cursor: default;
+      color: var(--bs-gray-600);
+      
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+// Dark theme support
+[data-bs-theme="dark"] {
+  .enhanced-breadcrumbs {
+    background-color: var(--bs-gray-800);
+    
+    .breadcrumb-item {
+      a {
+        color: var(--bs-info);
+        
+        &:hover {
+          color: var(--bs-info-light);
+        }
+      }
+      
+      &.active {
+        color: var(--bs-gray-300);
+      }
+      
+      + .breadcrumb-item::before {
+        color: var(--bs-gray-600);
+      }
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .enhanced-breadcrumbs {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    
+    // Hide intermediate items on mobile if too many
+    &.breadcrumb-mobile-compact {
+      .breadcrumb-item:not(:first-child):not(:last-child):not(:nth-last-child(2)) {
+        display: none;
+      }
+      
+      // Show ellipsis before last item if items hidden
+      .breadcrumb-item:nth-last-child(2)::after {
+        content: "...";
+        margin: 0 0.5rem;
+        color: var(--bs-gray-500);
+      }
+    }
+  }
+}
+
+// Minimal variant
+.enhanced-breadcrumbs.breadcrumb-minimal {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 1rem;
+  
+  .breadcrumb-item {
+    + .breadcrumb-item::before {
+      content: "›";
+      padding: 0 0.5rem;
+    }
+  }
+}
+
+// Inline variant
+.enhanced-breadcrumbs.breadcrumb-inline {
+  display: inline-flex;
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 0;
+}

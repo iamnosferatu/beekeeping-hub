@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Breadcrumb, Alert } from 'react-bootstrap';
+import { Container, Alert } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome } from 'react-icons/fa';
 import AuthContext from '../contexts/AuthContext';
 import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
@@ -74,16 +73,6 @@ const ForumNewThreadPage = () => {
 
   return (
     <Container className="py-4">
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-          <FaHome /> Home
-        </Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/forum' }}>
-          Forum
-        </Breadcrumb.Item>
-        <Breadcrumb.Item active>New Thread</Breadcrumb.Item>
-      </Breadcrumb>
-
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}

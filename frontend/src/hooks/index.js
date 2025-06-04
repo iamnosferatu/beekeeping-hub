@@ -10,6 +10,9 @@ export { default as useArticleFetch } from "./useArticleFetch";
 // Error handling hooks
 export { useErrorDisplay, useApiErrorDisplay } from "./useErrorDisplay";
 
+// Breadcrumb hook
+export { default as useDynamicBreadcrumb } from "./useDynamicBreadcrumb";
+
 // Generic API hooks
 export { useApi, usePaginatedApi, useMutation } from "./useApi";
 

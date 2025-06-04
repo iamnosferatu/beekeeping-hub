@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Button, Alert, Breadcrumb, Card, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button, Alert, Card, Badge } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaLock, FaUnlock, FaThumbtack, FaHome, FaEye, FaClock } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaLock, FaUnlock, FaThumbtack, FaEye, FaClock } from 'react-icons/fa';
 import AuthContext from '../contexts/AuthContext';
 import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
+import useDynamicBreadcrumb from '../hooks/useDynamicBreadcrumb';
 import CommentList from '../components/forum/CommentList';
 import CommentForm from '../components/forum/CommentForm';
 import ThreadForm from '../components/forum/ThreadForm';
@@ -33,6 +34,12 @@ const ForumThreadPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Set dynamic breadcrumb for thread with category information
+  useDynamicBreadcrumb({ 
+    title: thread?.title,
+    category: thread?.category 
+  }, [thread?.title, thread?.category]);
 
   useEffect(() => {
     fetchThreadData();
@@ -132,18 +139,6 @@ const ForumThreadPage = () => {
 
   return (
     <Container className="py-4 forum-thread-view">
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-          <FaHome /> Home
-        </Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/forum' }}>
-          Forum
-        </Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: `/forum/categories/${thread.category.slug}` }}>
-          {thread.category.name}
-        </Breadcrumb.Item>
-        <Breadcrumb.Item active>{thread.title}</Breadcrumb.Item>
-      </Breadcrumb>
 
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Button, Alert, Breadcrumb } from 'react-bootstrap';
+import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
 import { BsChatSquareDots } from 'react-icons/bs';
@@ -83,11 +83,6 @@ const ForumIndexPage = () => {
 
   return (
     <Container className="py-4">
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>Home</Breadcrumb.Item>
-        <Breadcrumb.Item active>Forum</Breadcrumb.Item>
-      </Breadcrumb>
-
       <Row className="mb-4">
         <Col>
           <div className="d-flex justify-content-between align-items-center">

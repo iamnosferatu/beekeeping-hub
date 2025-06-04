@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Alert, Breadcrumb, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button, Alert, Card } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaHome } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { useSiteSettings } from '../contexts/SiteSettingsContext';
 import { useForum } from '../hooks/api/useForum';
+import useDynamicBreadcrumb from '../hooks/useDynamicBreadcrumb';
 import ThreadList from '../components/forum/ThreadList';
 import CategoryForm from '../components/forum/CategoryForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
@@ -37,6 +38,9 @@ const ForumCategoryPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Set dynamic breadcrumb
+  useDynamicBreadcrumb({ name: category?.name }, [category?.name]);
 
   useEffect(() => {
     fetchCategoryData();
@@ -119,16 +123,6 @@ const ForumCategoryPage = () => {
 
   return (
     <Container className="py-4">
-      <Breadcrumb>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-          <FaHome /> Home
-        </Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/forum' }}>
-          Forum
-        </Breadcrumb.Item>
-        <Breadcrumb.Item active>{category.name}</Breadcrumb.Item>
-      </Breadcrumb>
-
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}

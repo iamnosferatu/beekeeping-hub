@@ -22,7 +22,9 @@ import {
   BsFileCode,
 } from "react-icons/bs";
 import AlertBanner from "../components/common/AlertBanner";
+import EnhancedBreadcrumbs from "../components/common/EnhancedBreadcrumbs";
 import "./AdminLayout.scss";
+import "../components/common/Breadcrumbs.scss";
 
 /**
  * AdminLayout Component
@@ -291,6 +293,7 @@ const AdminLayout = () => {
           }`}
         >
           <Container fluid className="p-4">
+            <EnhancedBreadcrumbs className="mb-4" />
             <Outlet />
           </Container>
         </main>
