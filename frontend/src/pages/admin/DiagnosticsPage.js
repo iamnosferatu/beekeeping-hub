@@ -15,6 +15,7 @@ import { BsSend, BsArrowRepeat, BsClipboard, BsTrash } from "react-icons/bs";
 import axios from "axios";
 import { API_URL, BASE_URL } from "../../config";
 import AuthContext from "../../contexts/AuthContext";
+import PerformanceMetricsChart from "../../components/Admin/PerformanceMetricsChart";
 
 /**
  * DiagnosticsPage Component
@@ -254,6 +255,9 @@ const DiagnosticsPage = () => {
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link eventKey="request-history">Request History</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="performance-metrics">Performance Metrics</Nav.Link>
               </Nav.Item>
             </Nav>
           </Card.Header>
@@ -739,6 +743,11 @@ const DiagnosticsPage = () => {
                     </table>
                   </div>
                 )}
+              </Tab.Pane>
+
+              {/* Performance Metrics Tab */}
+              <Tab.Pane eventKey="performance-metrics">
+                <PerformanceMetricsChart />
               </Tab.Pane>
             </Tab.Content>
           </Card.Body>

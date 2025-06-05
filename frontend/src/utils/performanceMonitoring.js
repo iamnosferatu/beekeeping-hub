@@ -502,14 +502,20 @@ export class PerformanceMonitor {
     const summary = performanceStore.getSummary();
     const metrics = Array.from(performanceStore.metrics.values());
     
+    const webVitals = this.analyzeWebVitals(metrics);
+    const api = this.analyzeApiPerformance(metrics);
+    const components = this.analyzeComponentPerformance(metrics);
+    const memory = this.analyzeMemoryUsage(metrics);
+    const trends = this.analyzeTrends(metrics);
+    
     return {
       summary,
-      webVitals: this.analyzeWebVitals(metrics),
-      api: this.analyzeApiPerformance(metrics),
-      components: this.analyzeComponentPerformance(metrics),
-      memory: this.analyzeMemoryUsage(metrics),
-      trends: this.analyzeTrends(metrics),
-      recommendations: this.generateRecommendations(metrics),
+      webVitals,
+      api,
+      components,
+      memory,
+      trends,
+      recommendations: this.generateRecommendations(metrics, { webVitals, api, components, memory }),
     };
   }
 
@@ -666,9 +672,13 @@ export class PerformanceMonitor {
   /**
    * Generate performance recommendations
    */
-  static generateRecommendations(metrics) {
+  static generateRecommendations(metrics, analysis) {
     const recommendations = [];
-    const analysis = this.getAnalytics();
+    
+    // If analysis not provided, return empty recommendations to avoid circular reference
+    if (!analysis) {
+      return recommendations;
+    }
 
     // API recommendations
     Object.entries(analysis.api).forEach(([endpoint, data]) => {
